@@ -1,0 +1,418 @@
+/* 玄心理命 - 全局样式 */
+
+/* CSS变量 - 古典与现代融合配色 */
+:root {
+  /* 主色调 */
+  --primary-color: #8B4513;           /* 古铜色 */
+  --primary-light: #D2691E;           /* 巧克力色 */
+  --primary-dark: #5D3A1A;            /* 深褐色 */
+  
+  /* 辅助色 */
+  --accent-gold: #DAA520;             /* 金色 */
+  --accent-red: #B22222;              /* 朱红色 */
+  --accent-jade: #2E8B57;             /* 翡翠绿 */
+  --accent-ink: #1a1a2e;              /* 墨黑色 */
+  
+  /* 五行色 */
+  --wuxing-wood: #228B22;             /* 木 - 绿色 */
+  --wuxing-fire: #DC143C;             /* 火 - 红色 */
+  --wuxing-earth: #DAA520;            /* 土 - 黄色 */
+  --wuxing-metal: #C0C0C0;            /* 金 - 银色 */
+  --wuxing-water: #1E90FF;            /* 水 - 蓝色 */
+  
+  /* 背景色 */
+  --bg-primary: #0f0f1a;              /* 深色背景 */
+  --bg-secondary: #1a1a2e;            /* 次级背景 */
+  --bg-card: rgba(30, 30, 50, 0.8);   /* 卡片背景 */
+  --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #0f0f1a 100%);
+  
+  /* 文字色 */
+  --text-primary: #f5f5f5;
+  --text-secondary: #b0b0b0;
+  --text-muted: #666666;
+  
+  /* 边框 */
+  --border-color: rgba(218, 165, 32, 0.3);
+  --border-glow: rgba(218, 165, 32, 0.5);
+  
+  /* 阴影 */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+  --shadow-glow: 0 0 20px rgba(218, 165, 32, 0.3);
+  
+  /* 字体 */
+  --font-display: 'Noto Serif SC', 'STSong', serif;
+  --font-body: 'Noto Sans SC', 'PingFang SC', sans-serif;
+}
+
+/* 全局重置 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* 布局 */
+.app-layout {
+  min-height: 100vh;
+  background: var(--bg-gradient);
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  padding: 0 40px;
+  background: rgba(15, 15, 26, 0.95) !important;
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: 40px;
+}
+
+.logo-icon {
+  font-size: 32px;
+  color: var(--accent-gold);
+  animation: rotate 20s linear infinite;
+}
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: bold;
+  background: linear-gradient(90deg, var(--accent-gold), var(--primary-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-menu {
+  flex: 1;
+  background: transparent !important;
+  border-bottom: none !important;
+}
+
+.app-content {
+  padding: 40px;
+  min-height: calc(100vh - 134px);
+}
+
+.app-footer {
+  text-align: center;
+  background: transparent !important;
+  color: var(--text-muted);
+  border-top: 1px solid var(--border-color);
+  padding: 20px;
+}
+
+/* 卡片样式 */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  border-color: var(--border-glow);
+  box-shadow: var(--shadow-glow);
+  transform: translateY(-2px);
+}
+
+.card-title {
+  font-family: var(--font-display);
+  font-size: 20px;
+  color: var(--accent-gold);
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* 按钮样式 */
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+  border: none;
+  color: white;
+  padding: 12px 32px;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-gold {
+  background: linear-gradient(135deg, var(--accent-gold), #FFA500);
+  border: none;
+  color: var(--bg-primary);
+  font-weight: bold;
+}
+
+/* 八字命盘样式 */
+.bazi-chart {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.bazi-pillar {
+  text-align: center;
+  background: var(--bg-card);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.bazi-pillar:hover {
+  border-color: var(--accent-gold);
+  box-shadow: var(--shadow-glow);
+}
+
+.bazi-pillar-title {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.bazi-gan {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.bazi-zhi {
+  font-family: var(--font-display);
+  font-size: 36px;
+  font-weight: bold;
+}
+
+/* 五行颜色 */
+.wuxing-wood { color: var(--wuxing-wood); }
+.wuxing-fire { color: var(--wuxing-fire); }
+.wuxing-earth { color: var(--wuxing-earth); }
+.wuxing-metal { color: var(--wuxing-metal); }
+.wuxing-water { color: var(--wuxing-water); }
+
+/* 紫微斗数盘 */
+.ziwei-chart {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 4px;
+  max-width: 800px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.ziwei-palace {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 8px;
+  font-size: 12px;
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+}
+
+.ziwei-palace:hover {
+  border-color: var(--accent-gold);
+  z-index: 10;
+  transform: scale(1.05);
+}
+
+.ziwei-palace.center {
+  grid-column: 2 / 4;
+  grid-row: 2 / 4;
+  background: rgba(139, 69, 19, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.palace-name {
+  font-weight: bold;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+}
+
+.palace-stars {
+  flex: 1;
+  overflow: hidden;
+}
+
+.star-main {
+  color: var(--accent-red);
+  font-weight: bold;
+}
+
+.star-aux {
+  color: var(--accent-jade);
+}
+
+.star-sha {
+  color: #888;
+}
+
+/* 易经卦象 */
+.hexagram-display {
+  text-align: center;
+  padding: 30px;
+}
+
+.hexagram-symbol {
+  font-size: 60px;
+  line-height: 1;
+  margin-bottom: 20px;
+  font-family: monospace;
+}
+
+.yao-line {
+  font-size: 32px;
+  letter-spacing: 8px;
+  color: var(--accent-gold);
+}
+
+.yao-line.dong {
+  color: var(--accent-red);
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.hexagram-name {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent-gold);
+  margin: 20px 0;
+}
+
+/* 表单样式 */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 0 16px;
+  }
+  
+  .app-content {
+    padding: 20px;
+  }
+  
+  .bazi-chart {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .ziwei-chart {
+    font-size: 10px;
+  }
+}
+
+/* Ant Design 主题覆盖 */
+.ant-menu-dark {
+  background: transparent !important;
+}
+
+.ant-menu-dark .ant-menu-item-selected {
+  background: rgba(218, 165, 32, 0.2) !important;
+}
+
+.ant-card {
+  background: var(--bg-card) !important;
+  border-color: var(--border-color) !important;
+}
+
+.ant-card-head {
+  border-bottom-color: var(--border-color) !important;
+  color: var(--accent-gold) !important;
+}
+
+.ant-card-head-title {
+  color: var(--accent-gold) !important;
+}
+
+.ant-form-item-label > label {
+  color: var(--text-secondary) !important;
+}
+
+.ant-input, .ant-select-selector, .ant-picker {
+  background: rgba(30, 30, 50, 0.8) !important;
+  border-color: var(--border-color) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-light)) !important;
+  border: none !important;
+}
+
+.ant-spin-dot-item {
+  background-color: var(--accent-gold) !important;
+}
+
+.ant-result-title {
+  color: var(--text-primary) !important;
+}
+
+.ant-statistic-title {
+  color: var(--text-secondary) !important;
+}
+
+.ant-statistic-content {
+  color: var(--text-primary) !important;
+}
+
+.ant-tag {
+  border-radius: 4px;
+}
+
+.ant-descriptions-item-label {
+  color: var(--text-secondary) !important;
+}
+
+.ant-descriptions-item-content {
+  color: var(--text-primary) !important;
+}

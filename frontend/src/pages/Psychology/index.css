@@ -1,0 +1,360 @@
+.psychology-page {
+    min-height: 100vh;
+    padding: 40px 24px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* 测试选择页面 */
+.test-selection {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.section-title {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 8px;
+    font-size: 2rem;
+}
+
+.section-desc {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 40px;
+    font-size: 1.1rem;
+}
+
+.test-cards {
+    margin-top: 24px;
+}
+
+.test-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+.test-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.test-card .ant-card-body {
+    padding: 32px 24px;
+}
+
+.test-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.test-card h4 {
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.test-card .ant-typography-secondary {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.test-meta {
+    margin-top: 16px;
+}
+
+.test-meta .ant-tag {
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 测试进行页面 */
+.test-progress {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.test-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.test-header h4 {
+    margin: 0;
+}
+
+.test-header .ant-typography {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.question-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    margin-top: 24px;
+    padding: 32px;
+}
+
+.question-text {
+    color: #fff;
+    margin-bottom: 32px;
+    font-size: 1.25rem;
+    line-height: 1.6;
+}
+
+.options-group {
+    width: 100%;
+}
+
+.option-item {
+    padding: 16px 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.option-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.option-item .ant-radio {
+    margin-right: 12px;
+}
+
+.option-item span {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+}
+
+.likert-group {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.likert-item {
+    min-width: 100px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.05) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 8px !important;
+}
+
+.likert-item:hover {
+    background: rgba(255, 255, 255, 0.1) !important;
+}
+
+.likert-item.ant-radio-button-wrapper-checked {
+    background: linear-gradient(135deg, #722ed1 0%, #eb2f96 100%) !important;
+    border-color: transparent !important;
+    color: #fff !important;
+}
+
+.nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding: 0 16px;
+}
+
+/* 结果页面 */
+.test-result {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.test-result .ant-result {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 32px;
+}
+
+.test-result .ant-result-title {
+    color: #fff;
+}
+
+.test-result .ant-result-subtitle {
+    color: rgba(255, 255, 255, 0.65);
+}
+
+.result-content {
+    margin-top: 32px;
+    text-align: center;
+}
+
+.type-badge {
+    display: inline-block;
+    padding: 16px 40px;
+    border-radius: 50px;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #fff;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
+.result-content h2 {
+    color: #fff;
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.result-content p {
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 1rem;
+    line-height: 1.8;
+}
+
+.dimensions {
+    margin-top: 32px;
+}
+
+.dimensions .ant-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.dimensions .ant-card-body {
+    text-align: center;
+}
+
+.dimensions .ant-typography {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.dimension-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.dimension-row .ant-typography {
+    min-width: 80px;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.dimension-row .ant-progress {
+    flex: 1;
+}
+
+.traits-card {
+    margin-top: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.traits-card .ant-card-head {
+    border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.traits-card .ant-card-head-title {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.primary-archetype {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 24px;
+    border-width: 2px;
+}
+
+.archetype-keywords {
+    margin-top: 16px;
+}
+
+.info-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+}
+
+.info-card p {
+    text-align: left;
+    margin-bottom: 8px;
+}
+
+.profile-text {
+    margin-top: 24px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    text-align: left;
+}
+
+.result-actions {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 40px;
+    padding-bottom: 40px;
+}
+
+/* 加载状态 */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+.loading-container .ant-spin-text {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .psychology-page {
+        padding: 24px 16px;
+    }
+
+    .section-title {
+        font-size: 1.5rem;
+    }
+
+    .question-card {
+        padding: 20px;
+    }
+
+    .question-text {
+        font-size: 1.1rem;
+    }
+
+    .likert-group {
+        flex-direction: column;
+    }
+
+    .likert-item {
+        width: 100%;
+    }
+
+    .type-badge {
+        padding: 12px 32px;
+        font-size: 2rem;
+    }
+
+    .dimensions .ant-col {
+        margin-bottom: 12px;
+    }
+}

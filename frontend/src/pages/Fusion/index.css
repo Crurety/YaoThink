@@ -1,0 +1,275 @@
+.fusion-page {
+    min-height: 100vh;
+    padding: 40px 24px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    text-align: center;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.page-desc {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 32px;
+}
+
+.fusion-steps {
+    margin-bottom: 40px;
+    padding: 24px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.fusion-steps .ant-steps-item-title {
+    color: rgba(255, 255, 255, 0.85) !important;
+}
+
+.fusion-steps .ant-steps-item-description {
+    color: rgba(255, 255, 255, 0.45) !important;
+}
+
+/* 数据状态卡片 */
+.data-status-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+}
+
+.data-status-card .ant-card-body {
+    padding: 32px;
+}
+
+.data-status-card h4 {
+    color: #fff;
+    margin-bottom: 24px;
+}
+
+.status-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.status-item.completed {
+    background: rgba(82, 196, 26, 0.1);
+    border-color: rgba(82, 196, 26, 0.3);
+}
+
+.status-item .anticon {
+    font-size: 24px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.status-item.completed .anticon {
+    color: #52c41a;
+}
+
+.status-item .ant-typography {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 32px;
+}
+
+/* 分析结果 */
+.analysis-result {
+    margin-top: 24px;
+}
+
+.result-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+}
+
+.result-card .ant-card-body {
+    padding: 32px;
+}
+
+.result-card h3 {
+    color: #fff;
+    margin-bottom: 24px;
+}
+
+.confidence-section {
+    margin-bottom: 24px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+}
+
+.confidence-section .ant-typography {
+    color: rgba(255, 255, 255, 0.65);
+    margin-bottom: 8px;
+    display: block;
+}
+
+.traits-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+}
+
+.consistency-score {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.consistency-score .ant-typography {
+    color: rgba(255, 255, 255, 0.85);
+}
+
+/* Collapse样式 */
+.result-card .ant-collapse {
+    background: transparent;
+    border: none;
+}
+
+.result-card .ant-collapse-item {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin-bottom: 8px;
+}
+
+.result-card .ant-collapse-header {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+}
+
+.result-card .ant-collapse-content {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.1);
+}
+
+.result-card .ant-collapse-content-box {
+    padding: 24px;
+}
+
+.result-card h5 {
+    color: rgba(255, 255, 255, 0.85);
+    margin: 16px 0 8px;
+}
+
+.result-card p {
+    color: rgba(255, 255, 255, 0.75);
+    margin-bottom: 8px;
+}
+
+/* 报告区域 */
+.report-section {
+    margin-top: 24px;
+}
+
+.report-card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+}
+
+.report-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.report-header h3 {
+    color: #fff;
+    margin: 0;
+}
+
+.markdown-content {
+    padding: 24px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content h4 {
+    color: #fff;
+    margin-top: 24px;
+    margin-bottom: 12px;
+}
+
+.markdown-content h1 {
+    font-size: 1.8rem;
+}
+
+.markdown-content h2 {
+    font-size: 1.4rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 8px;
+}
+
+.markdown-content h3 {
+    font-size: 1.2rem;
+}
+
+.markdown-content p,
+.markdown-content li {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.8;
+}
+
+.markdown-content ul {
+    padding-left: 20px;
+}
+
+.markdown-content hr {
+    border-color: rgba(255, 255, 255, 0.1);
+    margin: 24px 0;
+}
+
+.markdown-content em {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* 加载状态 */
+.loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+/* 响应式 */
+@media (max-width: 768px) {
+    .fusion-page {
+        padding: 24px 16px;
+    }
+
+    .status-item {
+        padding: 12px;
+    }
+
+    .action-buttons {
+        flex-direction: column;
+    }
+
+    .action-buttons button {
+        width: 100%;
+    }
+}

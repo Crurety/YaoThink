@@ -1,0 +1,320 @@
+/* 玄心理命 - 响应式布局样式 */
+
+/* 移动端优先的响应式断点 */
+:root {
+    --breakpoint-sm: 576px;
+    --breakpoint-md: 768px;
+    --breakpoint-lg: 992px;
+    --breakpoint-xl: 1200px;
+    --breakpoint-xxl: 1600px;
+}
+
+/* 容器 */
+.container {
+    width: 100%;
+    max-width: var(--breakpoint-xl);
+    margin: 0 auto;
+    padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+    .container {
+        padding: 0 24px;
+    }
+}
+
+@media (min-width: 1200px) {
+    .container {
+        padding: 0 40px;
+    }
+}
+
+/* 响应式网格 */
+.grid {
+    display: grid;
+    gap: 16px;
+}
+
+.grid-cols-1 {
+    grid-template-columns: repeat(1, 1fr);
+}
+
+.grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 575px) {
+    .sm\:grid-cols-1 {
+        grid-template-columns: repeat(1, 1fr);
+    }
+}
+
+@media (min-width: 576px) and (max-width: 767px) {
+    .md\:grid-cols-2 {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+    .lg\:grid-cols-3 {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 992px) {
+    .xl\:grid-cols-4 {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* 响应式显示/隐藏 */
+.hidden {
+    display: none !important;
+}
+
+.block {
+    display: block !important;
+}
+
+.flex {
+    display: flex !important;
+}
+
+@media (max-width: 767px) {
+    .md\:hidden {
+        display: none !important;
+    }
+
+    .md\:block {
+        display: block !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .md\:flex {
+        display: flex !important;
+    }
+
+    .sm\:hidden {
+        display: none !important;
+    }
+}
+
+/* 响应式间距 */
+.gap-sm {
+    gap: 8px;
+}
+
+.gap-md {
+    gap: 16px;
+}
+
+.gap-lg {
+    gap: 24px;
+}
+
+@media (min-width: 768px) {
+    .gap-md {
+        gap: 24px;
+    }
+
+    .gap-lg {
+        gap: 32px;
+    }
+}
+
+/* 响应式文字大小 */
+.text-sm {
+    font-size: 12px;
+}
+
+.text-base {
+    font-size: 14px;
+}
+
+.text-lg {
+    font-size: 16px;
+}
+
+.text-xl {
+    font-size: 20px;
+}
+
+.text-2xl {
+    font-size: 24px;
+}
+
+@media (min-width: 768px) {
+    .text-lg {
+        font-size: 18px;
+    }
+
+    .text-xl {
+        font-size: 24px;
+    }
+
+    .text-2xl {
+        font-size: 32px;
+    }
+}
+
+/* 响应式内边距 */
+.p-2 {
+    padding: 8px;
+}
+
+.p-4 {
+    padding: 16px;
+}
+
+.p-6 {
+    padding: 24px;
+}
+
+@media (min-width: 768px) {
+    .md\:p-6 {
+        padding: 24px;
+    }
+
+    .md\:p-8 {
+        padding: 32px;
+    }
+}
+
+/* 移动端导航适配 */
+@media (max-width: 767px) {
+    .app-header {
+        padding: 0 12px !important;
+    }
+
+    .logo-text {
+        font-size: 18px !important;
+    }
+
+    .header-menu {
+        display: none !important;
+    }
+
+    .mobile-menu-btn {
+        display: block !important;
+    }
+
+    .app-content {
+        padding: 16px !important;
+    }
+}
+
+@media (min-width: 768px) {
+    .mobile-menu-btn {
+        display: none !important;
+    }
+}
+
+/* 命盘响应式 */
+@media (max-width: 575px) {
+    .bazi-chart {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+    }
+
+    .bazi-gan,
+    .bazi-zhi {
+        font-size: 28px !important;
+    }
+
+    .ziwei-chart {
+        font-size: 9px !important;
+        gap: 2px !important;
+    }
+
+    .hexagram-symbol {
+        font-size: 40px !important;
+    }
+}
+
+/* 表单响应式 */
+@media (max-width: 767px) {
+    .ant-form-inline .ant-form-item {
+        margin-bottom: 12px !important;
+        width: 100% !important;
+    }
+
+    .ant-form-inline .ant-form-item-control {
+        width: 100% !important;
+    }
+}
+
+/* 卡片响应式 */
+@media (max-width: 575px) {
+    .ant-card {
+        border-radius: 8px !important;
+    }
+
+    .ant-card-body {
+        padding: 12px !important;
+    }
+}
+
+/* 模态框响应式 */
+@media (max-width: 575px) {
+    .ant-modal {
+        max-width: calc(100vw - 32px) !important;
+        margin: 16px !important;
+    }
+}
+
+/* 标签页响应式 */
+@media (max-width: 575px) {
+    .ant-tabs-nav {
+        margin-bottom: 12px !important;
+    }
+
+    .ant-tabs-tab {
+        padding: 8px 12px !important;
+        font-size: 13px !important;
+    }
+}
+
+/* 统计数据响应式 */
+@media (max-width: 575px) {
+    .ant-statistic-content-value {
+        font-size: 20px !important;
+    }
+}
+
+/* 滚动容器 */
+.scroll-x {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.scroll-x::-webkit-scrollbar {
+    height: 4px;
+}
+
+.scroll-x::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 2px;
+}
+
+/* 触摸优化 */
+@media (hover: none) and (pointer: coarse) {
+
+    .btn-primary,
+    .ant-btn {
+        min-height: 44px;
+    }
+
+    .ant-input,
+    .ant-select-selector {
+        min-height: 44px !important;
+    }
+}
