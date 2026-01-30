@@ -2,45 +2,16 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   pull_request:
     branches: [main]
 
-env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  # 后端测试
-  backend-test:
-    name: Backend Tests
+  # 测试任务
+  test:
+    name: Test
     runs-on: ubuntu-latest
     
-    services:
-      postgres:
-        image: postgres:15-alpine
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: yaothink_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-      
-      redis:
-        image: redis:7-alpine
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
     steps:
       - uses: actions/checkout@v4
 
@@ -48,124 +19,63 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install backend dependencies
         working-directory: ./backend
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        working-directory: ./backend
-        env:
-          DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/yaothink_test
-          REDIS_URL: redis://localhost:6379/0
-          SECRET_KEY: test-secret-key
-        run: |
-          pytest --cov=app --cov-report=xml --cov-report=term-missing
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-        with:
-          file: ./backend/coverage.xml
-          fail_ci_if_error: false
-
-  # 前端测试
-  frontend-test:
-    name: Frontend Tests
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
+          pip install fastapi uvicorn pydantic pydantic-settings pytest
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
 
-      - name: Lint
+      - name: Build frontend
         working-directory: ./frontend
-        run: npm run lint || true
-
-      - name: Build
-        working-directory: ./frontend
-        env:
-          VITE_API_BASE_URL: http://localhost:8000
         run: npm run build
 
-  # 构建和推送镜像
-  build-and-push:
-    name: Build and Push Docker Images
+  # 部署任务
+  deploy:
+    name: Deploy to Server
     runs-on: ubuntu-latest
-    needs: [backend-test, frontend-test]
+    needs: test
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    
-    permissions:
-      contents: read
-      packages: write
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
+      - name: Deploy to server via SSH
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      # 构建后端镜像
-      - name: Build and push backend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # 构建前端镜像
-      - name: Build and push frontend
-        uses: docker/build-push-action@v5
-        with:
-          context: ./frontend
-          push: true
-          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend:latest
-          build-args: |
-            VITE_API_BASE_URL=${{ secrets.API_BASE_URL }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  # 部署到生产环境
-  deploy:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: build-and-push
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    environment: production
-
-    steps:
-      - name: Deploy notification
-        run: echo "Deployment would happen here - configure with your hosting provider"
-
-      # 示例：SSH部署
-      # - name: Deploy to server
-      #   uses: appleboy/ssh-action@v1.0.0
-      #   with:
-      #     host: ${{ secrets.SERVER_HOST }}
-      #     username: ${{ secrets.SERVER_USER }}
-      #     key: ${{ secrets.SERVER_SSH_KEY }}
-      #     script: |
-      #       cd /app
-      #       docker-compose pull
-      #       docker-compose up -d
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            # 创建项目目录
+            mkdir -p /opt/yaothink
+            cd /opt/yaothink
+            
+            # 拉取最新代码
+            if [ -d ".git" ]; then
+              git pull origin main
+            else
+              git clone https://github.com/${{ github.repository }}.git .
+            fi
+            
+            # 停止现有容器
+            docker-compose down 2>/dev/null || true
+            
+            # 构建并启动
+            docker-compose up -d --build
+            
+            # 等待启动
+            sleep 10
+            
+            # 检查状态
+            docker-compose ps
+            
+            echo "部署完成！"
