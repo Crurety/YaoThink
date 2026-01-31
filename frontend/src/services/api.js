@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { useUserStore } from '../stores'
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL || '',
@@ -11,7 +12,11 @@ const api = axios.create({
 // 请求拦截器
 api.interceptors.request.use(
     config => {
-        // 可以在这里添加token等
+        // 从Store获取Token
+        const token = useUserStore.getState().token
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
         return config
     },
     error => {

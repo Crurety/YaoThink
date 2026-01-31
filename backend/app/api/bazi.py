@@ -49,6 +49,17 @@ async def analyze(request: BaZiRequest):
     包含：四柱排盘、五行分析、十神分析、格局判断、大运流年、神煞分析
     """
     try:
+        # 尝试从缓存获取
+        from app.core.cache import cache, CacheService
+        cache_key = CacheService.bazi_key(request.year, request.month, request.day, request.hour)
+        
+        try:
+            cached_result = await cache.get(cache_key)
+            if cached_result:
+                return {"success": True, "data": cached_result, "cached": True}
+        except Exception:
+            pass  # 缓存失败不影响正常流程
+        
         result = analyze_bazi(
             year=request.year,
             month=request.month,
@@ -57,6 +68,13 @@ async def analyze(request: BaZiRequest):
             gender=request.gender,
             target_year=request.target_year
         )
+        
+        # 存入缓存（1小时）
+        try:
+            await cache.set(cache_key, result, expire=3600)
+        except Exception:
+            pass  # 缓存失败不影响返回结果
+        
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

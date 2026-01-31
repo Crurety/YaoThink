@@ -57,6 +57,21 @@ async def analyze(request: ZiWeiRequest):
     包含：十二宫排列、主星安排、格局判断、运势分析
     """
     try:
+        # 尝试从缓存获取
+        from app.core.cache import cache, CacheService
+        cache_key = CacheService.ziwei_key(
+            request.year_gan, request.year_zhi, 
+            request.lunar_month, request.lunar_day, 
+            request.birth_hour_zhi
+        )
+        
+        try:
+            cached_result = await cache.get(cache_key)
+            if cached_result:
+                return {"success": True, "data": cached_result, "cached": True}
+        except Exception:
+            pass
+        
         result = analyze_ziwei(
             year_gan=request.year_gan,
             year_zhi=request.year_zhi,
@@ -64,6 +79,13 @@ async def analyze(request: ZiWeiRequest):
             lunar_day=request.lunar_day,
             birth_hour_zhi=request.birth_hour_zhi
         )
+        
+        # 存入缓存（1小时）
+        try:
+            await cache.set(cache_key, result, expire=3600)
+        except Exception:
+            pass
+        
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

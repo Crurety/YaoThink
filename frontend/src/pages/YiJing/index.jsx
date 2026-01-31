@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
     Card, Form, Input, Button, Row, Col, Spin, Tabs, Radio,
-    Tag, Descriptions, Typography, Space, Alert, Divider
+    Tag, Descriptions, Typography, Space, Alert, Divider, message
 } from 'antd'
 import { BookOutlined, ThunderboltOutlined, NumberOutlined, FontSizeOutlined } from '@ant-design/icons'
 import api from '../../services/api'
@@ -12,20 +12,29 @@ const { TextArea } = Input
 function YiJing() {
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
+    const [error, setError] = useState(null)
     const [method, setMethod] = useState('time')
 
     // 时间起卦
     const handleTimeMethod = async () => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const response = await api.post('/api/yijing/meihua/time', {
                 question: ''
             })
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '起卦失败')
+                message.error(response.data.error || '起卦失败')
             }
-        } catch (error) {
-            setResult(getMockData())
+        } catch (err) {
+            console.error('起卦失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -34,6 +43,8 @@ function YiJing() {
     // 数字起卦
     const handleNumberMethod = async (values) => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const response = await api.post('/api/yijing/meihua/number', {
                 number1: values.number1,
@@ -42,9 +53,15 @@ function YiJing() {
             })
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '起卦失败')
+                message.error(response.data.error || '起卦失败')
             }
-        } catch (error) {
-            setResult(getMockData())
+        } catch (err) {
+            console.error('起卦失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -53,6 +70,8 @@ function YiJing() {
     // 文字起卦
     const handleTextMethod = async (values) => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const response = await api.post('/api/yijing/meihua/text', {
                 text: values.text,
@@ -60,9 +79,15 @@ function YiJing() {
             })
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '起卦失败')
+                message.error(response.data.error || '起卦失败')
             }
-        } catch (error) {
-            setResult(getMockData())
+        } catch (err) {
+            console.error('起卦失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -71,15 +96,23 @@ function YiJing() {
     // 六爻起卦
     const handleLiuyaoMethod = async () => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const response = await api.post('/api/yijing/liuyao', {
                 question: ''
             })
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '摇卦失败')
+                message.error(response.data.error || '摇卦失败')
             }
-        } catch (error) {
-            setResult(getMockData())
+        } catch (err) {
+            console.error('摇卦失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -310,51 +343,6 @@ function HexagramResult({ result }) {
             </Row>
         </Card>
     )
-}
-
-// 模拟数据
-function getMockData() {
-    return {
-        question: "",
-        main_gua: {
-            name: "乾为天",
-            upper: { name: "乾", symbol: "☰", element: "金", nature: "天" },
-            lower: { name: "乾", symbol: "☰", element: "金", nature: "天" },
-            upper_symbol: "☰",
-            lower_symbol: "☰",
-            interpretation: {
-                summary: "元亨利贞，刚健中正",
-                keywords: ["刚健", "进取", "领导", "成功"],
-                fortune: "大吉，进取必成，但需防骄傲",
-                career: "事业顺利，可大展宏图",
-                relationship: "桃花旺盛，但需真诚",
-                wealth: "财运亨通，利于投资"
-            }
-        },
-        yaos: [
-            { position: 1, type: "阳爻", symbol: "———", is_dong: false },
-            { position: 2, type: "阳爻", symbol: "———", is_dong: false },
-            { position: 3, type: "阳爻", symbol: "———", is_dong: true },
-            { position: 4, type: "阳爻", symbol: "———", is_dong: false },
-            { position: 5, type: "阳爻", symbol: "———", is_dong: false },
-            { position: 6, type: "阳爻", symbol: "———", is_dong: false }
-        ],
-        dong_yao: 3,
-        dong_yao_meaning: "三爻动，事情到了转折点，需谨慎决断",
-        changed_gua: {
-            name: "天火同人",
-            interpretation: {
-                summary: "同人于野，亨"
-            }
-        },
-        overall_fortune: {
-            level: "大吉",
-            description: "下卦生上卦，内助外成，事业顺遂",
-            upper_element: "金",
-            lower_element: "金",
-            relation: "比"
-        }
-    }
 }
 
 export default YiJing

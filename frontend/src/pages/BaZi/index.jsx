@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
     Card, Form, DatePicker, Select, Button, Row, Col, Spin, Tabs,
-    Statistic, Tag, Descriptions, Progress, Divider, Typography
+    Statistic, Tag, Descriptions, Progress, Divider, Typography, message
 } from 'antd'
 import { CompassOutlined, FireOutlined } from '@ant-design/icons'
 import ReactECharts from 'echarts-for-react'
@@ -25,9 +25,12 @@ function BaZi() {
     const [form] = Form.useForm()
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
+    const [error, setError] = useState(null)
 
     const handleSubmit = async (values) => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const date = values.datetime
             const response = await api.post('/api/bazi/analyze', {
@@ -40,11 +43,15 @@ function BaZi() {
 
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '分析失败')
+                message.error(response.data.error || '分析失败')
             }
-        } catch (error) {
-            console.error('分析失败:', error)
-            // 使用模拟数据进行演示
-            setResult(getMockData())
+        } catch (err) {
+            console.error('分析失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -436,82 +443,6 @@ function BaZi() {
             )}
         </div>
     )
-}
-
-// 模拟数据
-function getMockData() {
-    return {
-        basic_info: {
-            birth_datetime: "1990年5月15日 10时",
-            gender: "男",
-            shengxiao: "马",
-            bazi: "庚午 辛巳 甲子 己巳",
-            sizhu: {
-                year: "庚午",
-                month: "辛巳",
-                day: "甲子",
-                hour: "己巳"
-            },
-            day_master: "甲",
-            day_master_wuxing: "木"
-        },
-        wuxing: {
-            scores: { "木": 2.4, "火": 3.6, "土": 2.1, "金": 4.2, "水": 1.8 },
-            percentages: { "木": 17, "火": 26, "土": 15, "金": 30, "水": 12 },
-            balance: { "木": "偏弱", "火": "偏旺", "土": "平衡", "金": "过旺", "水": "偏弱" }
-        },
-        day_master_analysis: {
-            strength_level: "身弱",
-            strength_ratio: 0.38,
-            description: "日主甲木力量不足，需要水木生扶"
-        },
-        xi_yong_shen: {
-            yong_shen: ["水"],
-            xi_shen: ["木"],
-            ji_shen: ["火", "土"],
-            chou_shen: ["金"],
-            analysis: "八字身弱，需要生扶。用神为水，喜神为木。宜接近用神属性的人事物，增强自身能量。"
-        },
-        geju: {
-            main_geju: "七杀格",
-            description: "七杀格者，有魄力胆识，敢于担当，适合军警或企业管理。"
-        },
-        personality: {
-            keywords: ["权威", "果断", "进取", "压力"],
-            summary: "您的八字以七杀为主导，属于官杀旺的格局，有责任感，事业心强。"
-        },
-        dayun_liunian: {
-            current_age: 35,
-            dayun_list: [
-                { order: 1, range: "3-12岁", ganzhi: "壬午", shishen: "偏印/正官", is_current: false },
-                { order: 2, range: "13-22岁", ganzhi: "癸未", shishen: "正印/七杀", is_current: false },
-                { order: 3, range: "23-32岁", ganzhi: "甲申", shishen: "比肩/七杀", is_current: false },
-                { order: 4, range: "33-42岁", ganzhi: "乙酉", shishen: "劫财/正官", is_current: true },
-                { order: 5, range: "43-52岁", ganzhi: "丙戌", shishen: "食神/偏财", is_current: false }
-            ],
-            liunian_list: [
-                { year: 2024, ganzhi: "甲辰", rating: "平", is_current: false },
-                { year: 2025, ganzhi: "乙巳", rating: "凶", is_current: false },
-                { year: 2026, ganzhi: "丙午", rating: "吉", is_current: true },
-                { year: 2027, ganzhi: "丁未", rating: "平", is_current: false },
-                { year: 2028, ganzhi: "戊申", rating: "大吉", is_current: false }
-            ]
-        },
-        shensha: {
-            ji_shensha: [
-                { name: "天乙贵人", position: "月支" },
-                { name: "文昌贵人", position: "时支" }
-            ],
-            xiong_shensha: [
-                { name: "羊刃", position: "年支" }
-            ],
-            zhong_shensha: [
-                { name: "驿马", position: "日支" },
-                { name: "桃花", position: "时支" }
-            ],
-            summary: "八字带有2个吉神，主一生多贵人相助。同时带有1个凶煞，需注意意外。"
-        }
-    }
 }
 
 export default BaZi

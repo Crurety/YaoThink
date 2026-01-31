@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
     Card, Form, InputNumber, Button, Row, Col, Spin, Tabs,
-    Tag, Descriptions, Typography, Select, Space, Alert
+    Tag, Descriptions, Typography, Select, Space, Alert, message
 } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
 import ZiWeiChart from '../../components/ZiWeiChart'
@@ -17,9 +17,12 @@ function ZiWei() {
     const [form] = Form.useForm()
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
+    const [error, setError] = useState(null)
 
     const handleSubmit = async (values) => {
         setLoading(true)
+        setError(null)
+        setResult(null)
         try {
             const response = await api.post('/api/ziwei/analyze', {
                 year_gan: values.year_gan,
@@ -31,10 +34,15 @@ function ZiWei() {
 
             if (response.data.success) {
                 setResult(response.data.data)
+            } else {
+                setError(response.data.error || '排盘失败')
+                message.error(response.data.error || '排盘失败')
             }
-        } catch (error) {
-            console.error('分析失败:', error)
-            setResult(getMockData())
+        } catch (err) {
+            console.error('分析失败:', err)
+            const errorMsg = err.response?.data?.error || err.message || '服务器连接失败，请稍后重试'
+            setError(errorMsg)
+            message.error(errorMsg)
         } finally {
             setLoading(false)
         }
@@ -208,13 +216,6 @@ function ZiWei() {
                     form={form}
                     layout="inline"
                     onFinish={handleSubmit}
-                    initialValues={{
-                        year_gan: '庚',
-                        year_zhi: '午',
-                        lunar_month: 5,
-                        lunar_day: 15,
-                        birth_hour_zhi: '巳'
-                    }}
                 >
                     <Space wrap>
                         <Form.Item name="year_gan" label="年干" rules={[{ required: true }]}>
@@ -260,80 +261,6 @@ function ZiWei() {
             )}
         </div>
     )
-}
-
-// 模拟数据
-function getMockData() {
-    return {
-        chart_data: {
-            wuxing_ju: "火六局",
-            ming_gong: "卯",
-            shen_gong: "未",
-            palaces: [
-                { name: "命宫", position: "甲卯", stars: { main: ["紫微", "天相"], auxiliary: ["文昌"], sha: [] } },
-                { name: "兄弟宫", position: "乙寅", stars: { main: ["天机"], auxiliary: [], sha: ["火星"] } },
-                { name: "夫妻宫", position: "丙丑", stars: { main: ["太阳"], auxiliary: ["左辅"], sha: [] } },
-                { name: "子女宫", position: "丁子", stars: { main: ["武曲", "天府"], auxiliary: [], sha: [] } },
-                { name: "财帛宫", position: "戊亥", stars: { main: ["天同"], auxiliary: ["右弼"], sha: [] } },
-                { name: "疾厄宫", position: "己戌", stars: { main: ["廉贞"], auxiliary: [], sha: ["擎羊"] } },
-                { name: "迁移宫", position: "庚酉", stars: { main: ["天府"], auxiliary: [], sha: [] } },
-                { name: "仆役宫", position: "辛申", stars: { main: ["太阴"], auxiliary: ["文曲"], sha: [] } },
-                { name: "官禄宫", position: "壬未", stars: { main: ["贪狼"], auxiliary: [], sha: ["铃星"] } },
-                { name: "田宅宫", position: "癸午", stars: { main: ["巨门"], auxiliary: [], sha: [] } },
-                { name: "福德宫", position: "甲巳", stars: { main: ["天梁"], auxiliary: [], sha: [] } },
-                { name: "父母宫", position: "乙辰", stars: { main: ["七杀"], auxiliary: [], sha: [] } }
-            ]
-        },
-        analysis: {
-            basic_info: {
-                ming_gong: "卯宫",
-                shen_gong: "未宫",
-                wuxing_ju: "火六局"
-            },
-            ming_analysis: {
-                main_star: "紫微",
-                description: "领导力强，有气度，受人尊敬，志向远大",
-                keywords: ["领导", "尊贵", "权威"],
-                career_hint: "适合管理、政治、大企业领导"
-            },
-            career_analysis: {
-                main_star: "贪狼",
-                description: "多才多艺，交际能力强，有艺术天赋",
-                keywords: ["才艺", "桃花", "多变"],
-                career_hint: "适合艺术、娱乐、销售、公关"
-            },
-            wealth_analysis: {
-                main_star: "天同",
-                description: "性格温和，有福气，财运稳定",
-                keywords: ["福气", "稳定"],
-                career_hint: "适合服务、休闲行业"
-            },
-            marriage_analysis: {
-                main_star: "太阳",
-                description: "热情开朗，乐于助人，感情丰富",
-                keywords: ["热情", "博爱"],
-                career_hint: "感情主动热烈"
-            },
-            pattern: {
-                name: "紫府同宫",
-                description: "帝王之相，大富大贵，领导才能出众"
-            },
-            palaces_detail: [
-                { name: "命宫", position: "甲卯", main_stars: ["紫微", "天相"], aux_stars: ["文昌"], sha_stars: [] },
-                { name: "兄弟宫", position: "乙寅", main_stars: ["天机"], aux_stars: [], sha_stars: ["火星"] },
-                { name: "夫妻宫", position: "丙丑", main_stars: ["太阳"], aux_stars: ["左辅"], sha_stars: [] },
-                { name: "子女宫", position: "丁子", main_stars: ["武曲", "天府"], aux_stars: [], sha_stars: [] },
-                { name: "财帛宫", position: "戊亥", main_stars: ["天同"], aux_stars: ["右弼"], sha_stars: [] },
-                { name: "疾厄宫", position: "己戌", main_stars: ["廉贞"], aux_stars: [], sha_stars: ["擎羊"] },
-                { name: "迁移宫", position: "庚酉", main_stars: ["天府"], aux_stars: [], sha_stars: [] },
-                { name: "仆役宫", position: "辛申", main_stars: ["太阴"], aux_stars: ["文曲"], sha_stars: [] },
-                { name: "官禄宫", position: "壬未", main_stars: ["贪狼"], aux_stars: [], sha_stars: ["铃星"] },
-                { name: "田宅宫", position: "癸午", main_stars: ["巨门"], aux_stars: [], sha_stars: [] },
-                { name: "福德宫", position: "甲巳", main_stars: ["天梁"], aux_stars: [], sha_stars: [] },
-                { name: "父母宫", position: "乙辰", main_stars: ["七杀"], aux_stars: [], sha_stars: [] }
-            ]
-        }
-    }
 }
 
 export default ZiWei

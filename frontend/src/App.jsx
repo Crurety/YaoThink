@@ -1,13 +1,15 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Routes, Route } from 'react-router-dom'
-import { Layout, Menu } from 'antd'
+import { Layout, Menu, Button, Dropdown, Avatar, message } from 'antd'
 import {
     HomeOutlined,
     CompassOutlined,
     StarOutlined,
     BookOutlined,
     UserOutlined,
-    ExperimentOutlined
+    ExperimentOutlined,
+    LogoutOutlined,
+    LoginOutlined
 } from '@ant-design/icons'
 import { useNavigate, useLocation } from 'react-router-dom'
 
@@ -18,6 +20,8 @@ import YiJing from './pages/YiJing'
 import Psychology from './pages/Psychology'
 import Fusion from './pages/Fusion'
 import Profile from './pages/Profile'
+import AuthModal from './components/AuthModal'
+import { useUserStore } from './stores'
 
 const { Header, Content, Footer } = Layout
 
@@ -28,17 +32,41 @@ const menuItems = [
     { key: '/yijing', icon: <BookOutlined />, label: '易经占卜' },
     { key: '/psychology', icon: <ExperimentOutlined />, label: '心理测评' },
     { key: '/fusion', icon: <StarOutlined />, label: '融合分析' },
-    { key: '/profile', icon: <UserOutlined />, label: '个人中心' }
 ]
 
 function App() {
     const navigate = useNavigate()
     const location = useLocation()
+    const [authModalVisible, setAuthModalVisible] = useState(false)
+    const { user, isAuthenticated, logout } = useUserStore()
+
+    const handleLogout = () => {
+        logout()
+        message.success('已退出登录')
+        navigate('/')
+    }
+
+    const userMenu = {
+        items: [
+            {
+                key: 'profile',
+                icon: <UserOutlined />,
+                label: '个人中心',
+                onClick: () => navigate('/profile')
+            },
+            {
+                key: 'logout',
+                icon: <LogoutOutlined />,
+                label: '退出登录',
+                onClick: handleLogout
+            }
+        ]
+    }
 
     return (
         <Layout className="app-layout">
             <Header className="app-header">
-                <div className="logo">
+                <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
                     <span className="logo-icon">☯</span>
                     <span className="logo-text">玄心理命</span>
                 </div>
@@ -50,6 +78,28 @@ function App() {
                     onClick={({ key }) => navigate(key)}
                     className="header-menu"
                 />
+                <div className="header-auth">
+                    {isAuthenticated ? (
+                        <Dropdown menu={userMenu} placement="bottomRight">
+                            <span className="user-dropdown-link" style={{ cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <Avatar 
+                                    src={user?.avatar} 
+                                    icon={<UserOutlined />} 
+                                    style={{ backgroundColor: 'var(--accent-gold)' }}
+                                />
+                                <span className="user-name">{user?.nickname || user?.phone || '用户'}</span>
+                            </span>
+                        </Dropdown>
+                    ) : (
+                        <Button 
+                            type="primary" 
+                            icon={<LoginOutlined />}
+                            onClick={() => setAuthModalVisible(true)}
+                        >
+                            登录/注册
+                        </Button>
+                    )}
+                </div>
             </Header>
 
             <Content className="app-content">
@@ -67,6 +117,11 @@ function App() {
             <Footer className="app-footer">
                 玄心理命 ©2024 - 东方玄学与西方心理学融合
             </Footer>
+
+            <AuthModal 
+                visible={authModalVisible} 
+                onClose={() => setAuthModalVisible(false)} 
+            />
         </Layout>
     )
 }
