@@ -55,6 +55,8 @@ function AuthModal({ visible, onClose }) {
 
     // 处理登录/注册
     const handleSubmit = async (values) => {
+        console.log('[Auth] Submit values:', values)
+        const hideLoading = message.loading('正在处理请求...', 0)
         setLoading(true)
         try {
             let endpoint = ''
@@ -97,18 +99,31 @@ function AuthModal({ visible, onClose }) {
                 }
             }
 
+            console.log('[Auth] Sending request to:', endpoint)
             const response = await api.post(endpoint, payload)
+            console.log('[Auth] Response:', response)
 
             if (response.data.success) {
                 const { user, token, is_new_user } = response.data.data
-                login(user, token.access_token)
+                // 兼容性处理：token可能是对象也可能是字符串
+                const tokenStr = token.access_token || token
+
+                console.log('[Auth] Login success, token:', tokenStr)
+                login(user, tokenStr)
+
                 message.success(is_new_user ? '注册成功！' : '登录成功！')
                 onClose()
                 form.resetFields()
+            } else {
+                console.error('[Auth] Failed success flag:', response.data)
+                message.error('请求虽成功但返回失败状态')
             }
         } catch (error) {
-            message.error(error.response?.data?.detail || '操作失败')
+            console.error('[Auth] Error:', error)
+            const errorMsg = error.response?.data?.detail || error.message || '操作失败'
+            message.error(`登录失败: ${errorMsg}`)
         } finally {
+            hideLoading()
             setLoading(false)
         }
     }
