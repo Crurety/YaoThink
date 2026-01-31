@@ -47,8 +47,20 @@ function ZiWeiChart({ palaces }) {
         }
     })
 
+    // Helper to determine star color class
+    const getStarColorClass = (name) => {
+        const purpleStars = ['紫微', '天府', '天相', '天梁'];
+        const redStars = ['太阳', '廉贞', '七杀', '贪狼', '火星', '铃星'];
+        const greenStars = ['天机', '太阴', '天同', '武曲', '破军', '巨门'];
+
+        if (purpleStars.some(s => name.includes(s))) return 'purple';
+        if (redStars.some(s => name.includes(s))) return 'red';
+        if (greenStars.some(s => name.includes(s))) return 'green';
+        return 'gold';
+    }
+
     return (
-        <div className="ziwei-chart">
+        <div className="ziwei-grid">
             {grid.map((row, rowIndex) => (
                 row.map((palace, colIndex) => {
                     // 中间区域
@@ -57,12 +69,11 @@ function ZiWeiChart({ palaces }) {
                             return (
                                 <div
                                     key={`center-${rowIndex}-${colIndex}`}
-                                    className="ziwei-palace center"
-                                    style={{ gridColumn: '2 / 4', gridRow: '2 / 4' }}
+                                    className="ziwei-center"
                                 >
-                                    <div style={{ textAlign: 'center' }}>
-                                        <div style={{ fontSize: 24, marginBottom: 8 }}>☯</div>
-                                        <div style={{ color: '#DAA520' }}>紫微斗数命盘</div>
+                                    <div style={{ zIndex: 2 }}>
+                                        <div style={{ fontSize: 32, marginBottom: 8, filter: 'drop-shadow(0 0 10px #7c3aed)' }}>☯</div>
+                                        <div style={{ color: '#DAA520', fontWeight: 'bold', letterSpacing: 2 }}>紫微斗数</div>
                                     </div>
                                 </div>
                             )
@@ -74,8 +85,8 @@ function ZiWeiChart({ palaces }) {
                         return (
                             <div
                                 key={`empty-${rowIndex}-${colIndex}`}
-                                className="ziwei-palace"
-                                style={{ background: 'rgba(30, 30, 50, 0.3)' }}
+                                className="ziwei-cell"
+                                style={{ opacity: 0.3 }}
                             />
                         )
                     }
@@ -83,47 +94,48 @@ function ZiWeiChart({ palaces }) {
                     const mainStars = palace.stars?.main || []
                     const auxStars = palace.stars?.auxiliary || []
                     const shaStars = palace.stars?.sha || []
+                    const isMingGong = palace.name === '命宫';
 
                     return (
                         <div
                             key={palace.name}
-                            className="ziwei-palace"
-                            style={{
-                                background: palace.name === '命宫'
-                                    ? 'rgba(218, 165, 32, 0.1)'
-                                    : 'var(--bg-card)'
-                            }}
+                            className={`ziwei-cell ${isMingGong ? 'ming-gong' : ''}`}
                         >
                             <div className="palace-name">
-                                {palace.name}
+                                <span>{palace.name}</span>
                                 <span style={{
                                     fontSize: 10,
-                                    color: '#888',
-                                    marginLeft: 4
+                                    opacity: 0.6,
+                                    fontFamily: 'monospace'
                                 }}>
                                     {palace.position}
                                 </span>
                             </div>
+
                             <div className="palace-stars">
                                 {mainStars.map(star => {
                                     // Handle both object (from backend) and string (fallback) formats
                                     const name = star.name || star
                                     const brightness = star.brightness ? `(${star.brightness})` : ''
                                     const hua = star.hua ? `·${star.hua}` : ''
+                                    const colorClass = getStarColorClass(name);
 
                                     return (
-                                        <div key={name} className="star-main">
+                                        <div key={name} className={`star-main ${colorClass}`}>
                                             {name}
                                             <span style={{ fontSize: 10, opacity: 0.8 }}>{brightness}{hua}</span>
                                         </div>
                                     )
                                 })}
-                                {auxStars.map(star => (
-                                    <div key={star} className="star-aux">{star}</div>
-                                ))}
-                                {shaStars.map(star => (
-                                    <div key={star} className="star-sha">{star}</div>
-                                ))}
+
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginTop: '4px' }}>
+                                    {auxStars.map(star => (
+                                        <div key={star} className="star-item star-aux">{star}</div>
+                                    ))}
+                                    {shaStars.map(star => (
+                                        <div key={star} className="star-item star-sha">{star}</div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     )
