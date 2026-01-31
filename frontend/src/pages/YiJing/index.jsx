@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     Card, Form, Input, Button, Row, Col, Spin, Tabs, Radio,
     Tag, Descriptions, Typography, Space, Alert, Divider, message
@@ -14,6 +14,9 @@ function YiJing() {
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
     const [method, setMethod] = useState('time')
+    const [isShaking, setIsShaking] = useState(false)
+    const [shakeCount, setShakeCount] = useState(0)
+    const [coins, setCoins] = useState(['?', '?', '?'])
 
     // 时间起卦
     const handleTimeMethod = async () => {
@@ -93,11 +96,35 @@ function YiJing() {
         }
     }
 
-    // 六爻起卦
+    // 六爻起卦（带动画）
     const handleLiuyaoMethod = async () => {
-        setLoading(true)
         setError(null)
         setResult(null)
+        setIsShaking(true)
+        setShakeCount(0)
+        setCoins(['?', '?', '?'])
+
+        // 模拟6次摇卦动画
+        for (let i = 0; i < 6; i++) {
+            setShakeCount(i + 1)
+
+            // 每次摇卦有多次翻转动画
+            for (let j = 0; j < 8; j++) {
+                await new Promise(resolve => setTimeout(resolve, 100))
+                setCoins([
+                    Math.random() > 0.5 ? '正' : '反',
+                    Math.random() > 0.5 ? '正' : '反',
+                    Math.random() > 0.5 ? '正' : '反'
+                ])
+            }
+
+            // 每爻之间短暂停顿
+            await new Promise(resolve => setTimeout(resolve, 300))
+        }
+
+        setIsShaking(false)
+        setLoading(true)
+
         try {
             const response = await api.post('/api/yijing/liuyao', {
                 question: ''
@@ -115,6 +142,7 @@ function YiJing() {
             message.error(errorMsg)
         } finally {
             setLoading(false)
+            setCoins(['?', '?', '?'])
         }
     }
 
@@ -194,8 +222,68 @@ function YiJing() {
                     <Paragraph style={{ color: '#b0b0b0', marginBottom: 24 }}>
                         模拟三枚铜钱摇卦，传统六爻占卜方式
                     </Paragraph>
-                    <Button type="primary" size="large" onClick={handleLiuyaoMethod}>
-                        开始摇卦
+
+                    {isShaking && (
+                        <div style={{ marginBottom: 24 }}>
+                            <div style={{
+                                fontSize: 16,
+                                color: 'var(--accent-gold)',
+                                marginBottom: 16
+                            }}>
+                                第 {shakeCount} / 6 爻
+                            </div>
+                            <div style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                gap: 20,
+                                marginBottom: 16
+                            }}>
+                                {coins.map((coin, idx) => (
+                                    <div
+                                        key={idx}
+                                        style={{
+                                            width: 60,
+                                            height: 60,
+                                            borderRadius: '50%',
+                                            background: coin === '正'
+                                                ? 'linear-gradient(135deg, #ffd700, #b8860b)'
+                                                : coin === '反'
+                                                    ? 'linear-gradient(135deg, #8b4513, #654321)'
+                                                    : 'linear-gradient(135deg, #444, #222)',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                            justifyContent: 'center',
+                                            fontSize: 20,
+                                            fontWeight: 'bold',
+                                            color: '#fff',
+                                            boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+                                            animation: 'coinShake 0.1s ease-in-out',
+                                            border: '3px solid rgba(255,215,0,0.3)'
+                                        }}
+                                    >
+                                        {coin}
+                                    </div>
+                                ))}
+                            </div>
+                            <style>{`
+                                @keyframes coinShake {
+                                    0%, 100% { transform: rotateY(0deg) scale(1); }
+                                    25% { transform: rotateY(90deg) scale(0.8); }
+                                    50% { transform: rotateY(180deg) scale(1); }
+                                    75% { transform: rotateY(270deg) scale(0.8); }
+                                }
+                            `}</style>
+                        </div>
+                    )}
+
+                    <Button
+                        type="primary"
+                        size="large"
+                        onClick={handleLiuyaoMethod}
+                        disabled={isShaking || loading}
+                        loading={loading}
+                    >
+                        {isShaking ? '摇卦中...' : loading ? '获取卦象...' : '开始摇卦'}
                     </Button>
                 </div>
             )
