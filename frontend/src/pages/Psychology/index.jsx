@@ -387,13 +387,11 @@ const PsychologyPage = () => {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
     // 加载题目
     const loadQuestions = async (type) => {
         setLoading(true);
         try {
-            const res = await axios.get(`${API_BASE}/api/psychology/${type}/questions`);
+            const res = await api.get(`/api/psychology/${type}/questions`);
             setQuestions(res.data.questions);
             setTestType(type);
             setStage('testing');
@@ -409,7 +407,7 @@ const PsychologyPage = () => {
     const submitTest = async (answers) => {
         setLoading(true);
         try {
-            const res = await axios.post(`${API_BASE}/api/psychology/${testType}/submit`, { answers });
+            const res = await api.post(`/api/psychology/${testType}/submit`, { answers });
             setResult(res.data.result);
             setStage('result');
         } catch (err) {

@@ -10,7 +10,7 @@ import {
     EyeOutlined,
     EditOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../../services/api';
 import './index.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -36,8 +36,6 @@ const ProfilePage = () => {
     const [editModalVisible, setEditModalVisible] = useState(false);
     const [settingsModalVisible, setSettingsModalVisible] = useState(false);
 
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
     // 加载用户数据
     useEffect(() => {
         loadUserData();
@@ -48,9 +46,9 @@ const ProfilePage = () => {
         try {
             // 并行加载数据
             const [profileRes, statsRes, settingsRes] = await Promise.all([
-                axios.get(`${API_BASE}/api/user/profile`),
-                axios.get(`${API_BASE}/api/user/stats`),
-                axios.get(`${API_BASE}/api/user/settings`)
+                api.get('/api/user/profile'),
+                api.get('/api/user/stats'),
+                api.get('/api/user/settings')
             ]);
 
             setProfile(profileRes.data.data);
@@ -93,28 +91,28 @@ const ProfilePage = () => {
             let res;
             switch (type) {
                 case 'analyses':
-                    res = await axios.get(`${API_BASE}/api/user/history/analyses`);
+                    res = await api.get('/api/user/history/analyses');
                     setAnalyses(res.data.data);
                     break;
                 case 'divinations':
-                    res = await axios.get(`${API_BASE}/api/user/history/divinations`);
+                    res = await api.get('/api/user/history/divinations');
                     setDivinations(res.data.data);
                     break;
                 case 'psychology':
-                    res = await axios.get(`${API_BASE}/api/user/history/psychology`);
+                    res = await api.get('/api/user/history/psychology');
                     setPsychologyTests(res.data.data);
                     break;
                 case 'fusions':
-                    res = await axios.get(`${API_BASE}/api/user/history/fusions`);
+                    res = await api.get('/api/user/history/fusions');
                     setFusions(res.data.data);
                     break;
                 case 'favorites':
-                    res = await axios.get(`${API_BASE}/api/user/favorites`);
+                    res = await api.get('/api/user/favorites');
                     setFavorites(res.data.data);
                     break;
             }
         } catch (err) {
-            console.error('加载历史失败', err);
+            console.error('加载历史记录失败', err);
         }
     };
 

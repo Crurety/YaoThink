@@ -8,7 +8,7 @@ import {
     FileTextOutlined,
     SyncOutlined
 } from '@ant-design/icons';
-import axios from 'axios';
+import api from '../../services/api';
 import ReactMarkdown from 'react-markdown';
 import './index.css';
 
@@ -32,8 +32,6 @@ const FusionPage = () => {
         enneagram: null
     });
 
-    const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-
     // 执行融合分析
     const runFusionAnalysis = async () => {
         setLoading(true);
@@ -50,7 +48,7 @@ const FusionPage = () => {
                 enneagram_type: userData.enneagram
             };
 
-            const res = await axios.post(`${API_BASE}/api/fusion/analyze`, requestData);
+            const res = await api.post('/api/fusion/analyze', requestData);
 
             if (res.data.success) {
                 setAnalysisResult(res.data.result);
@@ -78,7 +76,7 @@ const FusionPage = () => {
                 enneagram_type: userData.enneagram
             };
 
-            const res = await axios.post(`${API_BASE}/api/fusion/report`, requestData);
+            const res = await api.post('/api/fusion/report', requestData);
 
             if (res.data.success) {
                 setReport(res.data.report);

@@ -13,8 +13,8 @@ RUN npm ci
 COPY . .
 
 # 构建
-ARG VITE_API_BASE_URL
-ENV VITE_API_BASE_URL=${VITE_API_BASE_URL:-http://localhost:8000}
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL:-}
 
 RUN npm run build
 
