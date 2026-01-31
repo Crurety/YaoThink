@@ -193,7 +193,7 @@ async def get_archetype_test_questions():
         "test_name": "荣格原型测试",
         "description": "发现你的主要心理原型",
         "total_questions": len(questions),
-        "estimated_time": "10-15分钟",
+        "estimated_time": "15-20分钟",
         "archetypes": list(ARCHETYPES.keys()),
         "questions": questions
     }
@@ -250,7 +250,7 @@ async def get_enneagram_test_questions():
         "test_name": "九型人格测试",
         "description": "发现你的核心人格类型",
         "total_questions": len(questions),
-        "estimated_time": "10-15分钟",
+        "estimated_time": "20-30分钟",
         "types": list(range(1, 10)),
         "questions": questions
     }
@@ -331,15 +331,15 @@ async def get_available_tests():
                 "id": "archetype",
                 "name": "荣格原型",
                 "description": "12种心理原型分析",
-                "questions": 36,
-                "time": "10-15分钟"
+                "questions": 72,
+                "time": "15-20分钟"
             },
             {
                 "id": "enneagram",
                 "name": "九型人格",
                 "description": "九种核心人格类型",
-                "questions": 36,
-                "time": "10-15分钟"
+                "questions": 108,
+                "time": "20-30分钟"
             }
         ]
     }

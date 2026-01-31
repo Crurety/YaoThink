@@ -37,16 +37,16 @@ const TEST_TYPES = {
         icon: <HeartOutlined />,
         color: '#eb2f96',
         description: '发现你的心理原型',
-        questions: 36,
-        time: '10-15分钟'
+        questions: 72,
+        time: '15-20分钟'
     },
     enneagram: {
         name: '九型人格',
         icon: <RocketOutlined />,
         color: '#fa8c16',
         description: '了解你的核心人格类型',
-        questions: 36,
-        time: '10-15分钟'
+        questions: 108,
+        time: '20-30分钟'
     }
 };
 

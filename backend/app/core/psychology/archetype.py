@@ -238,101 +238,101 @@ ARCHETYPES = {
 # ==================== 原型测试题库 ====================
 
 ARCHETYPE_QUESTIONS = [
-    # 天真者
-    {"id": 1, "archetype": "INNOCENT", 
-     "text": "我相信世界本质上是美好的"},
-    {"id": 2, "archetype": "INNOCENT", 
-     "text": "我喜欢简单、纯粹的事物"},
-    {"id": 3, "archetype": "INNOCENT", 
-     "text": "我总是看到事情积极的一面"},
-    
-    # 凡人
-    {"id": 4, "archetype": "EVERYMAN", 
-     "text": "我喜欢融入群体，与大家打成一片"},
-    {"id": 5, "archetype": "EVERYMAN", 
-     "text": "我认为每个人都值得被尊重"},
-    {"id": 6, "archetype": "EVERYMAN", 
-     "text": "我不喜欢太特立独行"},
-    
-    # 英雄
-    {"id": 7, "archetype": "HERO", 
-     "text": "我喜欢迎接挑战并战胜它"},
-    {"id": 8, "archetype": "HERO", 
-     "text": "我认为坚强和勇敢很重要"},
-    {"id": 9, "archetype": "HERO", 
-     "text": "我愿意为正义挺身而出"},
-    
-    # 照顾者
-    {"id": 10, "archetype": "CAREGIVER", 
-     "text": "帮助别人让我感到满足"},
-    {"id": 11, "archetype": "CAREGIVER", 
-     "text": "我总是把别人的需求放在自己之前"},
-    {"id": 12, "archetype": "CAREGIVER", 
-     "text": "我擅长照顾和支持他人"},
-    
-    # 探险家
-    {"id": 13, "archetype": "EXPLORER", 
-     "text": "我渴望自由，不喜欢被束缚"},
-    {"id": 14, "archetype": "EXPLORER", 
-     "text": "我喜欢探索未知的领域"},
-    {"id": 15, "archetype": "EXPLORER", 
-     "text": "我享受独自旅行或冒险"},
-    
-    # 叛逆者
-    {"id": 16, "archetype": "REBEL", 
-     "text": "我不喜欢遵守不合理的规则"},
-    {"id": 17, "archetype": "REBEL", 
-     "text": "我愿意为改变而打破常规"},
-    {"id": 18, "archetype": "REBEL", 
-     "text": "我喜欢挑战权威和传统"},
-    
-    # 情人
-    {"id": 19, "archetype": "LOVER", 
-     "text": "我非常重视亲密关系"},
-    {"id": 20, "archetype": "LOVER", 
-     "text": "我很容易被美的事物吸引"},
-    {"id": 21, "archetype": "LOVER", 
-     "text": "我是一个充满激情的人"},
-    
-    # 创造者
-    {"id": 22, "archetype": "CREATOR", 
-     "text": "我喜欢创造新事物"},
-    {"id": 23, "archetype": "CREATOR", 
-     "text": "我追求完美和独特"},
-    {"id": 24, "archetype": "CREATOR", 
-     "text": "我有很多创意和想法"},
-    
-    # 愚者
-    {"id": 25, "archetype": "JESTER", 
-     "text": "我喜欢用幽默化解尴尬"},
-    {"id": 26, "archetype": "JESTER", 
-     "text": "我认为人生应该充满乐趣"},
-    {"id": 27, "archetype": "JESTER", 
-     "text": "我喜欢让周围的人开心"},
-    
-    # 智者
-    {"id": 28, "archetype": "SAGE", 
-     "text": "我追求知识和真理"},
-    {"id": 29, "archetype": "SAGE", 
-     "text": "我喜欢深入思考问题"},
-    {"id": 30, "archetype": "SAGE", 
-     "text": "我认为理解比行动更重要"},
-    
-    # 魔法师
-    {"id": 31, "archetype": "MAGICIAN", 
-     "text": "我相信一切皆有可能"},
-    {"id": 32, "archetype": "MAGICIAN", 
-     "text": "我善于发现事物之间的联系"},
-    {"id": 33, "archetype": "MAGICIAN", 
-     "text": "我能把愿景变为现实"},
-    
-    # 统治者
-    {"id": 34, "archetype": "RULER", 
-     "text": "我喜欢掌控局面"},
-    {"id": 35, "archetype": "RULER", 
-     "text": "我天生具有领导能力"},
-    {"id": 36, "archetype": "RULER", 
-     "text": "我追求权力和影响力"}
+    # ==================== 天真者 (Innocent) ====================
+    {"id": 1, "archetype": "INNOCENT", "text": "我相信世界本质上是美好的"},
+    {"id": 2, "archetype": "INNOCENT", "text": "我喜欢简单、纯粹的事物"},
+    {"id": 3, "archetype": "INNOCENT", "text": "我总是看到事情积极的一面"},
+    {"id": 4, "archetype": "INNOCENT", "text": "我害怕做错事而受到惩罚"},
+    {"id": 5, "archetype": "INNOCENT", "text": "我追求简单而快乐的生活，不求大富大贵"},
+    {"id": 6, "archetype": "INNOCENT", "text": "我相信只要保持善良，好运就会降临"},
+
+    # ==================== 凡人 (Everyman) ====================
+    {"id": 7, "archetype": "EVERYMAN", "text": "我喜欢融入群体，与大家打成一片"},
+    {"id": 8, "archetype": "EVERYMAN", "text": "我认为每个人都值得被尊重，没有高低贵贱"},
+    {"id": 9, "archetype": "EVERYMAN", "text": "我不喜欢太特立独行或引人注目"},
+    {"id": 10, "archetype": "EVERYMAN", "text": "我最害怕被抛弃或被孤立"},
+    {"id": 11, "archetype": "EVERYMAN", "text": "我认为诚实和脚踏实地是最重要的美德"},
+    {"id": 12, "archetype": "EVERYMAN", "text": "我喜欢那种大家都认可和使用的东西"},
+
+    # ==================== 英雄 (Hero) ====================
+    {"id": 13, "archetype": "HERO", "text": "我喜欢迎接挑战并战胜它"},
+    {"id": 14, "archetype": "HERO", "text": "我认为坚强和勇敢很重要，不能表现出软弱"},
+    {"id": 15, "archetype": "HERO", "text": "我愿意为正义挺身而出，保护弱小"},
+    {"id": 16, "archetype": "HERO", "text": "我希望通过我的行动让世界变得更好"},
+    {"id": 17, "archetype": "HERO", "text": "为了达成目标，我愿意付出任何努力"},
+    {"id": 18, "archetype": "HERO", "text": "我经常感到有责任去解决困难的问题"},
+
+    # ==================== 照顾者 (Caregiver) ====================
+    {"id": 19, "archetype": "CAREGIVER", "text": "帮助别人让我感到满足和快乐"},
+    {"id": 20, "archetype": "CAREGIVER", "text": "我总是把别人的需求放在自己之前"},
+    {"id": 21, "archetype": "CAREGIVER", "text": "我擅长照顾和支持他人，是大家倾诉的对象"},
+    {"id": 22, "archetype": "CAREGIVER", "text": "我担心别人因为我的疏忽而受到伤害"},
+    {"id": 23, "archetype": "CAREGIVER", "text": "我对他人的痛苦感同身受"},
+    {"id": 24, "archetype": "CAREGIVER", "text": "即使牺牲自己，我也要保护我爱的人"},
+
+    # ==================== 探险家 (Explorer) ====================
+    {"id": 25, "archetype": "EXPLORER", "text": "我渴望自由，不喜欢被束缚或限制"},
+    {"id": 26, "archetype": "EXPLORER", "text": "我喜欢探索未知的领域，尝试新鲜事物"},
+    {"id": 27, "archetype": "EXPLORER", "text": "我享受独自旅行或冒险带来的刺激"},
+    {"id": 28, "archetype": "EXPLORER", "text": "如果生活变得平淡无奇，我会感到窒息"},
+    {"id": 29, "archetype": "EXPLORER", "text": "我一直在寻找更真实、更充实的生活方式"},
+    {"id": 30, "archetype": "EXPLORER", "text": "我不愿意为了安稳而放弃探索世界的机会"},
+
+    # ==================== 叛逆者 (Rebel) ====================
+    {"id": 31, "archetype": "REBEL", "text": "我不喜欢遵守不合理的规则和传统"},
+    {"id": 32, "archetype": "REBEL", "text": "我愿意为改变现状而打破常规"},
+    {"id": 33, "archetype": "REBEL", "text": "我经常质疑权威，不盲从"},
+    {"id": 34, "archetype": "REBEL", "text": "我认为很多社会规范都是束缚人的枷锁"},
+    {"id": 35, "archetype": "REBEL", "text": "为了自由和变革，必要的破坏是可以接受的"},
+    {"id": 36, "archetype": "REBEL", "text": "我喜欢那些具有颠覆性和震撼力的事物"},
+
+    # ==================== 情人 (Lover) ====================
+    {"id": 37, "archetype": "LOVER", "text": "我非常重视亲密关系，害怕孤独"},
+    {"id": 38, "archetype": "LOVER", "text": "我很容易被美的事物吸引，追求感官享受"},
+    {"id": 39, "archetype": "LOVER", "text": "我是一个充满激情的人，全情投入"},
+    {"id": 40, "archetype": "LOVER", "text": "我希望在别人眼中是迷人且具吸引力的"},
+    {"id": 41, "archetype": "LOVER", "text": "为了获得爱和认同，我愿意改变自己"},
+    {"id": 42, "archetype": "LOVER", "text": "能够与他人建立深层的情感连接对我至关重要"},
+
+    # ==================== 创造者 (Creator) ====================
+    {"id": 43, "archetype": "CREATOR", "text": "我喜欢创造新事物，表达我的独特视角"},
+    {"id": 44, "archetype": "CREATOR", "text": "我追求完美，对自己作品要求很高"},
+    {"id": 45, "archetype": "CREATOR", "text": "我有很多创意和想法，需要将其实现"},
+    {"id": 46, "archetype": "CREATOR", "text": "我害怕平庸，不希望自己和别人一样"},
+    {"id": 47, "archetype": "CREATOR", "text": "我相信想象力可以改变现实"},
+    {"id": 48, "archetype": "CREATOR", "text": "通过艺术或创新来表达自我，是我存在的意义"},
+
+    # ==================== 愚者 (Jester) ====================
+    {"id": 49, "archetype": "JESTER", "text": "我喜欢用幽默化解尴尬和紧张的气氛"},
+    {"id": 50, "archetype": "JESTER", "text": "我认为人生苦短，应该及时行乐"},
+    {"id": 51, "archetype": "JESTER", "text": "我喜欢让周围的人开心，是大家的开心果"},
+    {"id": 52, "archetype": "JESTER", "text": "我讨厌通过严肃和沉重的方式来处理问题"},
+    {"id": 53, "archetype": "JESTER", "text": "我经常打破常规，用玩笑的方式表达真话"},
+    {"id": 54, "archetype": "JESTER", "text": "我不喜欢被无聊和乏味的事情困住"},
+
+    # ==================== 智者 (Sage) ====================
+    {"id": 55, "archetype": "SAGE", "text": "我追求知识和真理，想了解世界的运作方式"},
+    {"id": 56, "archetype": "SAGE", "text": "我喜欢深入思考问题，分析事物的本质"},
+    {"id": 57, "archetype": "SAGE", "text": "我认为理解比行动更重要，要做明智的决定"},
+    {"id": 58, "archetype": "SAGE", "text": "我害怕被愚弄或因无知而犯错"},
+    {"id": 59, "archetype": "SAGE", "text": "不管是买东西还是做决定，我都会做足功课"},
+    {"id": 60, "archetype": "SAGE", "text": "我相信真理会让心灵获得自由"},
+
+    # ==================== 魔法师 (Magician) ====================
+    {"id": 61, "archetype": "MAGICIAN", "text": "我相信一切皆有可能，奇迹会发生"},
+    {"id": 62, "archetype": "MAGICIAN", "text": "我善于发现事物之间隐秘的联系和规律"},
+    {"id": 63, "archetype": "MAGICIAN", "text": "我能把愿景变为现实，促成转化和改变"},
+    {"id": 64, "archetype": "MAGICIAN", "text": "我对宇宙法则、心理学或神秘学感兴趣"},
+    {"id": 65, "archetype": "MAGICIAN", "text": "我想要找到双赢的解决方案，化腐朽为神奇"},
+    {"id": 66, "archetype": "MAGICIAN", "text": "我相信直觉和意念的力量"},
+
+    # ==================== 统治者 (Ruler) ====================
+    {"id": 67, "archetype": "RULER", "text": "我喜欢掌控局面，建立秩序"},
+    {"id": 68, "archetype": "RULER", "text": "我天生具有领导能力，习惯承担责任"},
+    {"id": 69, "archetype": "RULER", "text": "我追求权力和影响力，希望在这个领域获得成功"},
+    {"id": 70, "archetype": "RULER", "text": "我害怕混乱和失控，必须确保一切井井有条"},
+    {"id": 71, "archetype": "RULER", "text": "我有很强的组织能力，能让事情高效运转"},
+    {"id": 72, "archetype": "RULER", "text": "我认为遵循等级和规则是社会繁荣的基础"}
 ]
 
 ARCHETYPE_OPTIONS = [
