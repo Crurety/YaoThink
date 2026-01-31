@@ -467,10 +467,10 @@ def _generate_dizhi_summary(chong: List, he: List, sanhe: List) -> str:
         parts.append(f"八字有三合局：{'、'.join([s['ju'] for s in sanhe])}，五行力量加强。")
     
     if he:
-        parts.append(f"有六合：{'、'.join([f'{h['zhi1']}{h['zhi2']}' for h in he])}，主和谐贵人。")
+        parts.append(f"有六合：{'、'.join([h['zhi1'] + h['zhi2'] for h in he])}，主和谐贵人。")
     
     if chong:
-        parts.append(f"有六冲：{'、'.join([f'{c['zhi1']}{c['zhi2']}' for c in chong])}，主变动不安。")
+        parts.append(f"有六冲：{'、'.join([c['zhi1'] + c['zhi2'] for c in chong])}，主变动不安。")
     
     if not parts:
         parts.append("八字地支关系较为平和。")
