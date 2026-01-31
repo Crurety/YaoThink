@@ -292,13 +292,23 @@ function AuthModal({ visible, onClose }) {
                 </div>
             </div>
 
-            <Form form={form} onFinish={handleSubmit} layout="vertical" requiredMark={false}>
+            <Form
+                form={form}
+                onFinish={handleSubmit}
+                onFinishFailed={(errorInfo) => {
+                    console.error('[Auth] Validation failed:', errorInfo)
+                    message.error('请检查填写的信息（是否有未填项）')
+                }}
+                layout="vertical"
+                requiredMark={false}
+            >
                 <Tabs
                     activeKey={activeTab}
                     onChange={setActiveTab}
                     items={tabItems}
                     centered
                     size="small"
+                    destroyInactiveTabPane={true}
                 />
 
                 <Form.Item style={{ marginBottom: 16, marginTop: 8 }}>
@@ -308,6 +318,7 @@ function AuthModal({ visible, onClose }) {
                         loading={loading}
                         block
                         size="large"
+                        onClick={() => console.log('[Auth] Login button clicked')}
                     >
                         {mode === 'login' ? '登录' : '注册'}
                     </Button>
