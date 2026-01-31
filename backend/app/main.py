@@ -19,15 +19,23 @@ async def lifespan(app: FastAPI):
     """应用生命周期管理"""
     # 启动时
     logger.info(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} 正在启动...")
-    await init_db()
-    logger.info("✅ 数据库连接已建立")
+    
+    # 尝试连接数据库（失败不阻止启动）
+    try:
+        await init_db()
+        logger.info("✅ 数据库连接已建立")
+    except Exception as e:
+        logger.warning(f"⚠️ 数据库连接失败，将在请求时重试: {e}")
     
     yield
     
     # 关闭时
     logger.info("🛑 应用正在关闭...")
-    await close_db()
-    logger.info("✅ 数据库连接已关闭")
+    try:
+        await close_db()
+        logger.info("✅ 数据库连接已关闭")
+    except Exception:
+        pass
 
 
 app = FastAPI(
