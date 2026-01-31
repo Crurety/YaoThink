@@ -105,9 +105,19 @@ function ZiWeiChart({ palaces }) {
                                 </span>
                             </div>
                             <div className="palace-stars">
-                                {mainStars.map(star => (
-                                    <div key={star} className="star-main">{star}</div>
-                                ))}
+                                {mainStars.map(star => {
+                                    // Handle both object (from backend) and string (fallback) formats
+                                    const name = star.name || star
+                                    const brightness = star.brightness ? `(${star.brightness})` : ''
+                                    const hua = star.hua ? `·${star.hua}` : ''
+
+                                    return (
+                                        <div key={name} className="star-main">
+                                            {name}
+                                            <span style={{ fontSize: 10, opacity: 0.8 }}>{brightness}{hua}</span>
+                                        </div>
+                                    )
+                                })}
                                 {auxStars.map(star => (
                                     <div key={star} className="star-aux">{star}</div>
                                 ))}
