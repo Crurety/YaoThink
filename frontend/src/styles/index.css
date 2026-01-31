@@ -1,68 +1,56 @@
-/* 玄心理命 - 全局样式 */
+/* 玄心理命 - 全局样式 (Youthful Cyberpunk Edition) */
 
-/* CSS变量 - 年轻化现代配色 */
+/* CSS变量 - 赛博修仙配色 */
 :root {
-  /* 主色调 - 紫蓝渐变 */
-  --primary-color: #6366f1;
-  /* 靛蓝紫 */
-  --primary-light: #818cf8;
-  /* 浅紫 */
-  --primary-dark: #4f46e5;
-  /* 深紫 */
+  /* 主色调 - 霓虹紫 */
+  --primary-color: #8b5cf6;
+  /* Violet 500 */
+  --primary-light: #a78bfa;
+  /* Violet 400 */
+  --primary-dark: #7c3aed;
+  /* Violet 600 */
 
-  /* 辅助色 - 活力青春 */
-  --accent-gold: #06b6d4;
-  /* 青色 */
-  --accent-red: #f43f5e;
-  /* 玫红 */
-  --accent-jade: #10b981;
-  /* 翡翠绿 */
-  --accent-ink: #0f172a;
-  /* 深蓝黑 */
-  --accent-pink: #ec4899;
-  /* 粉色 */
-  --accent-orange: #f97316;
-  /* 活力橙 */
+  /* 辅助色 - 赛博朋克 */
+  --accent-gold: #fbbf24;
+  /* Amber 400 - 更加明亮的金 */
+  --accent-cyan: #06b6d4;
+  /* Cyan 500 - 科技蓝 */
+  --accent-pink: #f472b6;
+  /* Pink 400 - 霓虹粉 */
+  --accent-red: #f87171;
+  /* Red 400 */
+  --accent-green: #34d399;
+  /* Emerald 400 */
 
-  /* 五行色 - 现代版 */
-  --wuxing-wood: #22c55e;
-  /* 木 - 翠绿 */
-  --wuxing-fire: #ef4444;
-  /* 火 - 亮红 */
-  --wuxing-earth: #eab308;
-  /* 土 - 明黄 */
-  --wuxing-metal: #a1a1aa;
-  /* 金 - 银灰 */
-  --wuxing-water: #3b82f6;
-  /* 水 - 天蓝 */
-
-  /* 背景色 - 深邃渐变 */
+  /* 背景色 - 深空 */
   --bg-primary: #0f172a;
-  /* 深蓝背景 */
+  /* Slate 900 */
   --bg-secondary: #1e293b;
-  /* 次级背景 */
-  --bg-card: rgba(30, 41, 59, 0.8);
-  /* 卡片背景 */
-  --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+  /* Slate 800 */
+  --bg-card: rgba(30, 41, 59, 0.7);
+  /* 更加通透的玻璃 */
+  --bg-input: rgba(15, 23, 42, 0.6);
+  --bg-gradient: radial-gradient(circle at 50% 0%, #2e1065 0%, #0f172a 60%, #000000 100%);
 
   /* 文字色 */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
 
-  /* 边框 - 渐变边框 */
-  --border-color: rgba(99, 102, 241, 0.3);
-  --border-glow: rgba(99, 102, 241, 0.6);
+  /* 边框 & 光效 */
+  --border-color: rgba(139, 92, 246, 0.2);
+  --border-glow: rgba(139, 92, 246, 0.5);
+  --glass-border: 1px solid rgba(255, 255, 255, 0.1);
 
-  /* 阴影 - 发光效果 */
-  --shadow-sm: 0 2px 8px rgba(99, 102, 241, 0.15);
-  --shadow-md: 0 4px 16px rgba(99, 102, 241, 0.2);
-  --shadow-lg: 0 8px 32px rgba(99, 102, 241, 0.25);
-  --shadow-glow: 0 0 30px rgba(99, 102, 241, 0.4);
+  /* 阴影 - 霓虹发光 */
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 0 20px rgba(139, 92, 246, 0.2);
+  --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 0 40px rgba(139, 92, 246, 0.3);
 
   /* 字体 */
-  --font-display: 'Noto Sans SC', 'PingFang SC', sans-serif;
-  --font-body: 'Noto Sans SC', 'PingFang SC', sans-serif;
+  --font-display: 'Chakra Petch', 'Orbitron', 'Noto Sans SC', sans-serif;
+  /* 增加一点科技感字体（如果有） */
+  --font-body: 'Inter', 'Noto Sans SC', sans-serif;
 }
 
 /* 全局重置 */
@@ -78,186 +66,193 @@ body {
   color: var(--text-primary);
   min-height: 100vh;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
-/* 布局 */
+/* 布局 - 沉浸式 */
 .app-layout {
   min-height: 100vh;
   background: var(--bg-gradient);
+  background-attachment: fixed;
 }
 
 .app-header {
   display: flex;
   align-items: center;
-  padding: 0 40px;
-  background: rgba(15, 15, 26, 0.95) !important;
-  border-bottom: 1px solid var(--border-color);
-  backdrop-filter: blur(10px);
+  padding: 0 32px;
+  background: rgba(15, 23, 42, 0.8) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 64px;
 }
 
+/* Logo 动效 */
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-right: 40px;
+  gap: 12px;
+  margin-right: 48px;
+  transition: transform 0.3s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
 }
 
 .logo-icon {
-  font-size: 32px;
-  color: var(--accent-gold);
-  animation: rotate 20s linear infinite;
+  font-size: 28px;
+  color: var(--primary-light);
+  filter: drop-shadow(0 0 8px var(--primary-color));
+  animation: float 3s ease-in-out infinite;
 }
 
-@keyframes rotate {
-  from {
-    transform: rotate(0deg);
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
   }
 
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateY(-5px);
   }
 }
 
 .logo-text {
   font-family: var(--font-display);
-  font-size: 24px;
-  font-weight: bold;
-  background: linear-gradient(90deg, var(--accent-gold), var(--primary-light));
+  font-size: 20px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  background: linear-gradient(135deg, #fff 0%, var(--primary-light) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
+/* 导航菜单 - 胶囊风格 */
 .header-menu {
   flex: 1;
   background: transparent !important;
   border-bottom: none !important;
+  line-height: 64px;
 }
 
-.header-auth {
-  margin-left: 20px;
-  display: flex;
-  align-items: center;
+.ant-menu-dark.ant-menu-horizontal>.ant-menu-item:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  border-radius: 20px;
 }
 
-.user-dropdown-link {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 12px;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-}
-
-.user-dropdown-link:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.user-name {
-  color: var(--text-primary);
-  font-weight: 500;
-}
-
-.app-content {
-  padding: 40px;
-  min-height: calc(100vh - 134px);
-}
-
-.app-footer {
-  text-align: center;
-  background: transparent !important;
-  color: var(--text-muted);
-  border-top: 1px solid var(--border-color);
-  padding: 20px;
-}
-
-/* 卡片样式 */
-.card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: var(--shadow-md);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-}
-
-.card:hover {
-  border-color: var(--border-glow);
-  box-shadow: var(--shadow-glow);
-  transform: translateY(-2px);
-}
-
-.card-title {
-  font-family: var(--font-display);
-  font-size: 20px;
-  color: var(--accent-gold);
-  margin-bottom: 16px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--border-color);
-}
-
-/* 按钮样式 */
-.btn-primary {
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-  border: none;
-  color: white;
-  padding: 12px 32px;
-  border-radius: 8px;
-  font-size: 16px;
-  cursor: pointer;
-  transition: all 0.3s ease;
+/* 卡片 - 磨砂玻璃 */
+.card,
+.ant-card {
+  background: var(--bg-card) !important;
+  border: var(--glass-border) !important;
+  border-radius: 24px !important;
+  /* 更大的圆角 */
+  backdrop-filter: blur(20px);
   box-shadow: var(--shadow-sm);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.btn-primary:hover {
-  transform: translateY(-2px);
+.card:hover,
+.ant-card:hover {
+  transform: translateY(-5px) scale(1.01);
   box-shadow: var(--shadow-md);
+  border-color: var(--border-glow) !important;
 }
 
-.btn-gold {
-  background: linear-gradient(135deg, var(--accent-gold), #FFA500);
+/* 如果是主要功能卡片，加更强的光效 */
+.feature-card:hover {
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.4) !important;
+}
+
+/* 按钮 - 药丸形状 & 渐变 */
+.ant-btn {
+  border-radius: 9999px !important;
+  /* 药丸按钮 */
+  font-weight: 600;
   border: none;
-  color: var(--bg-primary);
+  box-shadow: 0 4px 14px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.ant-btn-primary {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%) !important;
+}
+
+.ant-btn-primary:hover {
+  filter: brightness(1.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(139, 92, 246, 0.4);
+}
+
+.ant-btn-default {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: var(--text-primary) !important;
+}
+
+.ant-btn-default:hover {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: var(--primary-light) !important;
+  color: var(--primary-light) !important;
+}
+
+/* 输入框 - 填色风格 */
+.ant-input,
+.ant-input-password,
+.ant-input-number,
+.ant-picker,
+.ant-select-selector {
+  background-color: var(--bg-input) !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 12px !important;
+  backdrop-filter: blur(10px);
+  color: white !important;
+}
+
+.ant-input:focus,
+.ant-input-number:focus,
+.ant-picker:focus,
+.ant-select-selector:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2) !important;
+}
+
+/* 标签 - 霓虹风格 */
+.ant-tag {
+  border-radius: 8px;
+  border: none;
   font-weight: bold;
 }
 
-/* 八字命盘样式 */
-.bazi-chart {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
+/* 八字命盘 - 科技符咒 */
 .bazi-pillar {
-  text-align: center;
-  background: var(--bg-card);
-  border: 2px solid var(--border-color);
-  border-radius: 12px;
-  padding: 20px;
-  transition: all 0.3s ease;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 16px;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
 }
 
-.bazi-pillar:hover {
-  border-color: var(--accent-gold);
-  box-shadow: var(--shadow-glow);
-}
-
-.bazi-pillar-title {
-  color: var(--text-muted);
-  font-size: 14px;
-  margin-bottom: 12px;
+.bazi-pillar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent-gold), transparent);
 }
 
 .bazi-gan,
 .bazi-zhi {
-  font-family: var(--font-display);
-  font-size: 28px;
-  font-weight: bold;
-  line-height: 1.5;
+  font-family: 'Ma Shan Zheng', cursive, serif;
+  /* 书法字体如果有的话 */
+  text-shadow: 0 0 10px rgba(251, 191, 36, 0.5);
 }
 
 /* 紫微斗数盘样式 */

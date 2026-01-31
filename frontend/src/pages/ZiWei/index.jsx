@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import {
-    Card, Form, InputNumber, Button, Row, Col, Spin, Tabs,
+    Card, Form, InputNumber, Button, Row, Col, Spin, Tabs, DatePicker,
     Tag, Descriptions, Typography, Select, Space, Alert, message, Divider
 } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
@@ -24,12 +24,13 @@ function ZiWei() {
         setError(null)
         setResult(null)
         try {
-            const response = await api.post('/api/ziwei/analyze', {
-                year_gan: values.year_gan,
-                year_zhi: values.year_zhi,
-                lunar_month: values.lunar_month,
-                lunar_day: values.lunar_day,
-                birth_hour_zhi: values.birth_hour_zhi
+            const date = values.datetime
+            // 调用公历分析接口
+            const response = await api.post('/api/ziwei/analyze_solar', {
+                year: date.year(),
+                month: date.month() + 1,
+                day: date.date(),
+                hour: date.hour()
             })
 
             if (response.data.success) {
@@ -207,7 +208,7 @@ function ZiWei() {
                 style={{ marginBottom: 24 }}
             >
                 <Alert
-                    message="请输入农历生日信息"
+                    message="请输入出生时间（公历/阳历）"
                     type="info"
                     showIcon
                     style={{ marginBottom: 16 }}
@@ -216,31 +217,26 @@ function ZiWei() {
                     form={form}
                     layout="inline"
                     onFinish={handleSubmit}
+                    initialValues={{
+                        hour: 12
+                    }}
                 >
                     <Space wrap>
-                        <Form.Item name="year_gan" label="年干" rules={[{ required: true }]}>
-                            <Select style={{ width: 80 }}>
-                                {TIAN_GAN.map(g => <Option key={g} value={g}>{g}</Option>)}
-                            </Select>
+                        <Form.Item
+                            name="datetime"
+                            label="出生时间"
+                            rules={[{ required: true, message: '请选择出生日期' }]}
+                        >
+                            <DatePicker
+                                showTime={{ format: 'HH' }}
+                                format="YYYY-MM-DD HH:00"
+                                placeholder="选择公历时间"
+                                style={{ width: 220 }}
+                            />
                         </Form.Item>
-                        <Form.Item name="year_zhi" label="年支" rules={[{ required: true }]}>
-                            <Select style={{ width: 80 }}>
-                                {DI_ZHI.map(z => <Option key={z} value={z}>{z}</Option>)}
-                            </Select>
-                        </Form.Item>
-                        <Form.Item name="lunar_month" label="农历月" rules={[{ required: true }]}>
-                            <InputNumber min={1} max={12} />
-                        </Form.Item>
-                        <Form.Item name="lunar_day" label="农历日" rules={[{ required: true }]}>
-                            <InputNumber min={1} max={30} />
-                        </Form.Item>
-                        <Form.Item name="birth_hour_zhi" label="时辰" rules={[{ required: true }]}>
-                            <Select style={{ width: 80 }}>
-                                {DI_ZHI.map(z => <Option key={z} value={z}>{z}时</Option>)}
-                            </Select>
-                        </Form.Item>
+
                         <Form.Item>
-                            <Button type="primary" htmlType="submit" loading={loading}>
+                            <Button type="primary" htmlType="submit" loading={loading} icon={<StarOutlined />}>
                                 排盘分析
                             </Button>
                         </Form.Item>
