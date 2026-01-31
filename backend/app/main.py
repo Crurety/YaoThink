@@ -42,6 +42,7 @@ app = FastAPI(
     title=settings.APP_NAME,
     description=settings.APP_DESCRIPTION,
     version=settings.APP_VERSION,
+    # Trigger redeploy for psychology module fix
     lifespan=lifespan,
     docs_url="/docs",
     redoc_url="/redoc"
