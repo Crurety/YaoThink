@@ -437,9 +437,21 @@ function BaZi() {
             )}
 
             {result && !loading && (
-                <Card>
-                    <Tabs items={tabItems} />
-                </Card>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                    {tabItems.map(item => (
+                        <div key={item.key} id={`section-${item.key}`}>
+                            <Divider orientation="left" style={{
+                                fontSize: 18,
+                                color: '#DAA520',
+                                borderColor: 'rgba(218, 165, 32, 0.3)',
+                                margin: '0 0 24px 0'
+                            }}>
+                                {item.label}
+                            </Divider>
+                            {item.children}
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     )

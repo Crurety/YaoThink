@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
     Card, Form, InputNumber, Button, Row, Col, Spin, Tabs,
-    Tag, Descriptions, Typography, Select, Space, Alert, message
+    Tag, Descriptions, Typography, Select, Space, Alert, message, Divider
 } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
 import ZiWeiChart from '../../components/ZiWeiChart'
@@ -255,9 +255,21 @@ function ZiWei() {
             )}
 
             {result && !loading && (
-                <Card>
-                    <Tabs items={tabItems} />
-                </Card>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                    {tabItems.map(item => (
+                        <div key={item.key} id={`section-${item.key}`}>
+                            <Divider orientation="left" style={{
+                                fontSize: 18,
+                                color: '#DAA520',
+                                borderColor: 'rgba(218, 165, 32, 0.3)',
+                                margin: '0 0 24px 0'
+                            }}>
+                                {item.label}
+                            </Divider>
+                            {item.children}
+                        </div>
+                    ))}
+                </div>
             )}
         </div>
     )
