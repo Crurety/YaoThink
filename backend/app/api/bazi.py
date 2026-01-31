@@ -2,12 +2,13 @@
 玄心理命 - 八字命理API
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date
 
 from app.core.bazi import analyze_bazi, calculate_sizhu, Gender
+from app.core.auth import get_current_user, TokenData
 
 router = APIRouter()
 
@@ -42,9 +43,9 @@ class QuickBaZiRequest(BaseModel):
 
 
 @router.post("/analyze", summary="八字完整分析")
-async def analyze(request: BaZiRequest):
+async def analyze(request: BaZiRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    八字完整分析
+    八字完整分析（需要登录）
     
     包含：四柱排盘、五行分析、十神分析、格局判断、大运流年、神煞分析
     """

@@ -2,7 +2,7 @@
 玄心理命 - 易经占卜API
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
@@ -12,6 +12,7 @@ from app.core.yijing import (
     liuyao_by_coins, analyze_hexagram, divine,
     BAGUA, SIXTY_FOUR_GUA
 )
+from app.core.auth import get_current_user, TokenData
 
 router = APIRouter()
 
@@ -53,8 +54,8 @@ class MeihuaTextRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "text": "天行健",
-                "question": "求问指引"
+                "text": "问事业",
+                "question": "今年事业如何？"
             }
         }
 
@@ -72,9 +73,9 @@ class LiuYaoRequest(BaseModel):
 
 
 @router.post("/meihua/time", summary="梅花易数 - 时间起卦")
-async def meihua_time(request: MeihuaTimeRequest):
+async def meihua_time(request: MeihuaTimeRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    梅花易数时间起卦法
+    梅花易数时间起卦法（需要登录）
     
     根据当前或指定时间起卦
     """
@@ -93,9 +94,9 @@ async def meihua_time(request: MeihuaTimeRequest):
 
 
 @router.post("/meihua/number", summary="梅花易数 - 数字起卦")
-async def meihua_number(request: MeihuaNumberRequest):
+async def meihua_number(request: MeihuaNumberRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    梅花易数数字起卦法
+    梅花易数数字起卦法（需要登录）
     
     输入两个数字起卦
     """
@@ -109,9 +110,9 @@ async def meihua_number(request: MeihuaNumberRequest):
 
 
 @router.post("/meihua/text", summary="梅花易数 - 文字起卦")
-async def meihua_text(request: MeihuaTextRequest):
+async def meihua_text(request: MeihuaTextRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    梅花易数文字起卦法
+    梅花易数文字起卦法（需要登录）
     
     根据任意文字起卦
     """
@@ -125,9 +126,9 @@ async def meihua_text(request: MeihuaTextRequest):
 
 
 @router.post("/liuyao", summary="六爻 - 摇钱起卦")
-async def liuyao(request: LiuYaoRequest):
+async def liuyao(request: LiuYaoRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    六爻摇钱起卦法
+    六爻摇钱起卦法（需要登录）
     
     模拟三枚铜钱摇六次
     """

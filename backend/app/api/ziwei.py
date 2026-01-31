@@ -2,11 +2,12 @@
 玄心理命 - 紫微斗数API
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, Field
 from typing import Optional
 
 from app.core.ziwei import analyze_ziwei, MAIN_STAR_TRAITS
+from app.core.auth import get_current_user, TokenData
 
 router = APIRouter()
 
@@ -50,9 +51,9 @@ class ZiWeiFromSolarRequest(BaseModel):
 
 
 @router.post("/analyze", summary="紫微斗数分析")
-async def analyze(request: ZiWeiRequest):
+async def analyze(request: ZiWeiRequest, current_user: TokenData = Depends(get_current_user)):
     """
-    紫微斗数命盘分析
+    紫微斗数命盘分析（需要登录）
     
     包含：十二宫排列、主星安排、格局判断、运势分析
     """

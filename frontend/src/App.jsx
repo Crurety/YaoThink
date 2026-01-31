@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
 import { Layout, Menu, Button, Dropdown, Avatar, message } from 'antd'
 import {
     HomeOutlined,
@@ -11,7 +11,6 @@ import {
     LogoutOutlined,
     LoginOutlined
 } from '@ant-design/icons'
-import { useNavigate, useLocation } from 'react-router-dom'
 
 import Home from './pages/Home'
 import BaZi from './pages/BaZi'
@@ -21,6 +20,7 @@ import Psychology from './pages/Psychology'
 import Fusion from './pages/Fusion'
 import Profile from './pages/Profile'
 import AuthModal from './components/AuthModal'
+import PrivateRoute from './components/PrivateRoute'
 import { useUserStore } from './stores'
 
 const { Header, Content, Footer } = Layout
@@ -39,6 +39,12 @@ function App() {
     const location = useLocation()
     const [authModalVisible, setAuthModalVisible] = useState(false)
     const { user, isAuthenticated, logout } = useUserStore()
+
+    // 未登录时自动弹出登录框（访问受保护页面）
+    const handleAuthRequired = () => {
+        setAuthModalVisible(true)
+        message.warning('请先登录后再使用此功能')
+    }
 
     const handleLogout = () => {
         logout()
@@ -82,17 +88,17 @@ function App() {
                     {isAuthenticated ? (
                         <Dropdown menu={userMenu} placement="bottomRight">
                             <span className="user-dropdown-link" style={{ cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Avatar 
-                                    src={user?.avatar} 
-                                    icon={<UserOutlined />} 
+                                <Avatar
+                                    src={user?.avatar}
+                                    icon={<UserOutlined />}
                                     style={{ backgroundColor: 'var(--accent-gold)' }}
                                 />
                                 <span className="user-name">{user?.nickname || user?.phone || '用户'}</span>
                             </span>
                         </Dropdown>
                     ) : (
-                        <Button 
-                            type="primary" 
+                        <Button
+                            type="primary"
                             icon={<LoginOutlined />}
                             onClick={() => setAuthModalVisible(true)}
                         >
@@ -105,12 +111,36 @@ function App() {
             <Content className="app-content">
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/bazi" element={<BaZi />} />
-                    <Route path="/ziwei" element={<ZiWei />} />
-                    <Route path="/yijing" element={<YiJing />} />
-                    <Route path="/psychology" element={<Psychology />} />
-                    <Route path="/fusion" element={<Fusion />} />
-                    <Route path="/profile" element={<Profile />} />
+                    <Route path="/bazi" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <BaZi />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/ziwei" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <ZiWei />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/yijing" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <YiJing />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/psychology" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <Psychology />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/fusion" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <Fusion />
+                        </PrivateRoute>
+                    } />
+                    <Route path="/profile" element={
+                        <PrivateRoute onAuthRequired={handleAuthRequired}>
+                            <Profile />
+                        </PrivateRoute>
+                    } />
                 </Routes>
             </Content>
 
@@ -118,12 +148,13 @@ function App() {
                 玄心理命 ©2024 - 东方玄学与西方心理学融合
             </Footer>
 
-            <AuthModal 
-                visible={authModalVisible} 
-                onClose={() => setAuthModalVisible(false)} 
+            <AuthModal
+                visible={authModalVisible}
+                onClose={() => setAuthModalVisible(false)}
             />
         </Layout>
     )
 }
 
 export default App
+
