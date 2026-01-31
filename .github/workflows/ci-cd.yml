@@ -62,10 +62,11 @@ jobs:
               systemctl enable docker
             fi
             
-            # 安装docker-compose（如果未安装）
-            if ! command -v docker-compose &> /dev/null; then
-              curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-              chmod +x /usr/local/bin/docker-compose
+            # 安装 docker compose 插件（新版）
+            mkdir -p /usr/local/lib/docker/cli-plugins
+            if [ ! -f /usr/local/lib/docker/cli-plugins/docker-compose ]; then
+              curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-linux-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+              chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
             fi
             
             # 创建项目目录
@@ -80,15 +81,20 @@ jobs:
             fi
             
             # 停止现有容器
-            docker-compose down 2>/dev/null || true
+            docker compose down 2>/dev/null || docker-compose down 2>/dev/null || true
             
-            # 构建并启动
-            docker-compose up -d --build
+            # 清理旧容器
+            docker rm -f $(docker ps -aq) 2>/dev/null || true
+            
+            # 构建并启动（使用新版 docker compose）
+            docker compose up -d --build
             
             # 等待启动
-            sleep 15
+            sleep 20
             
             # 检查状态
-            docker-compose ps
+            docker compose ps
+            docker compose logs --tail=20 backend
             
             echo "部署完成！访问 http://$(hostname -I | awk '{print $1}')"
+
