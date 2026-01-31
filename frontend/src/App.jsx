@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Routes, Route, useNavigate, useLocation } from 'react-router-dom'
-import { Layout, Menu, Button, Dropdown, Avatar, message } from 'antd'
+import { Layout, Menu, Button, Dropdown, Avatar, message, ConfigProvider, theme } from 'antd'
 import {
     HomeOutlined,
     CompassOutlined,
@@ -70,89 +70,100 @@ function App() {
     }
 
     return (
-        <Layout className="app-layout">
-            <Header className="app-header">
-                <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
-                    <span className="logo-icon">☯</span>
-                    <span className="logo-text">玄心理命</span>
-                </div>
-                <Menu
-                    theme="dark"
-                    mode="horizontal"
-                    selectedKeys={[location.pathname]}
-                    items={menuItems}
-                    onClick={({ key }) => navigate(key)}
-                    className="header-menu"
+        <ConfigProvider
+            theme={{
+                algorithm: theme.darkAlgorithm,
+                token: {
+                    colorPrimary: '#6366f1',
+                    colorBgContainer: '#1e293b', // Match --bg-secondary
+                    colorBgElevated: '#1e293b', // Match --bg-secondary for dropdowns/modals
+                }
+            }}
+        >
+            <Layout className="app-layout">
+                <Header className="app-header">
+                    <div className="logo" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>
+                        <span className="logo-icon">☯</span>
+                        <span className="logo-text">玄心理命</span>
+                    </div>
+                    <Menu
+                        theme="dark"
+                        mode="horizontal"
+                        selectedKeys={[location.pathname]}
+                        items={menuItems}
+                        onClick={({ key }) => navigate(key)}
+                        className="header-menu"
+                    />
+                    <div className="header-auth">
+                        {isAuthenticated ? (
+                            <Dropdown menu={userMenu} placement="bottomRight">
+                                <span className="user-dropdown-link" style={{ cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
+                                    <Avatar
+                                        src={user?.avatar}
+                                        icon={<UserOutlined />}
+                                        style={{ backgroundColor: 'var(--accent-gold)' }}
+                                    />
+                                    <span className="user-name">{user?.nickname || user?.phone || '用户'}</span>
+                                </span>
+                            </Dropdown>
+                        ) : (
+                            <Button
+                                type="primary"
+                                icon={<LoginOutlined />}
+                                onClick={() => setAuthModalVisible(true)}
+                            >
+                                登录/注册
+                            </Button>
+                        )}
+                    </div>
+                </Header>
+
+                <Content className="app-content">
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/bazi" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <BaZi />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/ziwei" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <ZiWei />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/yijing" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <YiJing />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/psychology" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <Psychology />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/fusion" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <Fusion />
+                            </PrivateRoute>
+                        } />
+                        <Route path="/profile" element={
+                            <PrivateRoute onAuthRequired={handleAuthRequired}>
+                                <Profile />
+                            </PrivateRoute>
+                        } />
+                    </Routes>
+                </Content>
+
+                <Footer className="app-footer">
+                    玄心理命 ©2024 - 东方玄学与西方心理学融合
+                </Footer>
+
+                <AuthModal
+                    visible={authModalVisible}
+                    onClose={() => setAuthModalVisible(false)}
                 />
-                <div className="header-auth">
-                    {isAuthenticated ? (
-                        <Dropdown menu={userMenu} placement="bottomRight">
-                            <span className="user-dropdown-link" style={{ cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
-                                <Avatar
-                                    src={user?.avatar}
-                                    icon={<UserOutlined />}
-                                    style={{ backgroundColor: 'var(--accent-gold)' }}
-                                />
-                                <span className="user-name">{user?.nickname || user?.phone || '用户'}</span>
-                            </span>
-                        </Dropdown>
-                    ) : (
-                        <Button
-                            type="primary"
-                            icon={<LoginOutlined />}
-                            onClick={() => setAuthModalVisible(true)}
-                        >
-                            登录/注册
-                        </Button>
-                    )}
-                </div>
-            </Header>
-
-            <Content className="app-content">
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/bazi" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <BaZi />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/ziwei" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <ZiWei />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/yijing" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <YiJing />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/psychology" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <Psychology />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/fusion" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <Fusion />
-                        </PrivateRoute>
-                    } />
-                    <Route path="/profile" element={
-                        <PrivateRoute onAuthRequired={handleAuthRequired}>
-                            <Profile />
-                        </PrivateRoute>
-                    } />
-                </Routes>
-            </Content>
-
-            <Footer className="app-footer">
-                玄心理命 ©2024 - 东方玄学与西方心理学融合
-            </Footer>
-
-            <AuthModal
-                visible={authModalVisible}
-                onClose={() => setAuthModalVisible(false)}
-            />
-        </Layout>
+            </Layout>
+        </ConfigProvider>
     )
 }
 
