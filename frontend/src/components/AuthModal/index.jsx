@@ -267,10 +267,18 @@ function AuthModal({ visible, onClose }) {
     )
 
     const tabItems = [
-        { key: 'phone-sms', label: '验证码登录', children: <PhoneSmsForm /> },
-        { key: 'phone-password', label: '密码登录', children: <PhonePasswordForm /> },
-        { key: 'email-password', label: '邮箱登录', children: <EmailPasswordForm /> }
+        { key: 'phone-sms', label: mode === 'login' ? '验证码登录' : '手机号注册', children: <PhoneSmsForm /> },
+        // 注册模式下不支持单纯的"手机+密码"（必须验证码），所以隐藏
+        ...(mode === 'login' ? [{ key: 'phone-password', label: '密码登录', children: <PhonePasswordForm /> }] : []),
+        { key: 'email-password', label: mode === 'login' ? '邮箱登录' : '邮箱注册', children: <EmailPasswordForm /> }
     ]
+
+    // 如果当前在"密码登录"标签页切换到注册模式，自动切回"手机注册"
+    useEffect(() => {
+        if (mode === 'register' && activeTab === 'phone-password') {
+            setActiveTab('phone-sms')
+        }
+    }, [mode])
 
     return (
         <Modal
