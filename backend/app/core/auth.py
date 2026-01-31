@@ -21,7 +21,7 @@ SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-change-in-production-玄�
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 7天
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
 
 SMS_CODE_EXPIRE_SECONDS = 300  # 5分钟
@@ -121,6 +121,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 
 def get_password_hash(password: str) -> str:
     """生成密码哈希"""
+    # bcrypt 限制密码最长72字节
+    password = password[:72] if len(password.encode('utf-8')) > 72 else password
     return pwd_context.hash(password)
 
 

@@ -11,13 +11,13 @@ import os
 # 数据库URL配置
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql+asyncpg://postgres:password@localhost:5432/yaothink"
+    "postgresql+asyncpg://postgres:postgres@localhost:5432/yaothink"
 )
 
 # 创建异步引擎
 engine = create_async_engine(
     DATABASE_URL,
-    echo=True,
+    echo=os.getenv("DEBUG", "false").lower() == "true",
     pool_size=5,
     max_overflow=10
 )
