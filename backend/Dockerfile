@@ -38,7 +38,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
 
 # 复制启动脚本
 COPY prestart.sh .
-RUN chmod +x prestart.sh
+RUN sed -i 's/\r$//' prestart.sh && chmod +x prestart.sh
 
 # 启动命令
 CMD ["./prestart.sh"]
