@@ -141,254 +141,7 @@ function BaZi() {
         }
     }
 
-    const tabItems = [
-        {
-            key: 'basic',
-            label: '基本信息',
-            children: result && (
-                <Row gutter={[24, 24]}>
-                    <Col span={24}>
-                        <BaZiChart sizhu={result.basic_info.sizhu} />
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Descriptions column={1} bordered size="small">
-                            <Descriptions.Item label="出生时间">
-                                {result.basic_info.birth_datetime}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="性别">
-                                {result.basic_info.gender}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="生肖">
-                                {result.basic_info.shengxiao}
-                            </Descriptions.Item>
-                            <Descriptions.Item label="日主">
-                                <Text strong style={{ color: WUXING_COLORS[result.basic_info.day_master_wuxing] }}>
-                                    {result.basic_info.day_master}（{result.basic_info.day_master_wuxing}）
-                                </Text>
-                            </Descriptions.Item>
-                        </Descriptions>
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="日主强弱">
-                            <Statistic
-                                title={result.day_master_analysis.strength_level}
-                                value={`${(result.day_master_analysis.strength_ratio * 100).toFixed(1)}%`}
-                                prefix={<FireOutlined style={{ color: '#DAA520' }} />}
-                            />
-                            <Paragraph style={{ marginTop: 12, color: '#b0b0b0' }}>
-                                {result.day_master_analysis.description}
-                            </Paragraph>
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        },
-        {
-            key: 'wuxing',
-            label: '五行分析',
-            children: result && (
-                <Row gutter={[24, 24]}>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="五行雷达图">
-                            <ReactECharts option={getWuxingRadarOption()} style={{ height: 300 }} />
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="五行分布">
-                            <ReactECharts option={getWuxingPieOption()} style={{ height: 300 }} />
-                        </Card>
-                    </Col>
-                    <Col span={24}>
-                        <Card size="small" title="五行平衡分析">
-                            <Row gutter={[16, 16]}>
-                                {Object.entries(result.wuxing.balance).map(([wx, status]) => (
-                                    <Col key={wx} xs={12} sm={8} md={4}>
-                                        <div style={{ textAlign: 'center' }}>
-                                            <div style={{
-                                                fontSize: 28,
-                                                color: WUXING_COLORS[wx],
-                                                marginBottom: 8
-                                            }}>
-                                                {wx}
-                                            </div>
-                                            <Tag color={
-                                                status === '过旺' ? 'red' :
-                                                    status === '偏旺' ? 'orange' :
-                                                        status === '平衡' ? 'green' :
-                                                            status === '偏弱' ? 'blue' : 'purple'
-                                            }>
-                                                {status}
-                                            </Tag>
-                                        </div>
-                                    </Col>
-                                ))}
-                            </Row>
-                        </Card>
-                    </Col>
-                    <Col span={24}>
-                        <Card size="small" title="喜用神分析">
-                            <Row gutter={[16, 16]}>
-                                <Col xs={12} md={6}>
-                                    <Statistic
-                                        title="用神"
-                                        value={result.xi_yong_shen.yong_shen?.join('、') || '-'}
-                                        valueStyle={{ color: '#DAA520' }}
-                                    />
-                                </Col>
-                                <Col xs={12} md={6}>
-                                    <Statistic
-                                        title="喜神"
-                                        value={result.xi_yong_shen.xi_shen?.join('、') || '-'}
-                                        valueStyle={{ color: '#2E8B57' }}
-                                    />
-                                </Col>
-                                <Col xs={12} md={6}>
-                                    <Statistic
-                                        title="忌神"
-                                        value={result.xi_yong_shen.ji_shen?.join('、') || '-'}
-                                        valueStyle={{ color: '#DC143C' }}
-                                    />
-                                </Col>
-                                <Col xs={12} md={6}>
-                                    <Statistic
-                                        title="仇神"
-                                        value={result.xi_yong_shen.chou_shen?.join('、') || '-'}
-                                        valueStyle={{ color: '#666' }}
-                                    />
-                                </Col>
-                            </Row>
-                            <Divider />
-                            <Paragraph>{result.xi_yong_shen.analysis}</Paragraph>
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        },
-        {
-            key: 'shishen',
-            label: '十神格局',
-            children: result && (
-                <Row gutter={[24, 24]}>
-                    <Col span={24}>
-                        <Card size="small" title="格局判断">
-                            <Title level={4} style={{ color: '#DAA520' }}>
-                                {result.geju.main_geju}
-                            </Title>
-                            <Paragraph>{result.geju.description}</Paragraph>
-                        </Card>
-                    </Col>
-                    <Col span={24}>
-                        <Card size="small" title="性格特征">
-                            {result.personality.keywords && (
-                                <div style={{ marginBottom: 16 }}>
-                                    {result.personality.keywords.map(kw => (
-                                        <Tag key={kw} color="gold" style={{ marginBottom: 8 }}>{kw}</Tag>
-                                    ))}
-                                </div>
-                            )}
-                            <Paragraph>{result.personality.summary}</Paragraph>
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        },
-        {
-            key: 'dayun',
-            label: '大运流年',
-            children: result && result.dayun_liunian && (
-                <Row gutter={[24, 24]}>
-                    <Col span={24}>
-                        <Card size="small" title={`大运（当前${result.dayun_liunian.current_age}岁）`}>
-                            <div style={{ display: 'flex', gap: 12, overflowX: 'auto', padding: '8px 0' }}>
-                                {result.dayun_liunian.dayun_list?.map(dy => (
-                                    <div
-                                        key={dy.order}
-                                        style={{
-                                            minWidth: 100,
-                                            padding: 16,
-                                            textAlign: 'center',
-                                            background: dy.is_current ? 'rgba(218, 165, 32, 0.2)' : 'rgba(30, 30, 50, 0.8)',
-                                            border: dy.is_current ? '2px solid #DAA520' : '1px solid rgba(218, 165, 32, 0.3)',
-                                            borderRadius: 8
-                                        }}
-                                    >
-                                        <div style={{ fontSize: 12, color: '#888' }}>{dy.range}</div>
-                                        <div style={{ fontSize: 20, fontWeight: 'bold', margin: '8px 0' }}>
-                                            {dy.ganzhi}
-                                        </div>
-                                        <div style={{ fontSize: 12 }}>{dy.shishen}</div>
-                                    </div>
-                                ))}
-                            </div>
-                        </Card>
-                    </Col>
-                    <Col span={24}>
-                        <Card size="small" title="流年运势">
-                            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                {result.dayun_liunian.liunian_list?.map(ln => (
-                                    <Tag
-                                        key={ln.year}
-                                        color={
-                                            ln.rating === '大吉' ? 'gold' :
-                                                ln.rating === '吉' ? 'green' :
-                                                    ln.rating === '平' ? 'default' :
-                                                        ln.rating === '凶' ? 'orange' : 'red'
-                                        }
-                                        style={{
-                                            padding: '4px 12px',
-                                            border: ln.is_current ? '2px solid #DAA520' : undefined
-                                        }}
-                                    >
-                                        {ln.year}年 {ln.ganzhi} [{ln.rating}]
-                                    </Tag>
-                                ))}
-                            </div>
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        },
-        {
-            key: 'shensha',
-            label: '神煞',
-            children: result && (
-                <Row gutter={[24, 24]}>
-                    <Col xs={24} md={8}>
-                        <Card size="small" title="吉神" style={{ borderColor: '#2E8B57' }}>
-                            {result.shensha.ji_shensha?.map(s => (
-                                <Tag key={s.name} color="green" style={{ marginBottom: 8 }}>
-                                    {s.name}（{s.position}）
-                                </Tag>
-                            ))}
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={8}>
-                        <Card size="small" title="凶煞" style={{ borderColor: '#DC143C' }}>
-                            {result.shensha.xiong_shensha?.map(s => (
-                                <Tag key={s.name} color="red" style={{ marginBottom: 8 }}>
-                                    {s.name}（{s.position}）
-                                </Tag>
-                            ))}
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={8}>
-                        <Card size="small" title="中性神煞">
-                            {result.shensha.zhong_shensha?.map(s => (
-                                <Tag key={s.name} style={{ marginBottom: 8 }}>
-                                    {s.name}（{s.position}）
-                                </Tag>
-                            ))}
-                        </Card>
-                    </Col>
-                    <Col span={24}>
-                        <Card size="small" title="神煞总结">
-                            <Paragraph>{result.shensha.summary}</Paragraph>
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        }
-    ]
+    // tabItems has been replaced by bazi-dashboard layout
 
     return (
         <div>
@@ -437,20 +190,194 @@ function BaZi() {
             )}
 
             {result && !loading && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                    {tabItems.map(item => (
-                        <div key={item.key} id={`section-${item.key}`}>
-                            <Divider orientation="left" style={{
-                                fontSize: 18,
-                                color: '#DAA520',
-                                borderColor: 'rgba(218, 165, 32, 0.3)',
-                                margin: '0 0 24px 0'
-                            }}>
-                                {item.label}
-                            </Divider>
-                            {item.children}
-                        </div>
-                    ))}
+                <div className="bazi-dashboard" style={{ marginTop: 24 }}>
+                    {/* 第一行：命盘核心 + 基本强弱 */}
+                    <Row gutter={[24, 24]}>
+                        <Col xs={24} lg={16}>
+                            <Card title="八字命盘" className="feature-card" style={{ height: '100%' }}>
+                                <BaZiChart sizhu={result.basic_info.sizhu} />
+                            </Card>
+                        </Col>
+                        <Col xs={24} lg={8}>
+                            <Card title="命主信息" className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                                    <div style={{ fontSize: 14, color: '#94a3b8', marginBottom: 4 }}>日主天干</div>
+                                    <div style={{
+                                        fontSize: 48,
+                                        fontWeight: 'bold',
+                                        color: WUXING_COLORS[result.basic_info.day_master_wuxing],
+                                        textShadow: `0 0 20px ${WUXING_COLORS[result.basic_info.day_master_wuxing]}40`
+                                    }}>
+                                        {result.basic_info.day_master}
+                                    </div>
+                                    <Tag color={WUXING_COLORS[result.basic_info.day_master_wuxing]}>
+                                        {result.basic_info.day_master_wuxing}命人
+                                    </Tag>
+                                </div>
+                                <Divider style={{ margin: '16px 0' }} />
+                                <Statistic
+                                    title="身强身弱"
+                                    value={result.day_master_analysis.strength_level}
+                                    valueStyle={{ color: '#fff', fontSize: 24 }}
+                                    prefix={<FireOutlined style={{ color: '#f59e0b' }} />}
+                                    suffix={
+                                        <span style={{ fontSize: 14, color: '#94a3b8', marginLeft: 8 }}>
+                                            ({(result.day_master_analysis.strength_ratio * 100).toFixed(0)}%)
+                                        </span>
+                                    }
+                                />
+                                <Paragraph style={{ marginTop: 12, color: '#cbd5e1', fontSize: 13 }}>
+                                    {result.day_master_analysis.description}
+                                </Paragraph>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* 第二行：五行数据 + 喜用神 */}
+                    <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                        <Col xs={24} md={12} lg={8}>
+                            <Card title="五行能量" className="feature-card" style={{ height: '100%' }}>
+                                <ReactECharts option={getWuxingRadarOption()} style={{ height: 250 }} />
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12} lg={8}>
+                            <Card title="五行分布" className="feature-card" style={{ height: '100%' }}>
+                                <ReactECharts option={getWuxingPieOption()} style={{ height: 250 }} />
+                            </Card>
+                        </Col>
+                        <Col xs={24} lg={8}>
+                            <Card title="喜用神调整" className="feature-card" style={{ height: '100%' }}>
+                                <Row gutter={[16, 16]}>
+                                    <Col span={12}>
+                                        <Statistic
+                                            title="用神 (最需)"
+                                            value={result.xi_yong_shen.yong_shen?.join('、') || '-'}
+                                            valueStyle={{ color: '#fbbf24', fontWeight: 'bold' }}
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <Statistic
+                                            title="喜神 (辅助)"
+                                            value={result.xi_yong_shen.xi_shen?.join('、') || '-'}
+                                            valueStyle={{ color: '#34d399', fontWeight: 'bold' }}
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <Statistic
+                                            title="忌神 (应避)"
+                                            value={result.xi_yong_shen.ji_shen?.join('、') || '-'}
+                                            valueStyle={{ color: '#f87171' }}
+                                        />
+                                    </Col>
+                                    <Col span={12}>
+                                        <Statistic
+                                            title="仇神 (有害)"
+                                            value={result.xi_yong_shen.chou_shen?.join('、') || '-'}
+                                            valueStyle={{ color: '#94a3b8' }}
+                                        />
+                                    </Col>
+                                </Row>
+                                <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8 }}>
+                                    <div style={{ fontSize: 12, color: '#94a3b8', marginBottom: 4 }}>建议</div>
+                                    <div style={{ color: '#e2e8f0', fontSize: 13, lineHeight: 1.5 }}>
+                                        {result.xi_yong_shen.analysis}
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* 第三行：大运流年 (全宽) */}
+                    {result.dayun_liunian && (
+                        <Row style={{ marginTop: 24 }}>
+                            <Col span={24}>
+                                <Card title="大运流年趋势" className="feature-card">
+                                    <div style={{ overflowX: 'auto', paddingBottom: 16 }}>
+                                        <div style={{ display: 'flex', gap: 16, minWidth: 'max-content' }}>
+                                            {result.dayun_liunian.dayun_list?.map(dy => (
+                                                <div
+                                                    key={dy.order}
+                                                    style={{
+                                                        minWidth: 120,
+                                                        padding: 16,
+                                                        textAlign: 'center',
+                                                        background: dy.is_current
+                                                            ? 'linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(251, 191, 36, 0.05))'
+                                                            : 'rgba(255, 255, 255, 0.02)',
+                                                        border: dy.is_current ? '1px solid #fbbf24' : '1px solid rgba(255,255,255,0.05)',
+                                                        borderRadius: 12,
+                                                        position: 'relative'
+                                                    }}
+                                                >
+                                                    {dy.is_current && (
+                                                        <div style={{
+                                                            position: 'absolute', top: 0, right: 0,
+                                                            background: '#fbbf24', color: '#000',
+                                                            fontSize: 10, padding: '2px 6px',
+                                                            borderBottomLeftRadius: 8, borderTopRightRadius: 12
+                                                        }}>当前</div>
+                                                    )}
+                                                    <div style={{ fontSize: 12, color: '#94a3b8' }}>{dy.range}</div>
+                                                    <div style={{
+                                                        fontSize: 24,
+                                                        fontWeight: 'bold',
+                                                        margin: '8px 0',
+                                                        color: dy.is_current ? '#fbbf24' : '#e2e8f0'
+                                                    }}>
+                                                        {dy.ganzhi}
+                                                    </div>
+                                                    <Tag color="geekblue" style={{ margin: 0 }}>{dy.shishen}</Tag>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </Card>
+                            </Col>
+                        </Row>
+                    )}
+
+                    {/* 第四行：性格与神煞 */}
+                    <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                        <Col xs={24} md={12}>
+                            <Card title="性格格局" className="feature-card" style={{ height: '100%' }}>
+                                <Title level={4} style={{ color: '#fbbf24', marginTop: 0 }}>
+                                    {result.geju.main_geju}
+                                </Title>
+                                <div style={{ marginBottom: 16 }}>
+                                    {result.personality.keywords?.map(kw => (
+                                        <Tag key={kw} color="purple" style={{ marginRight: 8, marginBottom: 8 }}>#{kw}</Tag>
+                                    ))}
+                                </div>
+                                <Paragraph style={{ color: '#cbd5e1' }}>
+                                    {result.personality.summary}
+                                </Paragraph>
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Card title="神煞提示" className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ marginBottom: 16 }}>
+                                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 8 }}>吉神</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                        {result.shensha.ji_shensha?.map(s => (
+                                            <Tag key={s.name} color="success" style={{ padding: '4px 8px' }}>
+                                                {s.name} <span style={{ opacity: 0.6 }}>{s.position}</span>
+                                            </Tag>
+                                        )) || <span style={{ color: '#666' }}>无</span>}
+                                    </div>
+                                </div>
+                                <div>
+                                    <div style={{ fontSize: 13, color: '#94a3b8', marginBottom: 8 }}>凶煞</div>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                                        {result.shensha.xiong_shensha?.map(s => (
+                                            <Tag key={s.name} color="error" style={{ padding: '4px 8px' }}>
+                                                {s.name} <span style={{ opacity: 0.6 }}>{s.position}</span>
+                                            </Tag>
+                                        )) || <span style={{ color: '#666' }}>无</span>}
+                                    </div>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
                 </div>
             )}
         </div>

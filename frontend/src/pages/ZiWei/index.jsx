@@ -7,7 +7,7 @@ import { StarOutlined } from '@ant-design/icons'
 import ZiWeiChart from '../../components/ZiWeiChart'
 import api from '../../services/api'
 
-const { Title, Paragraph } = Typography
+const { Title, Paragraph, Text } = Typography
 const { Option } = Select
 
 const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
@@ -49,157 +49,7 @@ function ZiWei() {
         }
     }
 
-    const tabItems = [
-        {
-            key: 'chart',
-            label: '命盘',
-            children: result && (
-                <div>
-                    <Row gutter={[24, 24]} style={{ marginBottom: 24 }}>
-                        <Col xs={24} md={8}>
-                            <Descriptions column={1} bordered size="small">
-                                <Descriptions.Item label="命宫">
-                                    {result.chart_data.ming_gong}宫
-                                </Descriptions.Item>
-                                <Descriptions.Item label="身宫">
-                                    {result.chart_data.shen_gong}宫
-                                </Descriptions.Item>
-                                <Descriptions.Item label="五行局">
-                                    {result.chart_data.wuxing_ju}
-                                </Descriptions.Item>
-                            </Descriptions>
-                        </Col>
-                        <Col xs={24} md={16}>
-                            <Card size="small" title="格局">
-                                <Title level={4} style={{ color: '#DAA520', margin: 0 }}>
-                                    {result.analysis.pattern.name}
-                                </Title>
-                                <Paragraph style={{ marginTop: 8, marginBottom: 0, color: '#b0b0b0' }}>
-                                    {result.analysis.pattern.description}
-                                </Paragraph>
-                            </Card>
-                        </Col>
-                    </Row>
-                    <ZiWeiChart palaces={result.chart_data.palaces} />
-                </div>
-            )
-        },
-        {
-            key: 'analysis',
-            label: '详细分析',
-            children: result && (
-                <Row gutter={[24, 24]}>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="命宫分析" style={{ height: '100%' }}>
-                            {result.analysis.ming_analysis.main_star ? (
-                                <>
-                                    <Title level={4} style={{ color: '#DC143C' }}>
-                                        {result.analysis.ming_analysis.main_star}
-                                    </Title>
-                                    <div style={{ marginBottom: 12 }}>
-                                        {result.analysis.ming_analysis.keywords?.map(kw => (
-                                            <Tag key={kw} color="gold">{kw}</Tag>
-                                        ))}
-                                    </div>
-                                    <Paragraph style={{ color: '#b0b0b0' }}>
-                                        {result.analysis.ming_analysis.description}
-                                    </Paragraph>
-                                </>
-                            ) : (
-                                <Paragraph style={{ color: '#888' }}>
-                                    命宫无主星，需看对宫借星
-                                </Paragraph>
-                            )}
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="事业分析" style={{ height: '100%' }}>
-                            {result.analysis.career_analysis.main_star ? (
-                                <>
-                                    <Title level={4} style={{ color: '#2E8B57' }}>
-                                        {result.analysis.career_analysis.main_star}
-                                    </Title>
-                                    <Paragraph style={{ color: '#b0b0b0' }}>
-                                        {result.analysis.career_analysis.career_hint}
-                                    </Paragraph>
-                                </>
-                            ) : (
-                                <Paragraph style={{ color: '#888' }}>
-                                    官禄宫无主星
-                                </Paragraph>
-                            )}
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="财运分析" style={{ height: '100%' }}>
-                            {result.analysis.wealth_analysis.main_star ? (
-                                <>
-                                    <Title level={4} style={{ color: '#DAA520' }}>
-                                        {result.analysis.wealth_analysis.main_star}
-                                    </Title>
-                                    <Paragraph style={{ color: '#b0b0b0' }}>
-                                        {result.analysis.wealth_analysis.description}
-                                    </Paragraph>
-                                </>
-                            ) : (
-                                <Paragraph style={{ color: '#888' }}>
-                                    财帛宫无主星
-                                </Paragraph>
-                            )}
-                        </Card>
-                    </Col>
-                    <Col xs={24} md={12}>
-                        <Card size="small" title="感情分析" style={{ height: '100%' }}>
-                            {result.analysis.marriage_analysis.main_star ? (
-                                <>
-                                    <Title level={4} style={{ color: '#DC143C' }}>
-                                        {result.analysis.marriage_analysis.main_star}
-                                    </Title>
-                                    <Paragraph style={{ color: '#b0b0b0' }}>
-                                        {result.analysis.marriage_analysis.description}
-                                    </Paragraph>
-                                </>
-                            ) : (
-                                <Paragraph style={{ color: '#888' }}>
-                                    夫妻宫无主星
-                                </Paragraph>
-                            )}
-                        </Card>
-                    </Col>
-                </Row>
-            )
-        },
-        {
-            key: 'palaces',
-            label: '十二宫详情',
-            children: result && (
-                <Row gutter={[16, 16]}>
-                    {result.analysis.palaces_detail?.map(palace => (
-                        <Col xs={24} sm={12} md={8} lg={6} key={palace.name}>
-                            <Card
-                                size="small"
-                                title={palace.name}
-                                extra={<span style={{ color: '#888' }}>{palace.position}</span>}
-                            >
-                                <div>
-                                    <strong style={{ color: '#DC143C' }}>主星：</strong>
-                                    {palace.main_stars?.join('、') || '无'}
-                                </div>
-                                <div style={{ marginTop: 4 }}>
-                                    <strong style={{ color: '#2E8B57' }}>吉星：</strong>
-                                    {palace.aux_stars?.join('、') || '无'}
-                                </div>
-                                <div style={{ marginTop: 4 }}>
-                                    <strong style={{ color: '#888' }}>煞星：</strong>
-                                    {palace.sha_stars?.join('、') || '无'}
-                                </div>
-                            </Card>
-                        </Col>
-                    ))}
-                </Row>
-            )
-        }
-    ]
+    // tabItems has been replaced by ziwei-dashboard layout
 
     return (
         <div>
@@ -251,20 +101,158 @@ function ZiWei() {
             )}
 
             {result && !loading && (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
-                    {tabItems.map(item => (
-                        <div key={item.key} id={`section-${item.key}`}>
-                            <Divider orientation="left" style={{
-                                fontSize: 18,
-                                color: '#DAA520',
-                                borderColor: 'rgba(218, 165, 32, 0.3)',
-                                margin: '0 0 24px 0'
-                            }}>
-                                {item.label}
-                            </Divider>
-                            {item.children}
-                        </div>
-                    ))}
+                <div className="ziwei-dashboard" style={{ marginTop: 24 }}>
+                    {/* 第一行：命盘 + 核心参数 */}
+                    <Row gutter={[24, 24]}>
+                        <Col xs={24} lg={16}>
+                            <Card title="紫微斗数命盘" className="feature-card" style={{ height: '100%' }}>
+                                <ZiWeiChart palaces={result.chart_data.palaces} centerInfo={result.chart_data.wuxing_ju} />
+                            </Card>
+                        </Col>
+                        <Col xs={24} lg={8}>
+                            <Card title="命格概览" className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                                    <div style={{ fontSize: 40, fontWeight: 'bold', color: '#a78bfa', fontFamily: 'var(--font-display)' }}>
+                                        {result.chart_data.wuxing_ju}
+                                    </div>
+                                    <Tag color="purple">五行局</Tag>
+                                </div>
+                                <Divider />
+                                <Descriptions column={1} bordered size="small" style={{ marginTop: 16 }}>
+                                    <Descriptions.Item label="命宫" labelStyle={{ width: 80 }}>
+                                        <Text strong style={{ color: '#fbbf24' }}>{result.chart_data.ming_gong}宫</Text>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="身宫">
+                                        <Text strong style={{ color: '#34d399' }}>{result.chart_data.shen_gong}宫</Text>
+                                    </Descriptions.Item>
+                                    <Descriptions.Item label="格局">
+                                        <Text strong style={{ color: '#f472b6' }}>{result.analysis.pattern.name}</Text>
+                                    </Descriptions.Item>
+                                </Descriptions>
+                                <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8 }}>
+                                    <Paragraph style={{ fontSize: 13, color: '#e2e8f0', margin: 0 }}>
+                                        {result.analysis.pattern.description}
+                                    </Paragraph>
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* 第二行：四大运势 (2x2 Grid) */}
+                    <Row gutter={[24, 24]} style={{ marginTop: 24 }}>
+                        <Col xs={24} md={12}>
+                            <Card title={<><StarOutlined /> 命宫·核心</>} className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ minHeight: 120 }}>
+                                    {result.analysis.ming_analysis.main_star ? (
+                                        <>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                                                <Title level={4} style={{ color: '#a78bfa', margin: 0 }}>
+                                                    {result.analysis.ming_analysis.main_star}
+                                                </Title>
+                                                <div>
+                                                    {result.analysis.ming_analysis.keywords?.map(kw => (
+                                                        <Tag key={kw} color="geekblue">{kw}</Tag>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <Paragraph style={{ color: '#cbd5e1' }}>
+                                                {result.analysis.ming_analysis.description}
+                                            </Paragraph>
+                                        </>
+                                    ) : (
+                                        <div style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: 20 }}>
+                                            命宫无主星，借对宫（迁移宫）之星
+                                        </div>
+                                    )}
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Card title={<><span role="img" aria-label="money">💰</span> 财帛·财运</>} className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ minHeight: 120 }}>
+                                    {result.analysis.wealth_analysis.main_star ? (
+                                        <>
+                                            <Title level={4} style={{ color: '#fbbf24', marginTop: 0 }}>
+                                                {result.analysis.wealth_analysis.main_star}
+                                            </Title>
+                                            <Paragraph style={{ color: '#cbd5e1' }}>
+                                                {result.analysis.wealth_analysis.description}
+                                            </Paragraph>
+                                        </>
+                                    ) : <div style={{ color: '#666' }}>财帛宫无主星，参考对宫（福德宫）</div>}
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Card title={<><span role="img" aria-label="work">💼</span> 官禄·事业</>} className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ minHeight: 120 }}>
+                                    {result.analysis.career_analysis.main_star ? (
+                                        <>
+                                            <Title level={4} style={{ color: '#34d399', marginTop: 0 }}>
+                                                {result.analysis.career_analysis.main_star}
+                                            </Title>
+                                            <Paragraph style={{ color: '#cbd5e1' }}>
+                                                {result.analysis.career_analysis.career_hint}
+                                            </Paragraph>
+                                        </>
+                                    ) : <div style={{ color: '#666' }}>官禄宫无主星，参考对宫（夫妻宫）</div>}
+                                </div>
+                            </Card>
+                        </Col>
+                        <Col xs={24} md={12}>
+                            <Card title={<><span role="img" aria-label="heart">❤️</span> 夫妻·情感</>} className="feature-card" style={{ height: '100%' }}>
+                                <div style={{ minHeight: 120 }}>
+                                    {result.analysis.marriage_analysis.main_star ? (
+                                        <>
+                                            <Title level={4} style={{ color: '#f472b6', marginTop: 0 }}>
+                                                {result.analysis.marriage_analysis.main_star}
+                                            </Title>
+                                            <Paragraph style={{ color: '#cbd5e1' }}>
+                                                {result.analysis.marriage_analysis.description}
+                                            </Paragraph>
+                                        </>
+                                    ) : <div style={{ color: '#666' }}>夫妻宫无主星，参考对宫（官禄宫）</div>}
+                                </div>
+                            </Card>
+                        </Col>
+                    </Row>
+
+                    {/* 第三行：十二宫详情 (Refined Grid) */}
+                    <div style={{ marginTop: 24 }}>
+                        <Divider orientation="left" style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>十二宫完整星曜</Divider>
+                        <Row gutter={[12, 12]}>
+                            {result.analysis.palaces_detail?.map(palace => (
+                                <Col xs={24} sm={12} md={6} lg={4} key={palace.name}>
+                                    <div style={{
+                                        background: 'rgba(255,255,255,0.03)',
+                                        borderRadius: 12,
+                                        padding: 12,
+                                        border: '1px solid rgba(255,255,255,0.05)',
+                                        height: '100%'
+                                    }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                            <span style={{ fontWeight: 'bold', color: '#e2e8f0' }}>{palace.name}</span>
+                                            <span style={{ fontSize: 12, color: '#64748b' }}>{palace.position}</span>
+                                        </div>
+                                        <div style={{ fontSize: 12 }}>
+                                            <div style={{ marginBottom: 4 }}>
+                                                <span style={{ color: '#fca5a5' }}>主: </span>
+                                                {palace.main_stars?.map(s => <span key={s} style={{ color: '#fca5a5', marginRight: 4 }}>{s}</span>) || '-'}
+                                            </div>
+                                            <div style={{ marginBottom: 4 }}>
+                                                <span style={{ color: '#86efac' }}>吉: </span>
+                                                {palace.aux_stars?.map(s => <span key={s} style={{ color: '#86efac', marginRight: 4 }}>{s}</span>) || '-'}
+                                            </div>
+                                            <div>
+                                                <span style={{ color: '#cbd5e1' }}>煞: </span>
+                                                {palace.sha_stars?.map(s => <span key={s} style={{ color: '#94a3b8', marginRight: 4 }}>{s}</span>) || '-'}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </Col>
+                            ))}
+                        </Row>
+                    </div>
                 </div>
             )}
         </div>
