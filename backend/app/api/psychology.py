@@ -73,7 +73,7 @@ async def get_mbti_test_questions():
         "test_name": "MBTI人格类型测试",
         "description": "迈尔斯-布里格斯类型指标，分析你的性格类型",
         "total_questions": len(questions),
-        "estimated_time": "10-15分钟",
+        "estimated_time": "20-30分钟",
         "questions": questions
     }
 
@@ -317,8 +317,8 @@ async def get_available_tests():
                 "id": "mbti",
                 "name": "MBTI人格类型",
                 "description": "16种人格类型测评",
-                "questions": 32,
-                "time": "10-15分钟"
+                "questions": 93,
+                "time": "20-30分钟"
             },
             {
                 "id": "big5",

@@ -21,8 +21,8 @@ const TEST_TYPES = {
         icon: <UserOutlined />,
         color: '#722ed1',
         description: '探索你的16种人格类型',
-        questions: 32,
-        time: '10-15分钟'
+        questions: 93,
+        time: '20-30分钟'
     },
     big5: {
         name: '大五人格',
