@@ -426,12 +426,15 @@ def calculate_wuxing_ju(ming_gong_dizhi: str, year_gan: str) -> Tuple[str, int]:
 
 def arrange_main_stars(palaces: List[Palace], ziwei_position: int) -> None:
     """
-    排列十四主星
+    排列十四主星 (Optimized with Map Lookup)
     
     Args:
         palaces: 十二宫列表
         ziwei_position: 紫微星地支索引
     """
+    # Create O(1) lookup map
+    palace_map = {DI_ZHI.index(p.dizhi): p for p in palaces}
+
     # 主星相对紫微的位置关系（简化版）
     # 紫微星系列
     ziwei_group = {
@@ -459,35 +462,32 @@ def arrange_main_stars(palaces: List[Palace], ziwei_position: int) -> None:
     # 安排紫微星系
     for star_name, offset in ziwei_group.items():
         position = (ziwei_position + offset) % 12
-        # 找到对应地支的宫位
-        for palace in palaces:
-            if DI_ZHI.index(palace.dizhi) == position:
-                star = Star(
-                    name=star_name,
-                    star_type=StarType.ZHUXING,
-                    description=MAIN_STAR_TRAITS.get(star_name, {}).get("positive", "")
-                )
-                palace.stars.append(star)
-                break
+        if position in palace_map:
+            palace = palace_map[position]
+            star = Star(
+                name=star_name,
+                star_type=StarType.ZHUXING,
+                description=MAIN_STAR_TRAITS.get(star_name, {}).get("positive", "")
+            )
+            palace.stars.append(star)
     
     # 安排天府星系
     for star_name, offset in tianfu_group.items():
         position = (tianfu_position + offset) % 12
-        for palace in palaces:
-            if DI_ZHI.index(palace.dizhi) == position:
-                star = Star(
-                    name=star_name,
-                    star_type=StarType.ZHUXING,
-                    description=MAIN_STAR_TRAITS.get(star_name, {}).get("positive", "")
-                )
-                palace.stars.append(star)
-                break
+        if position in palace_map:
+            palace = palace_map[position]
+            star = Star(
+                name=star_name,
+                star_type=StarType.ZHUXING,
+                description=MAIN_STAR_TRAITS.get(star_name, {}).get("positive", "")
+            )
+            palace.stars.append(star)
 
 
 def arrange_auxiliary_stars(palaces: List[Palace], year_gan: str, year_zhi: str,
                            lunar_month: int, birth_hour_zhi_index: int) -> None:
     """
-    排列辅佐吉星
+    排列辅佐吉星 (Optimized with Map Lookup)
     
     Args:
         palaces: 十二宫列表
@@ -496,6 +496,9 @@ def arrange_auxiliary_stars(palaces: List[Palace], year_gan: str, year_zhi: str,
         lunar_month: 农历月份
         birth_hour_zhi_index: 出生时辰地支索引
     """
+    # Create O(1) lookup map
+    palace_map = {DI_ZHI.index(p.dizhi): p for p in palaces}
+
     # 左辅：辰上起正月，顺数至生月
     zuofu_position = (4 + lunar_month - 1) % 12  # 辰=4
     
@@ -516,29 +519,29 @@ def arrange_auxiliary_stars(palaces: List[Palace], year_gan: str, year_zhi: str,
     }
     
     for star_name, position in aux_positions.items():
-        for palace in palaces:
-            if DI_ZHI.index(palace.dizhi) == position:
-                star = Star(
-                    name=star_name,
-                    star_type=StarType.JIXING,
-                    description=AUXILIARY_STARS.get(star_name, {}).get("description", "")
-                )
-                palace.stars.append(star)
-                break
+        if position in palace_map:
+            palace = palace_map[position]
+            star = Star(
+                name=star_name,
+                star_type=StarType.JIXING,
+                description=AUXILIARY_STARS.get(star_name, {}).get("description", "")
+            )
+            palace.stars.append(star)
 
 
 def arrange_sha_stars(palaces: List[Palace], year_zhi: str, birth_hour_zhi_index: int) -> None:
     """
-    排列六煞星
+    排列六煞星 (Optimized with Map Lookup)
     
     Args:
         palaces: 十二宫列表
         year_zhi: 年支
         birth_hour_zhi_index: 出生时辰地支索引
     """
-    year_zhi_index = DI_ZHI.index(year_zhi)
+    # Create O(1) lookup map
+    palace_map = {DI_ZHI.index(p.dizhi): p for p in palaces}
     
-    # 擎羊、陀罗：以年干定位（简化处理）
+    # 擎羊、陀罗：安星在 Advanced 模块处理 (LUCUN关联)
     # 火星、铃星：以年支定位
     
     # 火星安星表（简化）
@@ -569,15 +572,14 @@ def arrange_sha_stars(palaces: List[Palace], year_zhi: str, birth_hour_zhi_index
     }
     
     for star_name, position in sha_positions.items():
-        for palace in palaces:
-            if DI_ZHI.index(palace.dizhi) == position:
-                star = Star(
-                    name=star_name,
-                    star_type=StarType.SHAXING,
-                    description=SHA_STARS.get(star_name, {}).get("description", "")
-                )
-                palace.stars.append(star)
-                break
+        if position in palace_map:
+            palace = palace_map[position]
+            star = Star(
+                name=star_name,
+                star_type=StarType.SHAXING,
+                description=SHA_STARS.get(star_name, {}).get("description", "")
+            )
+            palace.stars.append(star)
 
 
 @dataclass

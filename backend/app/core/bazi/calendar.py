@@ -7,6 +7,7 @@ from datetime import datetime, date
 from typing import Tuple, Optional
 from dataclasses import dataclass
 from enum import Enum
+from functools import lru_cache
 
 # 天干
 TIAN_GAN = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
@@ -159,6 +160,7 @@ def get_nayin(gan: str, zhi: str) -> str:
     return ""
 
 
+@lru_cache(maxsize=128)
 def get_year_ganzhi(year: int) -> GanZhi:
     """
     计算年柱干支
@@ -178,6 +180,7 @@ def get_year_ganzhi(year: int) -> GanZhi:
     return GanZhi(TIAN_GAN[gan_index], DI_ZHI[zhi_index])
 
 
+@lru_cache(maxsize=128)
 def get_month_ganzhi(year: int, month: int, day: int) -> GanZhi:
     """
     计算月柱干支
@@ -250,6 +253,7 @@ def _get_jieqi_month(month: int, day: int) -> int:
     return month
 
 
+@lru_cache(maxsize=128)
 def get_day_ganzhi(year: int, month: int, day: int) -> GanZhi:
     """
     计算日柱干支

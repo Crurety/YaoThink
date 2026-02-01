@@ -83,10 +83,10 @@ TIANYUE_TABLE = {
 }
 
 
-# ==================== 星曜庙旺落陷表 ====================
+# ==================== 星曜庙旺落陷表 (Original) ====================
 # 亮度等级：庙、旺、得地、平和、落陷
 
-STAR_BRIGHTNESS = {
+STAR_BRIGHTNESS_GROUPS = {
     "紫微": {
         "庙": ["午", "巳"],
         "旺": ["寅", "卯", "未", "申"],
@@ -187,19 +187,19 @@ STAR_BRIGHTNESS = {
     }
 }
 
+# ==================== Optimization: Inverted Index ====================
+# Create a static lookup table: (star_name, dizhi) -> brightness
+# This makes lookup O(1) instead of nested loop
+STAR_BRIGHTNESS_INDEX = {}
+for star, levels in STAR_BRIGHTNESS_GROUPS.items():
+    for level, positions in levels.items():
+        for pos in positions:
+            STAR_BRIGHTNESS_INDEX[(star, pos)] = level
+
 
 def get_star_brightness(star_name: str, dizhi: str) -> str:
-    """获取星曜在某宫位的亮度"""
-    if star_name not in STAR_BRIGHTNESS:
-        return "平和"
-    
-    brightness_data = STAR_BRIGHTNESS[star_name]
-    
-    for level, positions in brightness_data.items():
-        if dizhi in positions:
-            return level
-    
-    return "平和"
+    """获取星曜在某宫位的亮度 (O(1) Optimized)"""
+    return STAR_BRIGHTNESS_INDEX.get((star_name, dizhi), "平和")
 
 
 def arrange_sihua(palaces: List[Palace], year_gan: str) -> None:
@@ -217,6 +217,8 @@ def arrange_sihua(palaces: List[Palace], year_gan: str) -> None:
     
     for palace in palaces:
         for star in palace.stars:
+            # Reverse lookup in SiHua to find if this star is Hua what
+            # Using items() loop is OK since it's only 4 items
             for hua_type, star_name in sihua.items():
                 if star.name == star_name:
                     star.hua = hua_type
@@ -231,29 +233,28 @@ def arrange_lucun_tianma(palaces: List[Palace], year_gan: str, year_zhi: str) ->
         year_gan: 年干
         year_zhi: 年支
     """
+    # Create Map for O(1) lookup
+    palace_map = {p.dizhi: p for p in palaces}
+
     # 禄存
     if year_gan in LUCUN_TABLE:
         lucun_zhi = LUCUN_TABLE[year_gan]
-        for palace in palaces:
-            if palace.dizhi == lucun_zhi:
-                palace.stars.append(Star(
-                    name="禄存",
-                    star_type=StarType.JIXING,
-                    description="财禄之星，主稳定财运"
-                ))
-                break
+        if lucun_zhi in palace_map:
+            palace_map[lucun_zhi].stars.append(Star(
+                name="禄存",
+                star_type=StarType.JIXING,
+                description="财禄之星，主稳定财运"
+            ))
     
     # 天马
     if year_zhi in TIANMA_TABLE:
         tianma_zhi = TIANMA_TABLE[year_zhi]
-        for palace in palaces:
-            if palace.dizhi == tianma_zhi:
-                palace.stars.append(Star(
-                    name="天马",
-                    star_type=StarType.JIXING,
-                    description="奔波走动，利外出发展"
-                ))
-                break
+        if tianma_zhi in palace_map:
+            palace_map[tianma_zhi].stars.append(Star(
+                name="天马",
+                star_type=StarType.JIXING,
+                description="奔波走动，利外出发展"
+            ))
 
 
 def arrange_qingyang_tuoluo(palaces: List[Palace], year_gan: str) -> None:
@@ -264,29 +265,27 @@ def arrange_qingyang_tuoluo(palaces: List[Palace], year_gan: str) -> None:
         palaces: 十二宫列表
         year_gan: 年干
     """
+    palace_map = {p.dizhi: p for p in palaces}
+
     # 擎羊
     if year_gan in QINGYANG_TABLE:
         qy_zhi = QINGYANG_TABLE[year_gan]
-        for palace in palaces:
-            if palace.dizhi == qy_zhi:
-                palace.stars.append(Star(
-                    name="擎羊",
-                    star_type=StarType.SHAXING,
-                    description="刚烈冲动，易有意外"
-                ))
-                break
+        if qy_zhi in palace_map:
+            palace_map[qy_zhi].stars.append(Star(
+                name="擎羊",
+                star_type=StarType.SHAXING,
+                description="刚烈冲动，易有意外"
+            ))
     
     # 陀罗
     if year_gan in TUOLUO_TABLE:
         tl_zhi = TUOLUO_TABLE[year_gan]
-        for palace in palaces:
-            if palace.dizhi == tl_zhi:
-                palace.stars.append(Star(
-                    name="陀罗",
-                    star_type=StarType.SHAXING,
-                    description="拖延纠缠，做事反复"
-                ))
-                break
+        if tl_zhi in palace_map:
+            palace_map[tl_zhi].stars.append(Star(
+                name="陀罗",
+                star_type=StarType.SHAXING,
+                description="拖延纠缠，做事反复"
+            ))
 
 
 def arrange_tiankui_tianyue(palaces: List[Palace], year_gan: str) -> None:
@@ -297,29 +296,27 @@ def arrange_tiankui_tianyue(palaces: List[Palace], year_gan: str) -> None:
         palaces: 十二宫列表
         year_gan: 年干
     """
+    palace_map = {p.dizhi: p for p in palaces}
+
     # 天魁
     if year_gan in TIANKUI_TABLE:
         tk_zhi = TIANKUI_TABLE[year_gan]
-        for palace in palaces:
-            if palace.dizhi == tk_zhi:
-                palace.stars.append(Star(
-                    name="天魁",
-                    star_type=StarType.JIXING,
-                    description="阳贵人，主贵人相助"
-                ))
-                break
+        if tk_zhi in palace_map:
+            palace_map[tk_zhi].stars.append(Star(
+                name="天魁",
+                star_type=StarType.JIXING,
+                description="阳贵人，主贵人相助"
+            ))
     
     # 天钺
     if year_gan in TIANYUE_TABLE:
         ty_zhi = TIANYUE_TABLE[year_gan]
-        for palace in palaces:
-            if palace.dizhi == ty_zhi:
-                palace.stars.append(Star(
-                    name="天钺",
-                    star_type=StarType.JIXING,
-                    description="阴贵人，主贵人相助"
-                ))
-                break
+        if ty_zhi in palace_map:
+            palace_map[ty_zhi].stars.append(Star(
+                name="天钺",
+                star_type=StarType.JIXING,
+                description="阴贵人，主贵人相助"
+            ))
 
 
 def set_star_brightness(palaces: List[Palace]) -> None:
@@ -344,7 +341,7 @@ ADVANCED_PATTERNS = {
         "description": "才艺出众，有领导魅力，适合文艺领域"
     },
     "机月同梁": {
-        "condition": lambda stars: len([s for s in ["天机", "太阴", "天同", "天梁"] if s in stars]) >= 2,
+        "condition": lambda stars: len({"天机", "太阴", "天同", "天梁"}.intersection(stars)) >= 2,
         "level": "中上格",
         "description": "适合公职、技术、幕僚工作"
     },
@@ -354,7 +351,7 @@ ADVANCED_PATTERNS = {
         "description": "聪明才智，事业财运两全"
     },
     "杀破狼会": {
-        "condition": lambda stars: any(s in stars for s in ["七杀", "破军", "贪狼"]),
+        "condition": lambda stars: not {"七杀", "破军", "贪狼"}.isdisjoint(stars),
         "level": "变格",
         "description": "变动开创，适合冒险创业"
     },
@@ -374,12 +371,13 @@ ADVANCED_PATTERNS = {
         "description": "适合考试、公职、名声"
     },
     "火贪格": {
-        "condition": lambda stars, sha: "贪狼" in stars and "火星" in sha,
+        # Note: stars and sha are passed separately
+        "condition": lambda stars, sha, _: "贪狼" in stars and "火星" in sha,
         "level": "中格",
         "description": "意外发财，横财运佳"
     },
     "铃贪格": {
-        "condition": lambda stars, sha: "贪狼" in stars and "铃星" in sha,
+        "condition": lambda stars, sha, _: "贪狼" in stars and "铃星" in sha,
         "level": "中格",
         "description": "意外收获，但需防变故"
     }
@@ -388,7 +386,7 @@ ADVANCED_PATTERNS = {
 
 def analyze_advanced_patterns(chart: 'ZiWeiChart') -> List[Dict]:
     """
-    分析高级格局
+    分析高级格局 (Optimized)
     
     Args:
         chart: 紫微命盘
@@ -400,30 +398,35 @@ def analyze_advanced_patterns(chart: 'ZiWeiChart') -> List[Dict]:
     if not ming_gong:
         return []
     
-    main_star_names = [s.name for s in ming_gong.get_main_stars()]
-    sha_star_names = [s.name for s in ming_gong.get_sha_stars()]
+    # Pre-compute sets for O(1) checking
+    main_star_set = {s.name for s in ming_gong.get_main_stars()}
+    sha_star_set = {s.name for s in ming_gong.get_sha_stars()}
     
     patterns = []
     
     for pattern_name, pattern_info in ADVANCED_PATTERNS.items():
         condition = pattern_info["condition"]
         try:
-            # 处理需要两个参数的格局
-            if condition.__code__.co_argcount == 2:
-                if condition(main_star_names, sha_star_names):
-                    patterns.append({
-                        "name": pattern_name,
-                        "level": pattern_info["level"],
-                        "description": pattern_info["description"]
-                    })
-            else:
-                if condition(main_star_names):
-                    patterns.append({
-                        "name": pattern_name,
-                        "level": pattern_info["level"],
-                        "description": pattern_info["description"]
-                    })
-        except:
+            # Note: We need to handle lambda args generically
+            # Check lambda arg count using code object
+            arg_count = condition.__code__.co_argcount
+            
+            is_match = False
+            if arg_count == 1:
+                is_match = condition(main_star_set)
+            elif arg_count == 2: # old impl had 2
+                is_match = condition(main_star_set, sha_star_set)
+            elif arg_count == 3: # new impl for fire/bell greed, dummy arg for safety
+                is_match = condition(main_star_set, sha_star_set, None)
+                
+            if is_match:
+                patterns.append({
+                    "name": pattern_name,
+                    "level": pattern_info["level"],
+                    "description": pattern_info["description"]
+                })
+        except Exception:
+            # Fail safely for pattern checks
             pass
     
     return patterns
