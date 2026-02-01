@@ -8,8 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import (
     SendSmsCodeRequest, 
+    PhoneSmsLoginRequest, PhonePasswordLoginRequest, EmailPasswordLoginRequest,
     PhoneRegisterRequest, EmailRegisterRequest, SetPasswordRequest,
-    ChangePasswordRequest,  # Added
+    ChangePasswordRequest,
     UserResponse, AuthService, get_current_user, TokenData
 )
 from app.core.database import get_db
