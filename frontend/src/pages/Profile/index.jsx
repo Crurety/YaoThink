@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Tabs, List, Tag, Button, Avatar, Statistic, Empty, Spin, message, Modal, Form, Input, Select, Switch, Typography } from 'antd';
+import { Card, Row, Col, Tabs, List, Tag, Button, Avatar, Statistic, Empty, Spin, message, Modal, Form, Input, Select, Switch, Typography, Space } from 'antd';
 import {
     UserOutlined,
     HistoryOutlined,
@@ -8,9 +9,11 @@ import {
     HeartOutlined,
     DeleteOutlined,
     EyeOutlined,
-    EditOutlined
+    EditOutlined,
+    LockOutlined
 } from '@ant-design/icons';
 import api from '../../services/api';
+import HistoryDetailModal from './HistoryDetailModal';
 import './index.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -20,23 +23,32 @@ const ProfilePage = () => {
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
 
-    // 用户数据
+    // User Data
     const [profile, setProfile] = useState(null);
     const [stats, setStats] = useState(null);
     const [settings, setSettings] = useState(null);
 
-    // 历史记录
+    // History Data
     const [analyses, setAnalyses] = useState([]);
     const [divinations, setDivinations] = useState([]);
     const [psychologyTests, setPsychologyTests] = useState([]);
     const [fusions, setFusions] = useState([]);
     const [favorites, setFavorites] = useState([]);
 
-    // 弹窗
+    // Modals
     const [editModalVisible, setEditModalVisible] = useState(false);
-    const [settingsModalVisible, setSettingsModalVisible] = useState(false);
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
 
-    // 加载用户数据
+    // Detail Modal State
+    const [detailModalVisible, setDetailModalVisible] = useState(false);
+    const [selectedRecord, setSelectedRecord] = useState(null);
+    const [selectedRecordType, setSelectedRecordType] = useState('');
+
+    const [form] = Form.useForm();
+    const [passwordForm] = Form.useForm();
+    const [settingsForm] = Form.useForm();
+
+    // Load initial data
     useEffect(() => {
         loadUserData();
     }, []);
@@ -44,7 +56,6 @@ const ProfilePage = () => {
     const loadUserData = async () => {
         setLoading(true);
         try {
-            // 并行加载数据
             const [profileRes, statsRes, settingsRes] = await Promise.all([
                 api.get('/api/user/profile'),
                 api.get('/api/user/stats'),
@@ -54,38 +65,17 @@ const ProfilePage = () => {
             setProfile(profileRes.data.data);
             setStats(statsRes.data.data);
             setSettings(settingsRes.data.data);
+
+            // Set initial form values
+            settingsForm.setFieldsValue(settingsRes.data.data);
         } catch (err) {
-            console.error('加载用户数据失败', err);
-            // 使用模拟数据
-            setProfile({
-                id: 1,
-                nickname: '玄学爱好者',
-                avatar: null,
-                phone: '138****8888',
-                email: null,
-                is_vip: false,
-                created_at: new Date().toISOString()
-            });
-            setStats({
-                bazi_analyses: 5,
-                ziwei_analyses: 3,
-                divinations: 12,
-                psychology_tests: 4,
-                fusion_analyses: 2,
-                favorites: 8
-            });
-            setSettings({
-                theme: 'dark',
-                language: 'zh-CN',
-                timezone: 'Asia/Shanghai',
-                notification_enabled: true
-            });
+            console.error('Failed to load user data', err);
+            message.error('加载用户数据失败，请重试');
         } finally {
             setLoading(false);
         }
     };
 
-    // 加载历史记录
     const loadHistory = async (type) => {
         try {
             let res;
@@ -113,83 +103,143 @@ const ProfilePage = () => {
             }
         } catch (err) {
             console.error('加载历史记录失败', err);
+            message.error('加载历史记录失败');
         }
     };
 
-    // Tab切换时加载对应数据
     const handleTabChange = (key) => {
         setActiveTab(key);
-        if (key === 'analyses') loadHistory('analyses');
-        else if (key === 'divinations') loadHistory('divinations');
-        else if (key === 'psychology') loadHistory('psychology');
-        else if (key === 'fusions') loadHistory('fusions');
-        else if (key === 'favorites') loadHistory('favorites');
+        if (['analyses', 'divinations', 'psychology', 'fusions', 'favorites'].includes(key)) {
+            loadHistory(key);
+        }
     };
 
-    // 删除历史记录
     const handleDelete = async (type, id) => {
         try {
-            await axios.delete(`${API_BASE}/api/user/history/${type}/${id}`);
+            await api.delete(`/api/user/history/${type}/${id}`);
             message.success('删除成功');
             loadHistory(type);
+            // Refresh stats if needed
+            const statsRes = await api.get('/api/user/stats');
+            setStats(statsRes.data.data);
         } catch (err) {
             message.error('删除失败');
         }
     };
 
-    // 渲染概览
+    // View Detail
+    const handleViewDetail = (item, type) => {
+        setSelectedRecord(item);
+        setSelectedRecordType(type);
+        setDetailModalVisible(true);
+    };
+
+    // Update Profile
+    const handleUpdateProfile = async (values) => {
+        try {
+            const res = await api.put('/api/user/profile', values);
+            if (res.data.success) {
+                message.success('资料更新成功');
+                setEditModalVisible(false);
+                loadUserData(); // Reload all data
+            }
+        } catch (err) {
+            message.error('更新失败');
+        }
+    };
+
+    // Change Password
+    const handleChangePassword = async (values) => {
+        try {
+            const res = await api.post('/api/auth/change-password', values);
+            if (res.data.success) {
+                message.success('密码修改成功');
+                setPasswordModalVisible(false);
+                passwordForm.resetFields();
+            }
+        } catch (err) {
+            message.error(err.response?.data?.detail || '密码修改失败');
+        }
+    };
+
+    // Update Settings
+    const handleUpdateSettings = async (values) => {
+        try {
+            const res = await api.put('/api/user/settings', values);
+            if (res.data.success) {
+                message.success('设置更新成功');
+                setSettings(values);
+            }
+        } catch (err) {
+            message.error('设置更新失败');
+        }
+    };
+
     const renderOverview = () => (
         <div className="overview-section">
             <Card className="profile-card">
                 <div className="profile-header">
-                    <Avatar size={80} icon={<UserOutlined />} src={profile?.avatar} />
+                    <Avatar
+                        size={80}
+                        icon={<UserOutlined />}
+                        src={profile?.avatar}
+                        style={{ backgroundColor: '#722ed1' }}
+                    />
                     <div className="profile-info">
-                        <Title level={3}>{profile?.nickname || '用户'}</Title>
-                        <Text type="secondary">{profile?.phone || profile?.email}</Text>
-                        {profile?.is_vip && <Tag color="gold">VIP会员</Tag>}
+                        <Title level={3} style={{ marginBottom: 4 }}>{profile?.nickname || '用户'}</Title>
+                        <Space className="profile-meta">
+                            <Text type="secondary">{profile?.phone || profile?.email}</Text>
+                            {profile?.gender && <Tag color={profile.gender === '男' ? 'blue' : 'magenta'}>{profile.gender}</Tag>}
+                            {profile?.is_vip && <Tag color="gold">VIP会员</Tag>}
+                        </Space>
+                        <div style={{ marginTop: 8 }}>
+                            <Text type="secondary" style={{ fontSize: 12 }}>注册时间: {new Date(profile?.created_at).toLocaleDateString()}</Text>
+                        </div>
                     </div>
-                    <Button icon={<EditOutlined />} onClick={() => setEditModalVisible(true)}>
+                    <Button icon={<EditOutlined />} onClick={() => {
+                        form.setFieldsValue(profile);
+                        setEditModalVisible(true);
+                    }}>
                         编辑资料
                     </Button>
                 </div>
             </Card>
 
             <Row gutter={[16, 16]} className="stats-row">
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="八字分析" value={stats?.bazi_analyses || 0} />
+                        <Statistic title="八字" value={stats?.bazi_analyses || 0} prefix={<CompassOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="紫微分析" value={stats?.ziwei_analyses || 0} />
+                        <Statistic title="紫微" value={stats?.ziwei_analyses || 0} prefix={<StarOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="易经占卜" value={stats?.divinations || 0} />
+                        <Statistic title="占卜" value={stats?.divinations || 0} prefix={<ExperimentOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="心理测试" value={stats?.psychology_tests || 0} />
+                        <Statistic title="测试" value={stats?.psychology_tests || 0} prefix={<UserOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="融合分析" value={stats?.fusion_analyses || 0} />
+                        <Statistic title="融合" value={stats?.fusion_analyses || 0} prefix={<StarOutlined />} />
                     </Card>
                 </Col>
-                <Col span={4}>
+                <Col xs={12} sm={8} md={4}>
                     <Card className="stat-card">
-                        <Statistic title="我的收藏" value={stats?.favorites || 0} prefix={<HeartOutlined />} />
+                        <Statistic title="收藏" value={stats?.favorites || 0} prefix={<HeartOutlined />} valueStyle={{ color: '#cf1322' }} />
                     </Card>
                 </Col>
             </Row>
         </div>
     );
 
-    // 渲染历史列表
     const renderHistoryList = (data, type) => (
         <List
             className="history-list"
@@ -198,31 +248,43 @@ const ProfilePage = () => {
             renderItem={(item) => (
                 <List.Item
                     actions={[
-                        <Button icon={<EyeOutlined />} type="link">查看</Button>,
-                        <Button icon={<DeleteOutlined />} type="link" danger onClick={() => handleDelete(type, item.id)}>删除</Button>
+                        <Button icon={<EyeOutlined />} type="text" onClick={() => handleViewDetail(item, type)}>查看</Button>,
+                        <Button icon={<DeleteOutlined />} type="text" danger onClick={() => handleDelete(type === 'psychology' ? 'psychology' : 'analyses', item.id)}>删除</Button>
                     ]}
                 >
                     <List.Item.Meta
-                        title={item.title || item.result_summary || item.question || `${item.type || item.test_type}分析`}
-                        description={new Date(item.created_at).toLocaleString()}
+                        avatar={<Avatar icon={<HistoryOutlined />} style={{ backgroundColor: '#1890ff' }} />}
+                        title={
+                            <Space>
+                                <Text strong>{item.title || item.question || `${item.type || item.test_type}分析`}</Text>
+                                {item.confidence && <Tag color="orange">{item.confidence}%</Tag>}
+                            </Space>
+                        }
+                        description={
+                            <Space direction="vertical" size={2}>
+                                <Text type="secondary" style={{ fontSize: 13 }}>
+                                    {item.result_summary || item.hexagram || (item.test_type ? item.test_type.toUpperCase() : '')}
+                                </Text>
+                                <Text type="secondary" style={{ fontSize: 12 }}>{new Date(item.created_at).toLocaleString()}</Text>
+                            </Space>
+                        }
                     />
-                    {item.hexagram && <Tag color="blue">{item.hexagram}</Tag>}
-                    {item.method && <Tag color="purple">{item.method}</Tag>}
-                    {item.test_type && <Tag color="green">{item.test_type.toUpperCase()}</Tag>}
-                    {item.confidence && <Tag color="orange">{`${item.confidence}%`}</Tag>}
                 </List.Item>
             )}
         />
     );
 
-    // 渲染设置
     const renderSettings = () => (
-        <Card className="settings-card">
-            <Form layout="vertical" initialValues={settings}>
+        <Card className="settings-card" title="应用设置">
+            <Form
+                form={settingsForm}
+                layout="vertical"
+                onFinish={handleUpdateSettings}
+            >
                 <Form.Item label="主题" name="theme">
                     <Select>
-                        <Select.Option value="dark">深色</Select.Option>
-                        <Select.Option value="light">浅色</Select.Option>
+                        <Select.Option value="dark">深色模式</Select.Option>
+                        <Select.Option value="light">浅色模式</Select.Option>
                     </Select>
                 </Form.Item>
                 <Form.Item label="语言" name="language">
@@ -231,25 +293,34 @@ const ProfilePage = () => {
                         <Select.Option value="en-US">English</Select.Option>
                     </Select>
                 </Form.Item>
-                <Form.Item label="时区" name="timezone">
-                    <Select>
-                        <Select.Option value="Asia/Shanghai">东八区 (北京)</Select.Option>
-                        <Select.Option value="Asia/Tokyo">东九区 (东京)</Select.Option>
-                        <Select.Option value="America/New_York">西五区 (纽约)</Select.Option>
-                    </Select>
-                </Form.Item>
                 <Form.Item label="接收通知" name="notification_enabled" valuePropName="checked">
-                    <Switch />
+                    <Switch checkedChildren="开启" unCheckedChildren="关闭" />
                 </Form.Item>
-                <Button type="primary">保存设置</Button>
+                <Form.Item style={{ marginTop: 24 }}>
+                    <Button type="primary" htmlType="submit" icon={<SaveOutlined />}>
+                        保存设置
+                    </Button>
+                    <Button
+                        icon={<LockOutlined />}
+                        style={{ marginLeft: 16 }}
+                        onClick={() => setPasswordModalVisible(true)}
+                    >
+                        修改密码
+                    </Button>
+                </Form.Item>
             </Form>
         </Card>
     );
 
+    // Need to import icons used in renderOverview & renderSettings if not imported
+    const CompassOutlined = StarOutlined; // Fallback/Alias if not imported
+    const ExperimentOutlined = UserOutlined; // Fallback/Alias
+    const SaveOutlined = EditOutlined; // Fallback/Alias
+
     if (loading) {
         return (
             <div className="loading-container">
-                <Spin size="large" tip="加载中..." />
+                <Spin size="large" tip="加载数据中..." />
             </div>
         );
     }
@@ -260,7 +331,7 @@ const ProfilePage = () => {
                 <UserOutlined /> 个人中心
             </Title>
 
-            <Tabs activeKey={activeTab} onChange={handleTabChange} className="profile-tabs">
+            <Tabs activeKey={activeTab} onChange={handleTabChange} className="profile-tabs" type="card">
                 <TabPane tab={<span><UserOutlined />概览</span>} key="overview">
                     {renderOverview()}
                 </TabPane>
@@ -290,15 +361,22 @@ const ProfilePage = () => {
                 </TabPane>
             </Tabs>
 
-            {/* 编辑资料弹窗 */}
+            {/* Edit Profile Modal */}
             <Modal
                 title="编辑资料"
                 open={editModalVisible}
                 onCancel={() => setEditModalVisible(false)}
                 footer={null}
             >
-                <Form layout="vertical" initialValues={profile}>
-                    <Form.Item label="昵称" name="nickname">
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleUpdateProfile}
+                >
+                    <Form.Item label="头像链接" name="avatar" help="请输入网络图片地址，或后续支持上传">
+                        <Input prefix={<UserOutlined />} placeholder="https://..." />
+                    </Form.Item>
+                    <Form.Item label="昵称" name="nickname" rules={[{ required: true, message: '请输入昵称' }]}>
                         <Input />
                     </Form.Item>
                     <Form.Item label="性别" name="gender">
@@ -308,10 +386,68 @@ const ProfilePage = () => {
                         </Select>
                     </Form.Item>
                     <Form.Item>
-                        <Button type="primary" block>保存</Button>
+                        <Button type="primary" htmlType="submit" block>保存</Button>
                     </Form.Item>
                 </Form>
             </Modal>
+
+            {/* Change Password Modal */}
+            <Modal
+                title="修改密码"
+                open={passwordModalVisible}
+                onCancel={() => setPasswordModalVisible(false)}
+                footer={null}
+            >
+                <Form
+                    form={passwordForm}
+                    layout="vertical"
+                    onFinish={handleChangePassword}
+                >
+                    <Form.Item
+                        label="旧密码"
+                        name="old_password"
+                        rules={[{ required: true, message: '请输入旧密码' }]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+                    <Form.Item
+                        label="新密码"
+                        name="new_password"
+                        rules={[{ required: true, message: '请输入新密码' }, { min: 6, message: '密码至少6位' }]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+                    <Form.Item
+                        label="确认新密码"
+                        name="confirm_password"
+                        dependencies={['new_password']}
+                        rules={[
+                            { required: true, message: '请确认新密码' },
+                            ({ getFieldValue }) => ({
+                                validator(_, value) {
+                                    if (!value || getFieldValue('new_password') === value) {
+                                        return Promise.resolve();
+                                    }
+                                    return Promise.reject(new Error('两次输入的密码不一致'));
+                                },
+                            }),
+                        ]}
+                    >
+                        <Input.Password />
+                    </Form.Item>
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" block>修改密码</Button>
+                    </Form.Item>
+                </Form>
+            </Modal>
+
+            {/* History Detail Modal */}
+            <HistoryDetailModal
+                visible={detailModalVisible}
+                onClose={() => setDetailModalVisible(false)}
+                record={selectedRecord}
+                type={selectedRecordType}
+            />
         </div>
     );
 };

@@ -92,6 +92,12 @@ class SetPasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=6)
 
 
+class ChangePasswordRequest(BaseModel):
+    """修改密码（已登录）"""
+    old_password: str = Field(..., min_length=6)
+    new_password: str = Field(..., min_length=6)
+
+
 class UserResponse(BaseModel):
     """用户信息响应"""
     id: int
@@ -417,3 +423,25 @@ class AuthService:
         await self.db.commit()
         
         return {"message": "密码设置成功"}
+
+    async def change_password(self, user_id: int, old_password: str, new_password: str) -> dict:
+        """修改密码"""
+        from sqlalchemy import select
+        from app.core.database import User
+        
+        result = await self.db.execute(select(User).where(User.id == user_id))
+        user = result.scalar_one_or_none()
+        
+        if not user:
+            raise HTTPException(status_code=404, detail="用户不存在")
+            
+        if not user.hashed_password:
+            raise HTTPException(status_code=400, detail="请先设置密码")
+            
+        if not verify_password(old_password, user.hashed_password):
+            raise HTTPException(status_code=400, detail="旧密码错误")
+            
+        user.hashed_password = get_password_hash(new_password)
+        await self.db.commit()
+        
+        return {"message": "密码修改成功"}

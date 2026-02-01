@@ -8,8 +8,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.auth import (
     SendSmsCodeRequest, 
-    PhoneSmsLoginRequest, PhonePasswordLoginRequest, EmailPasswordLoginRequest,
     PhoneRegisterRequest, EmailRegisterRequest, SetPasswordRequest,
+    ChangePasswordRequest,  # Added
     UserResponse, AuthService, get_current_user, TokenData
 )
 from app.core.database import get_db
@@ -96,6 +96,20 @@ async def set_password(request: SetPasswordRequest, db: AsyncSession = Depends(g
         phone=request.phone,
         email=request.email,
         code=request.code,
+        new_password=request.new_password
+    )
+    return {"success": True, "data": result}
+
+
+@router.post("/change-password", summary="修改密码")
+async def change_password(request: ChangePasswordRequest, 
+                          current_user: TokenData = Depends(get_current_user),
+                          db: AsyncSession = Depends(get_db)):
+    """修改密码（需要登录）"""
+    auth_service = AuthService(db)
+    result = await auth_service.change_password(
+        user_id=current_user.user_id,
+        old_password=request.old_password,
         new_password=request.new_password
     )
     return {"success": True, "data": result}
