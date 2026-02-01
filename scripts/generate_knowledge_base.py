@@ -108,20 +108,81 @@ YIJING_ESSENCE = {
     }
 }
 
+
+# ==================== 4. 诸子百家：经典引悟 (Classic Wisdom Integration) ====================
+
+CLASSIC_WISDOM = {
+    "Strategy_Weak": [
+        {"source": "《老子》", "quote": "守柔曰强。高以下为基，贵以贱为本。", "desc": "以退为进，善于示弱才是真正的强者思维。"},
+        {"source": "《鬼谷子》", "quote": "欲张反敛，欲高反下。", "desc": "想要扩张，先要收敛；想要升高，先要降低身段。此为捭阖之道。"}
+    ],
+    "Strategy_Strong": [
+        {"source": "《老子》", "quote": "持而盈之，不如其已；揣而锐之，不可长保。", "desc": "锋芒太露难以长久，适度收敛才能保持优势。"},
+        {"source": "《周易》", "quote": "亢龙有悔，盈不可久。", "desc": "身处高位更要谦虚谨慎，凡事留有余地。"}
+    ],
+    "Leadership": [
+        {"source": "《鬼谷子》", "quote": "智用于众人之所不能知，而能用于众人之所不能见。", "desc": "真正的领导力，在于看到别人看不到的趋势，做别人不敢做的决断。"},
+        {"source": "《庄子》", "quote": "乘物以游心。", "desc": "驾驭外物而不被外物所役，保持内心的超脱与自由。"}
+    ],
+    "Adaptability": [
+        {"source": "《易经》", "quote": "穷则变，变则通，通则久。", "desc": "当局面陷入困境时，唯一的方法就是主动求变。"},
+        {"source": "《庄子》", "quote": "物物而不物于物。", "desc": "利用万物而不被万物所束缚，灵活应变。"}
+    ]
+}
+
+def get_wisdom(category):
+    """获取经典智慧引用"""
+    # 简单轮询或选择第一个，这里为了确定性选第一个，实际可随机
+    item = CLASSIC_WISDOM.get(category, CLASSIC_WISDOM["Adaptability"])[0]
+    return f"> **经典引悟**：*{item['source']}* 云：“{item['quote']}”\n> **解析**：{item['desc']}"
+
 # ==================== 生成逻辑 ====================
 
 def generate_essence_data():
     data = {}
-    print("Generating [Essence & Precise] Knowledge Base...")
+    print("Generating [Essence & Precise] Knowledge Base with Classics...")
     
-    # 1. BaZi: Day Master x Season (Refined)
+    # 1. BaZi: Day Master x Season (Refined + Classics)
     for gan in TIAN_GAN:
         for zhi in DI_ZHI:
             key = f"bazi:day_master:{gan}:month:{zhi}"
-            data[key] = get_bazi_essence(gan, zhi) # Uses dynamic rich text
             
-    # 2. ZiWei: Star x Palace (Refined)
+            # Determine wisdom category based on strength (simplified logic reuse)
+            dm_el = GAN_ELEMENT[gan]
+            zhi_el = ZHI_ELEMENT_MAIN[zhi]
+            is_strong = dm_el == zhi_el or (dm_el == "木" and zhi_el == "水") or \
+                        (dm_el == "火" and zhi_el == "木") or (dm_el == "土" and zhi_el == "火") or \
+                        (dm_el == "金" and zhi_el == "土") or (dm_el == "水" and zhi_el == "金")
+            
+            wisdom_cat = "Strategy_Strong" if is_strong else "Strategy_Weak"
+            wisdom = get_wisdom(wisdom_cat)
+            
+            base_content = get_bazi_essence(gan, zhi)
+            
+            # Inject Wisdom into the Markdown
+            # split by sections to insert gracefully
+            parts = base_content.split("### 建议")
+            if len(parts) == 2:
+                final_content = f"{parts[0]}\n{wisdom}\n\n### 建议{parts[1]}"
+            else:
+                final_content = f"{base_content}\n\n{wisdom}"
+                
+            data[key] = final_content
+            
+    # 2. ZiWei: Star x Palace (Refined + Classics)
     for star, info in ZIWEI_ESSENCE.items():
+        # Determine specific wisdom for stars
+        if star in ["紫微", "天府", "太阳"]:
+            w_cat = "Leadership"
+        elif star in ["天机", "贪狼", "巨门"]:
+            w_cat = "Adaptability"
+        elif star in ["七杀", "破军", "武曲"]:
+            w_cat = "Strategy_Strong" # Action oriented
+        else:
+            w_cat = "Strategy_Weak" # Support oriented
+            
+        wisdom = get_wisdom(w_cat)
+
         # Life Palace
         key_ming = f"ziwei:star:{star}:palace:命宫"
         data[key_ming] = f"""
@@ -131,31 +192,40 @@ def generate_essence_data():
 **命宫精断**：
 {info['palace_life']}
 
+{wisdom}
+
 **精进建议**：
 {info['advice']}
 """.strip()
 
         # Wealth Palace
         key_cai = f"ziwei:star:{star}:palace:财帛"
+        # Wealth often needs Guiguzi strategy
+        wealth_wisdom = get_wisdom("Strategy_Weak") if "险" in info['palace_wealth'] else get_wisdom("Leadership")
+        
         data[key_cai] = f"""
 ### {star}入财帛
 **财富特质**：
 {info['palace_wealth']}
 
+{wealth_wisdom}
+
 **建议**：
 {info['advice']}
 """.strip()
         
-        # Default fallback for other palaces to keep file clean but usable
-        # "Precise but few" -> We focused on Life/Wealth as core for now
-        
-    # 3. YiJing: Hexagram x Line (Refined)
+    # 3. YiJing: Hexagram x Line (Refined + Classics)
+    # YiJing is already a classic, so we reinforce with specific philosophical expansion
     for gua, lines in YIJING_ESSENCE.items():
         for line, desc in lines.items():
             key = f"yijing:gua:{gua}:line:{line}"
-            data[key] = f"**易经智慧**：\n{desc}"
+            # Inject a Zhuangzi or Laozi quote for spiritual depth
+            extra_wisdom = get_wisdom("Adaptability")
+            
+            data[key] = f"**易经智慧**：\n{desc}\n\n{extra_wisdom}"
 
     return data
+
 
 def main():
     output_dir = "backend/app/data/rules"
