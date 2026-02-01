@@ -1,19 +1,8 @@
-"""
-玄心理命 - 紫微斗数高级算法
-四化星、禄存天马、星曜亮度、更多格局
-"""
 
 from typing import Dict, List, Tuple, Optional
-from .palace import (
-    Palace, Star, StarType, ZiWeiChart,
-    TIAN_GAN, DI_ZHI, MAIN_STAR_TRAITS
-)
-
+from .palace import Palace, Star, StarType, ZiWeiChart
 
 # ==================== 四化星表 ====================
-# 四化：禄、权、科、忌
-# 按年干定四化
-
 SIHUA_TABLE = {
     "甲": {"禄": "廉贞", "权": "破军", "科": "武曲", "忌": "太阳"},
     "乙": {"禄": "天机", "权": "天梁", "科": "紫微", "忌": "太阴"},
@@ -27,31 +16,22 @@ SIHUA_TABLE = {
     "癸": {"禄": "破军", "权": "巨门", "科": "太阴", "忌": "贪狼"}
 }
 
-
 # ==================== 禄存安星表 ====================
-# 禄存以年干定位
-
 LUCUN_TABLE = {
     "甲": "寅", "乙": "卯", "丙": "巳", "丁": "午",
     "戊": "巳", "己": "午", "庚": "申", "辛": "酉",
     "壬": "亥", "癸": "子"
 }
 
-
 # ==================== 天马安星表 ====================
-# 天马以年支定位
-
 TIANMA_TABLE = {
-    "寅": "申", "午": "申", "戌": "申",  # 寅午戌年生人天马在申
-    "申": "寅", "子": "寅", "辰": "寅",  # 申子辰年生人天马在寅
-    "巳": "亥", "酉": "亥", "丑": "亥",  # 巳酉丑年生人天马在亥
-    "亥": "巳", "卯": "巳", "未": "巳"   # 亥卯未年生人天马在巳
+    "寅": "申", "午": "申", "戌": "申",  
+    "申": "寅", "子": "寅", "辰": "寅",  
+    "巳": "亥", "酉": "亥", "丑": "亥",  
+    "亥": "巳", "卯": "巳", "未": "巳"   
 }
 
-
 # ==================== 擎羊陀罗安星表 ====================
-# 以年干定位，在禄存前后
-
 QINGYANG_TABLE = {
     "甲": "卯", "乙": "辰", "丙": "午", "丁": "未",
     "戊": "午", "己": "未", "庚": "酉", "辛": "戌",
@@ -64,10 +44,7 @@ TUOLUO_TABLE = {
     "壬": "戌", "癸": "亥"
 }
 
-
 # ==================== 天魁天钺安星表 ====================
-# 以年干定位
-
 TIANKUI_TABLE = {
     "甲": "丑", "戊": "丑", "庚": "丑",
     "乙": "子", "己": "子",
@@ -82,10 +59,7 @@ TIANYUE_TABLE = {
     "辛": "寅", "壬": "巳", "癸": "巳"
 }
 
-
-# ==================== 星曜庙旺落陷表 (Original) ====================
-# 亮度等级：庙、旺、得地、平和、落陷
-
+# ==================== 星曜庙旺落陷表 ====================
 STAR_BRIGHTNESS_GROUPS = {
     "紫微": {
         "庙": ["午", "巳"],
@@ -187,9 +161,10 @@ STAR_BRIGHTNESS_GROUPS = {
     }
 }
 
+# Alias for compatibility with __init__
+STAR_BRIGHTNESS = STAR_BRIGHTNESS_GROUPS
+
 # ==================== Optimization: Inverted Index ====================
-# Create a static lookup table: (star_name, dizhi) -> brightness
-# This makes lookup O(1) instead of nested loop
 STAR_BRIGHTNESS_INDEX = {}
 for star, levels in STAR_BRIGHTNESS_GROUPS.items():
     for level, positions in levels.items():
@@ -200,132 +175,6 @@ for star, levels in STAR_BRIGHTNESS_GROUPS.items():
 def get_star_brightness(star_name: str, dizhi: str) -> str:
     """获取星曜在某宫位的亮度 (O(1) Optimized)"""
     return STAR_BRIGHTNESS_INDEX.get((star_name, dizhi), "平和")
-
-
-def arrange_sihua(palaces: List[Palace], year_gan: str) -> None:
-    """
-    安排四化星
-    
-    Args:
-        palaces: 十二宫列表
-        year_gan: 年干
-    """
-    if year_gan not in SIHUA_TABLE:
-        return
-    
-    sihua = SIHUA_TABLE[year_gan]
-    
-    for palace in palaces:
-        for star in palace.stars:
-            # Reverse lookup in SiHua to find if this star is Hua what
-            # Using items() loop is OK since it's only 4 items
-            for hua_type, star_name in sihua.items():
-                if star.name == star_name:
-                    star.hua = hua_type
-
-
-def arrange_lucun_tianma(palaces: List[Palace], year_gan: str, year_zhi: str) -> None:
-    """
-    安排禄存和天马
-    
-    Args:
-        palaces: 十二宫列表
-        year_gan: 年干
-        year_zhi: 年支
-    """
-    # Create Map for O(1) lookup
-    palace_map = {p.dizhi: p for p in palaces}
-
-    # 禄存
-    if year_gan in LUCUN_TABLE:
-        lucun_zhi = LUCUN_TABLE[year_gan]
-        if lucun_zhi in palace_map:
-            palace_map[lucun_zhi].stars.append(Star(
-                name="禄存",
-                star_type=StarType.JIXING,
-                description="财禄之星，主稳定财运"
-            ))
-    
-    # 天马
-    if year_zhi in TIANMA_TABLE:
-        tianma_zhi = TIANMA_TABLE[year_zhi]
-        if tianma_zhi in palace_map:
-            palace_map[tianma_zhi].stars.append(Star(
-                name="天马",
-                star_type=StarType.JIXING,
-                description="奔波走动，利外出发展"
-            ))
-
-
-def arrange_qingyang_tuoluo(palaces: List[Palace], year_gan: str) -> None:
-    """
-    安排擎羊和陀罗
-    
-    Args:
-        palaces: 十二宫列表
-        year_gan: 年干
-    """
-    palace_map = {p.dizhi: p for p in palaces}
-
-    # 擎羊
-    if year_gan in QINGYANG_TABLE:
-        qy_zhi = QINGYANG_TABLE[year_gan]
-        if qy_zhi in palace_map:
-            palace_map[qy_zhi].stars.append(Star(
-                name="擎羊",
-                star_type=StarType.SHAXING,
-                description="刚烈冲动，易有意外"
-            ))
-    
-    # 陀罗
-    if year_gan in TUOLUO_TABLE:
-        tl_zhi = TUOLUO_TABLE[year_gan]
-        if tl_zhi in palace_map:
-            palace_map[tl_zhi].stars.append(Star(
-                name="陀罗",
-                star_type=StarType.SHAXING,
-                description="拖延纠缠，做事反复"
-            ))
-
-
-def arrange_tiankui_tianyue(palaces: List[Palace], year_gan: str) -> None:
-    """
-    安排天魁和天钺
-    
-    Args:
-        palaces: 十二宫列表
-        year_gan: 年干
-    """
-    palace_map = {p.dizhi: p for p in palaces}
-
-    # 天魁
-    if year_gan in TIANKUI_TABLE:
-        tk_zhi = TIANKUI_TABLE[year_gan]
-        if tk_zhi in palace_map:
-            palace_map[tk_zhi].stars.append(Star(
-                name="天魁",
-                star_type=StarType.JIXING,
-                description="阳贵人，主贵人相助"
-            ))
-    
-    # 天钺
-    if year_gan in TIANYUE_TABLE:
-        ty_zhi = TIANYUE_TABLE[year_gan]
-        if ty_zhi in palace_map:
-            palace_map[ty_zhi].stars.append(Star(
-                name="天钺",
-                star_type=StarType.JIXING,
-                description="阴贵人，主贵人相助"
-            ))
-
-
-def set_star_brightness(palaces: List[Palace]) -> None:
-    """为所有主星设置亮度"""
-    for palace in palaces:
-        for star in palace.stars:
-            if star.star_type == StarType.ZHUXING:
-                star.brightness = get_star_brightness(star.name, palace.dizhi)
-
 
 # ==================== 更多格局 ====================
 
@@ -387,12 +236,6 @@ ADVANCED_PATTERNS = {
 def analyze_advanced_patterns(chart: 'ZiWeiChart') -> List[Dict]:
     """
     分析高级格局 (Optimized)
-    
-    Args:
-        chart: 紫微命盘
-    
-    Returns:
-        格局列表
     """
     ming_gong = chart.get_palace_by_name("命宫")
     if not ming_gong:
@@ -431,99 +274,85 @@ def analyze_advanced_patterns(chart: 'ZiWeiChart') -> List[Dict]:
     
     return patterns
 
+def arrange_sihua(palaces: List[Palace], year_gan: str) -> None:
+    if year_gan not in SIHUA_TABLE:
+        return
+    sihua = SIHUA_TABLE[year_gan]
+    for palace in palaces:
+        for star in palace.stars:
+            for hua_type, star_name in sihua.items():
+                if star.name == star_name:
+                    star.hua = hua_type
+
+def arrange_lucun_tianma(palaces: List[Palace], year_gan: str, year_zhi: str) -> None:
+    palace_map = {p.dizhi: p for p in palaces}
+    if year_gan in LUCUN_TABLE:
+        lucun_zhi = LUCUN_TABLE[year_gan]
+        if lucun_zhi in palace_map:
+            palace_map[lucun_zhi].stars.append(Star(name="禄存", star_type=StarType.JIXING, description="财禄之星，主稳定财运"))
+    if year_zhi in TIANMA_TABLE:
+        tianma_zhi = TIANMA_TABLE[year_zhi]
+        if tianma_zhi in palace_map:
+            palace_map[tianma_zhi].stars.append(Star(name="天马", star_type=StarType.JIXING, description="奔波走动，利外出发展"))
+
+def arrange_qingyang_tuoluo(palaces: List[Palace], year_gan: str) -> None:
+    palace_map = {p.dizhi: p for p in palaces}
+    if year_gan in QINGYANG_TABLE:
+        qy_zhi = QINGYANG_TABLE[year_gan]
+        if qy_zhi in palace_map:
+            palace_map[qy_zhi].stars.append(Star(name="擎羊", star_type=StarType.SHAXING, description="刚烈冲动，易有意外"))
+    if year_gan in TUOLUO_TABLE:
+        tl_zhi = TUOLUO_TABLE[year_gan]
+        if tl_zhi in palace_map:
+            palace_map[tl_zhi].stars.append(Star(name="陀罗", star_type=StarType.SHAXING, description="拖延纠缠，做事反复"))
+
+def arrange_tiankui_tianyue(palaces: List[Palace], year_gan: str) -> None:
+    palace_map = {p.dizhi: p for p in palaces}
+    if year_gan in TIANKUI_TABLE:
+        tk_zhi = TIANKUI_TABLE[year_gan]
+        if tk_zhi in palace_map:
+            palace_map[tk_zhi].stars.append(Star(name="天魁", star_type=StarType.JIXING, description="阳贵人，主贵人相助"))
+    if year_gan in TIANYUE_TABLE:
+        ty_zhi = TIANYUE_TABLE[year_gan]
+        if ty_zhi in palace_map:
+            palace_map[ty_zhi].stars.append(Star(name="天钺", star_type=StarType.JIXING, description="阴贵人，主贵人相助"))
+
+def set_star_brightness(palaces: List[Palace]) -> None:
+    for palace in palaces:
+        for star in palace.stars:
+            if star.star_type == StarType.ZHUXING:
+                star.brightness = get_star_brightness(star.name, palace.dizhi)
 
 def calculate_palace_score(palace: Palace) -> Dict:
-    """
-    计算宫位综合评分
-    
-    Args:
-        palace: 宫位
-    
-    Returns:
-        评分结果
-    """
-    score = 50  # 基础分
+    score = 50
     positive_factors = []
     negative_factors = []
-    
-    # 主星加分
     main_stars = palace.get_main_stars()
     for star in main_stars:
-        if star.brightness == "庙":
-            score += 20
-            positive_factors.append(f"{star.name}入庙")
-        elif star.brightness == "旺":
-            score += 15
-            positive_factors.append(f"{star.name}旺")
-        elif star.brightness == "得地":
-            score += 10
-        elif star.brightness == "落陷":
-            score -= 15
-            negative_factors.append(f"{star.name}落陷")
-        
-        # 化禄权科加分
-        if star.hua == "禄":
-            score += 15
-            positive_factors.append(f"{star.name}化禄")
-        elif star.hua == "权":
-            score += 12
-            positive_factors.append(f"{star.name}化权")
-        elif star.hua == "科":
-            score += 10
-            positive_factors.append(f"{star.name}化科")
-        elif star.hua == "忌":
-            score -= 15
-            negative_factors.append(f"{star.name}化忌")
-    
-    # 吉星加分
+        if star.brightness == "庙": score += 20; positive_factors.append(f"{star.name}入庙")
+        elif star.brightness == "旺": score += 15; positive_factors.append(f"{star.name}旺")
+        elif star.brightness == "得地": score += 10
+        elif star.brightness == "落陷": score -= 15; negative_factors.append(f"{star.name}落陷")
+        if star.hua == "禄": score += 15; positive_factors.append(f"{star.name}化禄")
+        elif star.hua == "权": score += 12; positive_factors.append(f"{star.name}化权")
+        elif star.hua == "科": score += 10; positive_factors.append(f"{star.name}化科")
+        elif star.hua == "忌": score -= 15; negative_factors.append(f"{star.name}化忌")
     aux_stars = palace.get_auxiliary_stars()
     for star in aux_stars:
-        if star.name in ["左辅", "右弼"]:
-            score += 8
-            positive_factors.append(star.name)
-        elif star.name in ["文昌", "文曲"]:
-            score += 6
-            positive_factors.append(star.name)
-        elif star.name in ["天魁", "天钺"]:
-            score += 10
-            positive_factors.append(star.name)
-        elif star.name in ["禄存"]:
-            score += 12
-            positive_factors.append(star.name)
-        elif star.name in ["天马"]:
-            score += 5
-    
-    # 煞星减分
+        if star.name in ["左辅", "右弼"]: score += 8; positive_factors.append(star.name)
+        elif star.name in ["文昌", "文曲"]: score += 6; positive_factors.append(star.name)
+        elif star.name in ["天魁", "天钺"]: score += 10; positive_factors.append(star.name)
+        elif star.name in ["禄存"]: score += 12; positive_factors.append(star.name)
+        elif star.name in ["天马"]: score += 5
     sha_stars = palace.get_sha_stars()
     for star in sha_stars:
-        if star.name in ["擎羊", "陀罗"]:
-            score -= 10
-            negative_factors.append(star.name)
-        elif star.name in ["火星", "铃星"]:
-            score -= 8
-            negative_factors.append(star.name)
-        elif star.name in ["地空", "地劫"]:
-            score -= 12
-            negative_factors.append(star.name)
-    
-    # 确保分数在0-100之间
+        if star.name in ["擎羊", "陀罗"]: score -= 10; negative_factors.append(star.name)
+        elif star.name in ["火星", "铃星"]: score -= 8; negative_factors.append(star.name)
+        elif star.name in ["地空", "地劫"]: score -= 12; negative_factors.append(star.name)
     score = max(0, min(100, score))
-    
-    # 评级
-    if score >= 80:
-        level = "极佳"
-    elif score >= 65:
-        level = "良好"
-    elif score >= 50:
-        level = "中等"
-    elif score >= 35:
-        level = "偏弱"
-    else:
-        level = "不佳"
-    
-    return {
-        "score": score,
-        "level": level,
-        "positive_factors": positive_factors,
-        "negative_factors": negative_factors
-    }
+    if score >= 80: level = "极佳"
+    elif score >= 65: level = "良好"
+    elif score >= 50: level = "中等"
+    elif score >= 35: level = "偏弱"
+    else: level = "不佳"
+    return {"score": score, "level": level, "positive_factors": positive_factors, "negative_factors": negative_factors}
