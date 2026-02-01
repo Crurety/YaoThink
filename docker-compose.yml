@@ -1,8 +1,6 @@
-version: '3.8'
-
 services:
   # 后端服务
-  backend:
+  yaothink-backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -30,7 +28,7 @@ services:
       start_period: 160s
 
   # 前端服务
-  frontend:
+  yaothink-frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -41,7 +39,7 @@ services:
     ports:
       - "80:80"
     depends_on:
-      backend:
+      yaothink-backend:
         condition: service_healthy
     networks:
       - yaothink-network
