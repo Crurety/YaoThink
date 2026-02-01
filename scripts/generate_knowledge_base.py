@@ -12,55 +12,49 @@ ZHI_ELEMENT_MAIN = {"子": "水", "丑": "土", "寅": "木", "卯": "木", "辰
 
 # ==================== 1. 八字：日主格局 (Essence of Pattern) ====================
 
-def get_bazi_essence(gan, zhi):
+
+# ==================== 1. 八字：日主格局 (Essence of Pattern) ====================
+
+def get_bazi_essence_struct(gan, zhi):
     """
-    结合经典《滴天髓》与现代职场心理学，生成精准的格局分析
+    Returns structured components for BaZi analysis
     """
     dm_el = GAN_ELEMENT[gan]
     zhi_el = ZHI_ELEMENT_MAIN[zhi]
     season = ZHI_SEASON[zhi]
     
-    # 简单强弱判断 (精华版逻辑)
-    is_strong = dm_el == zhi_el or (dm_el == "木" and zhi_el == "水") or (dm_el == "火" and zhi_el == "木") or \
-                (dm_el == "土" and zhi_el == "火") or (dm_el == "金" and zhi_el == "土") or (dm_el == "水" and zhi_el == "金")
+    # 简单强弱判断
+    is_strong = dm_el == zhi_el or (dm_el == "木" and zhi_el == "水") or \
+                (dm_el == "火" and zhi_el == "木") or (dm_el == "土" and zhi_el == "火") or \
+                (dm_el == "金" and zhi_el == "土") or (dm_el == "水" and zhi_el == "金")
                 
-    base = {}
-    
     if is_strong:
-        style = "【独立开拓者】"
-        classic = "古云：'身旺任财官，宏图大展时'。"
-        desc = f"日主{gan}木生于{season}季，得令而旺。您具备强大的内在驱动力和抗压韧性。"
-        modern = "在现代社会，您是天生的'掌舵人'。不适合按部就班的螺丝钉工作，而适合在充满不确定性的环境中开疆拓土。"
-        career = "适合：创业创始人、企业高管、独立专业人士（律师/医生）、项目总负责人。"
-        wealth = "财运逻辑：只有承担风险才能获得超额回报。您的财富往往来自于'资产增值'而非固定工资。"
-        advice = "忌刚愎自用。您的短板在于太过于相信自己的直觉，建议配置一位性格沉稳的'军师'型助手。"
+        pattern_name = "建禄/羊刃（身旺格）"
+        core_trait = "独立、坚韧、开创"
+        dts_quote = "旺即是弱，弱即是旺，旺弱存乎一念之间。身旺者，宜泄宜克，忌扶忌助。"  # 模拟滴天髓语意
+        modern_role = "开拓者 / 创始人 / 破局者"
+        career_focus = "适合在高风险、高回报的领域深耕，如创业、销售总监、投行。"
+        wealth_logic = "资产增值：利用杠杆和趋势获取非线性收益。"
+        strategy_cat = "Strategy_Strong"
     else:
-        style = "【策略协作者】"
-        classic = "古云：'身弱喜印比，贵人扶持地'。"
-        desc = f"日主{gan}木生于{season}季，不得令。但这并非坏事，意味着您更懂得审时度势，借力使力。"
-        modern = "在现代职场，您是完美的'资源整合者'或'二把手'。您善于发现他人的优势并进行链接，比单打独斗更容易成功。"
-        career = "适合：平台型企业中层、行政管理、教育科研、人力资源、投资顾问。"
-        wealth = "财运逻辑：您的财富来自于'人脉'和'平台'。选对圈子和平台，比自己努力更重要。"
-        advice = "忌盲目冒进。不要试图独自扛起所有压力，学会建立支持系统（Mentorship）是您突破瓶颈的关键。"
+        pattern_name = "正官/正印（身弱格）"
+        core_trait = "协作、智谋、整合"
+        dts_quote = "柔弱胜刚强。身弱者，喜印比相生，不宜克泄交加。"
+        modern_role = "军师 / 整合者 / 运营官"
+        career_focus = "适合在成熟平台借力发展，如行政管理、咨询顾问、教育科研。"
+        wealth_logic = "资源变现：通过链接人脉和平台资源获取稳定的高收益。"
+        strategy_cat = "Strategy_Weak"
         
-    return f"""
-### 全局格局：{style}
-{desc}
-> *{classic}*
-
-**时代解读**：
-{modern}
-
-**事业建议**：
-{career}
-
-**财富密码**：
-{wealth}
-
-**成长箴言**：
-{advice}
-""".strip()
-
+    return {
+        "pattern_name": pattern_name,
+        "core_trait": core_trait,
+        "dts_quote": dts_quote,
+        "modern_role": modern_role,
+        "career_focus": career_focus,
+        "wealth_logic": wealth_logic,
+        "strategy_cat": strategy_cat,
+        "desc": f"日主【{gan}】生于【{season}】季，{zhi}月令。"
+    }
 
 # ==================== 2. 紫微斗数：主星精要 (Essence of Stars) ====================
 
@@ -108,123 +102,133 @@ YIJING_ESSENCE = {
     }
 }
 
-
-# ==================== 4. 诸子百家：经典引悟 (Classic Wisdom Integration) ====================
+# ==================== 4. 诸子百家：经典引悟 ====================
 
 CLASSIC_WISDOM = {
     "Strategy_Weak": [
-        {"source": "《老子》", "quote": "守柔曰强。高以下为基，贵以贱为本。", "desc": "以退为进，善于示弱才是真正的强者思维。"},
-        {"source": "《鬼谷子》", "quote": "欲张反敛，欲高反下。", "desc": "想要扩张，先要收敛；想要升高，先要降低身段。此为捭阖之道。"}
+        {"source": "《老子》", "quote": "守柔曰强。高以下为基，贵以贱为本。", "desc": "在自身力量尚未壮大时，示弱不是退缩，而是为了积蓄力量。以柔克刚，方为上策。"},
+        {"source": "《鬼谷子》", "quote": "欲张反敛，欲高反下。", "desc": "想要扩张，先要收敛；想要升高，先要降低身段。此为捭阖之道，利用形势而非蛮力。"},
+        {"source": "《庄子》", "quote": "无用之用，方为大用。", "desc": "不要被世俗的'有用'标准束缚，看似无用的闲暇或技能，往往在关键时刻成为你的独特优势。"}
     ],
     "Strategy_Strong": [
-        {"source": "《老子》", "quote": "持而盈之，不如其已；揣而锐之，不可长保。", "desc": "锋芒太露难以长久，适度收敛才能保持优势。"},
-        {"source": "《周易》", "quote": "亢龙有悔，盈不可久。", "desc": "身处高位更要谦虚谨慎，凡事留有余地。"}
+        {"source": "《老子》", "quote": "持而盈之，不如其已；揣而锐之，不可长保。", "desc": "锋芒太露难以长久，适度收敛才能保持优势。越是强势，越要懂得藏锋。"},
+        {"source": "《周易》", "quote": "亢龙有悔，盈不可久。", "desc": "身处高位更要谦虚谨慎，凡事留有余地，否则物极必反。"},
+        {"source": "《鬼谷子》", "quote": "圣人之道，在隐与匿。", "desc": "真正的强者，不轻易暴露自己的意图和底牌。"}
     ],
     "Leadership": [
-        {"source": "《鬼谷子》", "quote": "智用于众人之所不能知，而能用于众人之所不能见。", "desc": "真正的领导力，在于看到别人看不到的趋势，做别人不敢做的决断。"},
-        {"source": "《庄子》", "quote": "乘物以游心。", "desc": "驾驭外物而不被外物所役，保持内心的超脱与自由。"}
+        {"source": "《鬼谷子》", "quote": "智用于众人之所不能知，而能用于众人之所不能见。", "desc": "真正的领导力，在于看到别人看不到的趋势（远见），做别人不敢做的决断（魄力）。"},
+        {"source": "《庄子》", "quote": "乘物以游心。", "desc": "驾驭外物而不被外物所役，保持内心的超脱与自由，才能在复杂的管理中游刃有余。"}
     ],
     "Adaptability": [
-        {"source": "《易经》", "quote": "穷则变，变则通，通则久。", "desc": "当局面陷入困境时，唯一的方法就是主动求变。"},
-        {"source": "《庄子》", "quote": "物物而不物于物。", "desc": "利用万物而不被万物所束缚，灵活应变。"}
+        {"source": "《易经》", "quote": "穷则变，变则通，通则久。", "desc": "当局面陷入困境时，唯一的方法就是主动求变。固守旧规只有死路一条。"},
+        {"source": "《庄子》", "quote": "物物而不物于物。", "desc": "利用万物而不被万物所束缚，灵活应变，顺势而为。"}
     ]
 }
 
 def get_wisdom(category):
-    """获取经典智慧引用"""
-    # 简单轮询或选择第一个，这里为了确定性选第一个，实际可随机
-    item = CLASSIC_WISDOM.get(category, CLASSIC_WISDOM["Adaptability"])[0]
+    """获取经典智慧引用，这里随机取一条或轮询"""
+    import random
+    options = CLASSIC_WISDOM.get(category, CLASSIC_WISDOM["Adaptability"])
+    item = random.choice(options)
     return f"> **经典引悟**：*{item['source']}* 云：“{item['quote']}”\n> **解析**：{item['desc']}"
 
-# ==================== 生成逻辑 ====================
+# ==================== 生成逻辑 (Structured Report) ====================
 
 def generate_essence_data():
     data = {}
-    print("Generating [Essence & Precise] Knowledge Base with Classics...")
+    print("Generating [Structured & Logical] Knowledge Base...")
     
-    # 1. BaZi: Day Master x Season (Refined + Classics)
+    # 1. BaZi: Day Master x Season
     for gan in TIAN_GAN:
         for zhi in DI_ZHI:
             key = f"bazi:day_master:{gan}:month:{zhi}"
             
-            # Determine wisdom category based on strength (simplified logic reuse)
-            dm_el = GAN_ELEMENT[gan]
-            zhi_el = ZHI_ELEMENT_MAIN[zhi]
-            is_strong = dm_el == zhi_el or (dm_el == "木" and zhi_el == "水") or \
-                        (dm_el == "火" and zhi_el == "木") or (dm_el == "土" and zhi_el == "火") or \
-                        (dm_el == "金" and zhi_el == "土") or (dm_el == "水" and zhi_el == "金")
+            # Get Structured Data
+            info = get_bazi_essence_struct(gan, zhi)
+            wisdom = get_wisdom(info["strategy_cat"])
             
-            wisdom_cat = "Strategy_Strong" if is_strong else "Strategy_Weak"
-            wisdom = get_wisdom(wisdom_cat)
+            # Construct Logical Report
+            content = f"""
+## 1. 命理核心 (Theoretical Basis)
+> *《滴天髓》*：{info['dts_quote']}
+
+**【格局定义】**：{info['pattern_name']}
+**【核心特质】**：{info['core_trait']}
+**【五行能量】**：{info['desc']}
+
+## 2. 现代全息解读 (Modern Analysis)
+**【社会角色】**：{info['modern_role']}
+**【事业方向】**：{info['career_focus']}
+**【财富逻辑】**：{info['wealth_logic']}
+
+## 3. 经典哲学指引 (Philosophical Strategy)
+{wisdom}
+""".strip()
+            data[key] = content
             
-            base_content = get_bazi_essence(gan, zhi)
-            
-            # Inject Wisdom into the Markdown
-            # split by sections to insert gracefully
-            parts = base_content.split("### 建议")
-            if len(parts) == 2:
-                final_content = f"{parts[0]}\n{wisdom}\n\n### 建议{parts[1]}"
-            else:
-                final_content = f"{base_content}\n\n{wisdom}"
-                
-            data[key] = final_content
-            
-    # 2. ZiWei: Star x Palace (Refined + Classics)
+    # 2. ZiWei: Star x Palace
     for star, info in ZIWEI_ESSENCE.items():
-        # Determine specific wisdom for stars
-        if star in ["紫微", "天府", "太阳"]:
-            w_cat = "Leadership"
-        elif star in ["天机", "贪狼", "巨门"]:
-            w_cat = "Adaptability"
-        elif star in ["七杀", "破军", "武曲"]:
-            w_cat = "Strategy_Strong" # Action oriented
-        else:
-            w_cat = "Strategy_Weak" # Support oriented
+        # Determine wisdom category
+        if star in ["紫微", "天府", "太阳"]: w_cat = "Leadership"
+        elif star in ["天机", "贪狼", "巨门"]: w_cat = "Adaptability"
+        elif star in ["七杀", "破军", "武曲"]: w_cat = "Strategy_Strong"
+        else: w_cat = "Strategy_Weak"
             
         wisdom = get_wisdom(w_cat)
-
+        
         # Life Palace
         key_ming = f"ziwei:star:{star}:palace:命宫"
         data[key_ming] = f"""
-### {star}：{info['title']}
-> *{info['desc']}*
+## 1. 星曜本义 (Star Essence)
+**【{star}】**：{info['title']}
+> *核心定义*：{info['desc']}
 
-**命宫精断**：
+## 2. 命宫详断 (Life Analysis)
 {info['palace_life']}
 
+## 3. 经典哲学指引 (Philosophical Strategy)
 {wisdom}
 
-**精进建议**：
+## 4. 行动建议 (Actionable Advice)
 {info['advice']}
 """.strip()
 
         # Wealth Palace
         key_cai = f"ziwei:star:{star}:palace:财帛"
-        # Wealth often needs Guiguzi strategy
-        wealth_wisdom = get_wisdom("Strategy_Weak") if "险" in info['palace_wealth'] else get_wisdom("Leadership")
+        w_cat_wealth = "Strategy_Weak" if "险" in info['palace_wealth'] else "Leadership"
+        wealth_wisdom = get_wisdom(w_cat_wealth)
         
         data[key_cai] = f"""
-### {star}入财帛
-**财富特质**：
+## 1. 财运特质 (Wealth Nature)
+**【{star}入财帛】**
 {info['palace_wealth']}
 
+## 2. 经典哲学指引 (Wealth Wisdom)
 {wealth_wisdom}
 
-**建议**：
+## 3. 建议 (Advice)
 {info['advice']}
 """.strip()
         
-    # 3. YiJing: Hexagram x Line (Refined + Classics)
-    # YiJing is already a classic, so we reinforce with specific philosophical expansion
+    # 3. YiJing: Hexagram x Line
     for gua, lines in YIJING_ESSENCE.items():
         for line, desc in lines.items():
             key = f"yijing:gua:{gua}:line:{line}"
-            # Inject a Zhuangzi or Laozi quote for spiritual depth
             extra_wisdom = get_wisdom("Adaptability")
             
-            data[key] = f"**易经智慧**：\n{desc}\n\n{extra_wisdom}"
+            # Parse the desc to split Quote and Interpretation if possible, 
+            # currently desc is mixed. We wrap it nicely.
+            
+            data[key] = f"""
+## 1. 爻辞解读 (Line Interpretation)
+{desc}
+
+## 2. 道家/纵横家启示 (Active Philosophy)
+{extra_wisdom}
+""".strip()
 
     return data
+
 
 
 def main():
