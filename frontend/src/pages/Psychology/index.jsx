@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import React, { useState, useEffect } from 'react';
+
 import { Card, Row, Col, Button, Progress, Radio, Space, Typography, Tag, Tabs, Spin, message, Result, Modal } from 'antd';
 import {
     UserOutlined,
