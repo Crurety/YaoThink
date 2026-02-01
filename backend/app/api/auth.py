@@ -1,6 +1,7 @@
 """
 玄心理命 - 认证API路由
 支持三种方式：手机号+验证码、手机号+密码、邮箱+密码
+# Last deployed: 2026-02-02 (Force Update)
 """
 
 from fastapi import APIRouter, Depends, HTTPException
