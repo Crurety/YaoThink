@@ -147,5 +147,67 @@ class RuleEngine:
         
         return final_report
 
+    def analyze_ziwei(self, chart_data: Dict) -> str:
+        """
+        分析紫微斗数 - 星曜宫位模式匹配
+        """
+        reports = []
+        
+        # chart_data 结构示例:
+        # {
+        #   "ming_gong": {"stars": ["紫微", "天府"], ...},
+        #   "palace_name": "命宫", ...
+        # }
+        # 实际调用时需确保传入的数据结构便于提取 "星曜" 和 "宫位"
+        
+        # 假设 chart_data 是一个包含主要宫位信息的字典列表或字典
+        # 这里简化处理：假设传入的是一个已提取好特征的列表
+        # features = [{"star": "紫微", "palace": "命宫"}, ...]
+        
+        features = chart_data.get("features", [])
+        
+        for feature in features:
+            star = feature.get("star")
+            palace = feature.get("palace")
+            
+            if star and palace:
+                key = f"ziwei:star:{star}:palace:{palace}"
+                res = self.match(key)
+                if res:
+                    reports.append(f"### {star}入{palace}\n{res}")
+        
+        if not reports:
+            return "暂无详细星曜分析数据。"
+            
+        return "\n\n".join(reports)
+
+    def analyze_yijing(self, hexagram_data: Dict) -> str:
+        """
+        分析易经 - 卦爻辞大数据匹配
+        """
+        reports = []
+        
+        main_gua = hexagram_data.get("main_gua", {}).get("name")
+        dong_yao = hexagram_data.get("dong_yao") # int or None
+        
+        # 1. 动爻大数据建议
+        if main_gua and dong_yao:
+            key = f"yijing:gua:{main_gua}:line:{dong_yao}"
+            res = self.match(key)
+            if res:
+                reports.append(res)
+        
+        # 2. 变卦趋势 (可扩展)
+        # changed_gua = hexagram_data.get("changed_gua", {}).get("name")
+        # if changed_gua:
+        #    ...
+        
+        if not reports:
+            # 如果没有大数据规则（例如未定义的卦），返回空字符串，前端只显示默认解读
+            return ""
+            
+        return "\n\n".join(reports)
+
 # Global instance
 engine = RuleEngine()
+
