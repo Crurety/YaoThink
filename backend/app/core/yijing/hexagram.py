@@ -63,40 +63,8 @@ SIXTY_FOUR_GUA = {
 }
 
 # 卦象解读模板
-GUA_INTERPRETATIONS = {
-    "乾为天": {
-        "summary": "元亨利贞，刚健中正",
-        "keywords": ["刚健", "进取", "领导", "成功"],
-        "fortune": "大吉，进取必成，但需防骄傲",
-        "career": "事业顺利，可大展宏图",
-        "relationship": "桃花旺盛，但需真诚",
-        "wealth": "财运亨通，利于投资"
-    },
-    "坤为地": {
-        "summary": "元亨，利牝马之贞",
-        "keywords": ["柔顺", "包容", "谨慎", "守成"],
-        "fortune": "吉，宜守不宜攻",
-        "career": "稳扎稳打，不宜冒进",
-        "relationship": "顺从柔和，利于感情",
-        "wealth": "积少成多，稳定增长"
-    },
-    "水雷屯": {
-        "summary": "元亨利贞，勿用有攸往",
-        "keywords": ["艰难", "初创", "等待", "积累"],
-        "fortune": "初期困难，坚持必成",
-        "career": "创业艰难，需要耐心",
-        "relationship": "感情初期磨合较多",
-        "wealth": "暂时困难，后有转机"
-    },
-    "山水蒙": {
-        "summary": "亨，匪我求童蒙，童蒙求我",
-        "keywords": ["启蒙", "学习", "迷惑", "求教"],
-        "fortune": "需要学习和请教",
-        "career": "多学习，虚心请教",
-        "relationship": "需要时间了解对方",
-        "wealth": "理财需要学习"
-    }
-}
+# 导入卦象解读数据
+from .data import GUA_INTERPRETATIONS
 
 # 默认卦象解读（用于未定义的卦）
 DEFAULT_INTERPRETATION = {
