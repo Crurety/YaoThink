@@ -22,6 +22,7 @@ async def lifespan(app: FastAPI):
     
     # 尝试连接数据库（失败不阻止启动）
     try:
+        logger.info("Starting up YaoThink Backend... Version: 2026-02-02-Force-Redeploy-03")
         await init_db()
         logger.info("✅ 数据库连接已建立")
     except Exception as e:
