@@ -80,6 +80,7 @@ jobs:
             # docker system prune -f
             
             docker compose down || true
+            docker network prune -f || true
             docker compose up -d --build
             
             # Wait a bit for services to start
