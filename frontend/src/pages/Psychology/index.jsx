@@ -11,12 +11,8 @@ import {
     ArrowLeftOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
+import api from '../../services/api';
 import './index.css';
-
-// Fix potential missing api definition
-const api = axios.create({
-    baseURL: 'http://localhost:8000'
-});
 
 const { Title, Text, Paragraph } = Typography;
 
