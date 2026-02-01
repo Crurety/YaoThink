@@ -24,7 +24,7 @@ from ..core.psychology import (
     ENNEAGRAM_TYPES
 )
 
-router = APIRouter(prefix="/psychology", tags=["心理学测试"])
+router = APIRouter(tags=["心理学测试"])
 
 
 # ==================== 请求/响应模型 ====================
@@ -66,14 +66,25 @@ class EnneagramCompatibilityRequest(BaseModel):
 # ==================== MBTI API ====================
 
 @router.get("/mbti/questions")
-async def get_mbti_test_questions():
-    """获取MBTI测试题目"""
-    questions = get_mbti_questions()
+async def get_mbti_test_questions(level: str = "master"):
+    """
+    获取MBTI测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    questions = get_mbti_questions(level)
+    
+    # 估算时间
+    count = len(questions)
+    estimated_time = f"{max(5, count // 3)}-{max(10, count // 2)}分钟"
+    
     return {
         "test_name": "MBTI人格类型测试",
         "description": "迈尔斯-布里格斯类型指标，分析你的性格类型",
-        "total_questions": len(questions),
-        "estimated_time": "20-30分钟",
+        "total_questions": count,
+        "level": level,
+        "estimated_time": estimated_time,
         "questions": questions
     }
 
@@ -139,14 +150,24 @@ async def check_mbti_compatibility(request: CompatibilityRequest):
 # ==================== 大五人格 API ====================
 
 @router.get("/big5/questions")
-async def get_big5_test_questions():
-    """获取大五人格测试题目"""
-    questions = get_big5_questions()
+async def get_big5_test_questions(level: str = "master"):
+    """
+    获取大五人格测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    questions = get_big5_questions(level)
+    
+    count = len(questions)
+    estimated_time = f"{max(3, count // 4)}-{max(8, count // 3)}分钟"
+    
     return {
         "test_name": "大五人格测试",
         "description": "NEO-FFI量表，评估五大人格维度",
-        "total_questions": len(questions),
-        "estimated_time": "15-20分钟",
+        "total_questions": count,
+        "level": level,
+        "estimated_time": estimated_time,
         "dimensions": list(BIG5_DIMENSIONS.keys()),
         "questions": questions
     }
@@ -186,14 +207,24 @@ async def get_big5_dimensions():
 # ==================== 荣格原型 API ====================
 
 @router.get("/archetype/questions")
-async def get_archetype_test_questions():
-    """获取荣格原型测试题目"""
-    questions = get_archetype_questions()
+async def get_archetype_test_questions(level: str = "master"):
+    """
+    获取荣格原型测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    questions = get_archetype_questions(level)
+    
+    count = len(questions)
+    estimated_time = f"{max(5, count // 4)}-{max(8, count // 3)}分钟"
+    
     return {
         "test_name": "荣格原型测试",
         "description": "发现你的主要心理原型",
-        "total_questions": len(questions),
-        "estimated_time": "15-20分钟",
+        "total_questions": count,
+        "level": level,
+        "estimated_time": estimated_time,
         "archetypes": list(ARCHETYPES.keys()),
         "questions": questions
     }
@@ -243,14 +274,24 @@ async def get_archetype_detail(archetype_code: str):
 # ==================== 九型人格 API ====================
 
 @router.get("/enneagram/questions")
-async def get_enneagram_test_questions():
-    """获取九型人格测试题目"""
-    questions = get_enneagram_questions()
+async def get_enneagram_test_questions(level: str = "master"):
+    """
+    获取九型人格测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    questions = get_enneagram_questions(level)
+    
+    count = len(questions)
+    estimated_time = f"{max(5, count // 4)}-{max(10, count // 3)}分钟"
+    
     return {
         "test_name": "九型人格测试",
         "description": "发现你的核心人格类型",
-        "total_questions": len(questions),
-        "estimated_time": "20-30分钟",
+        "total_questions": count,
+        "level": level,
+        "estimated_time": estimated_time,
         "types": list(range(1, 10)),
         "questions": questions
     }

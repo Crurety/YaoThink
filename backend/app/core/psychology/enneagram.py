@@ -384,14 +384,45 @@ def calculate_enneagram(answers: List[Dict]) -> EnneagramResult:
     )
 
 
-def get_enneagram_questions() -> List[Dict]:
-    """获取九型人格测试题目"""
+def get_enneagram_questions(level: str = "master") -> List[Dict]:
+    """
+    获取九型人格测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    if level == "master":
+        questions = ENNEAGRAM_QUESTIONS
+    else:
+        # 定义不同等级每种类型的题目数量 (共9种类型)
+        # simple: 27题 (3*9)
+        # professional: 54题 (6*9)
+        if level == "simple":
+            count_per_type = 3
+        elif level == "professional":
+            count_per_type = 6
+        else:
+            questions = ENNEAGRAM_QUESTIONS
+        
+        if level in ["simple", "professional"]:
+            # 按类型分组并切片
+            grouped = {i: [] for i in range(1, 10)}
+            for q in ENNEAGRAM_QUESTIONS:
+                if q["type"] in grouped:
+                    grouped[q["type"]].append(q)
+            
+            questions = []
+            for t, t_qs in grouped.items():
+                questions.extend(t_qs[:count_per_type])
+            
+            questions.sort(key=lambda x: x["id"])
+
     return [{
         "id": q["id"],
         "text": q["text"],
         "type": q["type"],
         "options": ENNEAGRAM_OPTIONS
-    } for q in ENNEAGRAM_QUESTIONS]
+    } for q in questions]
 
 
 def get_enneagram_compatibility(type1: int, type2: int) -> Dict:

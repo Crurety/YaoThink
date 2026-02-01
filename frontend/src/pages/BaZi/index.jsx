@@ -26,6 +26,27 @@ function BaZi() {
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
     const [error, setError] = useState(null)
+    const [analysisLoading, setAnalysisLoading] = useState(false)
+    const [analysisResult, setAnalysisResult] = useState(null)
+
+    const handleBigDataAnalysis = async () => {
+        if (!result) return
+        setAnalysisLoading(true)
+        try {
+            const response = await api.post('/api/analysis/analyze', {
+                data: result.basic_info,
+                type: 'bazi'
+            })
+            if (response.data.success) {
+                setAnalysisResult(response.data.data)
+                message.success('大数据分析完成')
+            }
+        } catch (err) {
+            message.error('分析失败')
+        } finally {
+            setAnalysisLoading(false)
+        }
+    }
 
     const handleSubmit = async (values) => {
         setLoading(true)
@@ -194,7 +215,18 @@ function BaZi() {
                     {/* 第一行：命盘核心 + 基本强弱 */}
                     <Row gutter={[24, 24]}>
                         <Col xs={24} lg={16}>
-                            <Card title="八字命盘" className="feature-card" style={{ height: '100%' }}>
+                            <Card title="八字命盘" className="feature-card" style={{ height: '100%' }}
+                                extra={
+                                    <Button
+                                        type="dashed"
+                                        onClick={handleBigDataAnalysis}
+                                        loading={analysisLoading}
+                                        style={{ borderColor: '#DAA520', color: '#DAA520' }}
+                                    >
+                                        大数据详批
+                                    </Button>
+                                }
+                            >
                                 <BaZiChart sizhu={result.basic_info.sizhu} />
                             </Card>
                         </Col>
@@ -232,6 +264,21 @@ function BaZi() {
                             </Card>
                         </Col>
                     </Row>
+
+                    {analysisResult && (
+                        <Row style={{ marginTop: 24 }}>
+                            <Col span={24}>
+                                <Card title="大数据引擎分析报告" className="feature-card" style={{ border: '1px solid #DAA520' }}>
+                                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: 15, color: '#e2e8f0' }}>
+                                        {analysisResult}
+                                    </div>
+                                    <div style={{ marginTop: 16, textAlign: 'right', fontSize: 12, color: '#64748b' }}>
+                                        Power by Local Rule Engine (50MB Corpus)
+                                    </div>
+                                </Card>
+                            </Col>
+                        </Row>
+                    )}
 
                     {/* 第二行：五行数据 + 喜用神 */}
                     <Row gutter={[24, 24]} style={{ marginTop: 24 }}>

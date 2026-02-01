@@ -418,11 +418,42 @@ def calculate_archetype(answers: List[Dict]) -> ArchetypeResult:
     )
 
 
-def get_archetype_questions() -> List[Dict]:
-    """获取原型测试题目"""
+def get_archetype_questions(level: str = "master") -> List[Dict]:
+    """
+    获取原型测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    if level == "master":
+        questions = ARCHETYPE_QUESTIONS
+    else:
+        # 定义不同等级每种原型的题目数量 (共12种原型)
+        # simple: 24题 (2*12)
+        # professional: 48题 (4*12)
+        if level == "simple":
+            count_per_type = 2
+        elif level == "professional":
+            count_per_type = 4
+        else:
+            questions = ARCHETYPE_QUESTIONS
+        
+        if level in ["simple", "professional"]:
+            # 按原型分组并切片
+            grouped = {key: [] for key in ARCHETYPES.keys()}
+            for q in ARCHETYPE_QUESTIONS:
+                if q["archetype"] in grouped:
+                    grouped[q["archetype"]].append(q)
+            
+            questions = []
+            for atype, atype_qs in grouped.items():
+                questions.extend(atype_qs[:count_per_type])
+            
+            questions.sort(key=lambda x: x["id"])
+
     return [{
         "id": q["id"],
         "text": q["text"],
         "archetype": q["archetype"],
         "options": ARCHETYPE_OPTIONS
-    } for q in ARCHETYPE_QUESTIONS]
+    } for q in questions]

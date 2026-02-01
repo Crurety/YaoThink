@@ -380,11 +380,42 @@ def get_big5_interpretation(scores: Dict[str, float]) -> Dict:
     return interpretations
 
 
-def get_big5_questions() -> List[Dict]:
-    """获取大五人格测试题目"""
+def get_big5_questions(level: str = "master") -> List[Dict]:
+    """
+    获取大五人格测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    if level == "master":
+        questions = BIG5_QUESTIONS
+    else:
+        # 定义不同等级每维度的题目数量
+        # simple: 15题 (3*5)
+        # professional: 30题 (6*5)
+        if level == "simple":
+            count_per_dim = 3
+        elif level == "professional":
+            count_per_dim = 6
+        else:
+            questions = BIG5_QUESTIONS
+        
+        if level in ["simple", "professional"]:
+            # 按维度分组并切片
+            grouped = {d: [] for d in ["O", "C", "E", "A", "N"]}
+            for q in BIG5_QUESTIONS:
+                if q["dimension"] in grouped:
+                    grouped[q["dimension"]].append(q)
+            
+            questions = []
+            for dim, dim_qs in grouped.items():
+                questions.extend(dim_qs[:count_per_dim])
+            
+            questions.sort(key=lambda x: x["id"])
+
     return [{
         "id": q["id"],
         "text": q["text"],
         "dimension": q["dimension"],
         "options": BIG5_OPTIONS
-    } for q in BIG5_QUESTIONS]
+    } for q in questions]

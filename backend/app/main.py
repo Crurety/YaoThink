@@ -11,7 +11,7 @@ import time
 from app.core.config import settings
 from app.core.database import init_db, close_db
 from app.core.logging import logger, log_request
-from app.api import bazi, ziwei, yijing, auth, psychology, fusion, user
+from app.api import bazi, ziwei, yijing, auth, psychology, fusion, user, analysis
 
 
 @asynccontextmanager
@@ -103,15 +103,14 @@ async def global_exception_handler(request: Request, exc: Exception):
 
 # ==================== 注册路由 ====================
 
-# 认证路由
-app.include_router(auth.router, prefix="/api/auth", tags=["认证"])
-
-# 业务路由
+app.include_router(auth.router, prefix="/api/auth", tags=["用户认证"])
+app.include_router(user.router, prefix="/api/users", tags=["用户管理"])
 app.include_router(bazi.router, prefix="/api/bazi", tags=["八字命理"])
 app.include_router(ziwei.router, prefix="/api/ziwei", tags=["紫微斗数"])
 app.include_router(yijing.router, prefix="/api/yijing", tags=["易经占卜"])
-app.include_router(psychology.router, prefix="/api", tags=["心理测评"])
-app.include_router(fusion.router, prefix="/api", tags=["融合分析"])
+app.include_router(psychology.router, prefix="/api/psychology", tags=["心理评测"])
+app.include_router(fusion.router, prefix="/api/fusion", tags=["玄心融合"])
+app.include_router(analysis.router, prefix="/api/analysis", tags=["大数据分析"])
 app.include_router(user.router, prefix="/api", tags=["用户中心"])
 
 

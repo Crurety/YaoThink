@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Card, Row, Col, Button, Progress, Radio, Space, Typography, Tag, Tabs, Spin, message, Result } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Card, Row, Col, Button, Progress, Radio, Space, Typography, Tag, Tabs, Spin, message, Result, Modal } from 'antd';
 import {
     UserOutlined,
     RocketOutlined,
@@ -11,6 +12,11 @@ import {
 } from '@ant-design/icons';
 import axios from 'axios';
 import './index.css';
+
+// Fix potential missing api definition
+const api = axios.create({
+    baseURL: 'http://localhost:8000'
+});
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -85,6 +91,85 @@ const TestSelection = ({ onSelect }) => {
                 ))}
             </Row>
         </div>
+    );
+};
+
+// 难度等级选择弹窗
+const LevelSelectionModal = ({ visible, testType, onCancel, onStart }) => {
+    const [level, setLevel] = useState('professional');
+
+    if (!visible || !testType) return null;
+
+    const test = TEST_TYPES[testType];
+
+    // 估算时间映射
+    const timeMap = {
+        simple: "3-5分钟",
+        professional: "10-15分钟",
+        master: test.time
+    };
+
+    // 题目数量映射
+    const countMap = {
+        simple: `约${Math.round(test.questions * 0.25)}题`,
+        professional: `约${Math.round(test.questions * 0.5)}题`,
+        master: `${test.questions}题`
+    };
+
+    return (
+        <Modal
+            title={`开始 ${test.name}`}
+            open={visible}
+            onCancel={onCancel}
+            footer={[
+                <Button key="back" onClick={onCancel}>取消</Button>,
+                <Button
+                    key="submit"
+                    type="primary"
+                    onClick={() => onStart(level)}
+                    style={{ background: test.color, borderColor: test.color }}
+                >
+                    开始测试
+                </Button>
+            ]}
+        >
+            <Paragraph>{test.description}</Paragraph>
+            <Title level={5}>选择难度等级</Title>
+            <Radio.Group onChange={e => setLevel(e.target.value)} value={level} style={{ width: '100%' }}>
+                <Space direction="vertical" style={{ width: '100%' }} size="middle">
+                    <Radio value="simple" className="level-radio">
+                        <div className="level-content">
+                            <Text strong>体验版 (普通级)</Text>
+                            <div className="level-meta">
+                                <Tag color="blue">快速</Tag>
+                                <Text type="secondary">{countMap.simple} · {timeMap.simple}</Text>
+                            </div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>适合快速了解概况，题目精简。</Text>
+                        </div>
+                    </Radio>
+                    <Radio value="professional" className="level-radio">
+                        <div className="level-content">
+                            <Text strong>标准版 (专业级)</Text>
+                            <div className="level-meta">
+                                <Tag color="green">推荐</Tag>
+                                <Text type="secondary">{countMap.professional} · {timeMap.professional}</Text>
+                            </div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>平衡了耗时与准确度，适合大多数用户。</Text>
+                        </div>
+                    </Radio>
+                    <Radio value="master" className="level-radio">
+                        <div className="level-content">
+                            <Text strong>完整版 (大师级)</Text>
+                            <div className="level-meta">
+                                <Tag color="gold">深度</Tag>
+                                <Text type="secondary">{countMap.master} · {timeMap.master}</Text>
+                            </div>
+                            <Text type="secondary" style={{ fontSize: 12 }}>包含所有题目的深度分析，结果最精准。</Text>
+                        </div>
+                    </Radio>
+                </Space>
+            </Radio.Group>
+        </Modal>
     );
 };
 
@@ -387,11 +472,35 @@ const PsychologyPage = () => {
     const [result, setResult] = useState(null);
     const [loading, setLoading] = useState(false);
 
+    // Level Selection State
+    const [modalVisible, setModalVisible] = useState(false);
+    const [selectedTestCandidate, setSelectedTestCandidate] = useState(null);
+
+    // 打开选择弹窗
+    const handleTestSelect = (type) => {
+        setSelectedTestCandidate(type);
+        setModalVisible(true);
+    };
+
+    // 关闭弹窗
+    const handleModalCancel = () => {
+        setModalVisible(false);
+        setSelectedTestCandidate(null);
+    };
+
+    // 开始测试 (带Level)
+    const handleStartTest = (level) => {
+        setModalVisible(false);
+        loadQuestions(selectedTestCandidate, level);
+    };
+
     // 加载题目
-    const loadQuestions = async (type) => {
+    const loadQuestions = async (type, level = 'master') => {
         setLoading(true);
         try {
-            const res = await api.get(`/api/psychology/${type}/questions`);
+            const res = await api.get(`/api/psychology/${type}/questions`, {
+                params: { level }
+            });
             setQuestions(res.data.questions);
             setTestType(type);
             setStage('testing');
@@ -437,8 +546,15 @@ const PsychologyPage = () => {
     return (
         <div className="psychology-page">
             {stage === 'select' && (
-                <TestSelection onSelect={loadQuestions} />
+                <TestSelection onSelect={handleTestSelect} />
             )}
+
+            <LevelSelectionModal
+                visible={modalVisible}
+                testType={selectedTestCandidate}
+                onCancel={handleModalCancel}
+                onStart={handleStartTest}
+            />
 
             {stage === 'testing' && questions.length > 0 && (
                 <TestInProgress

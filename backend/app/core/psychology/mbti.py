@@ -680,9 +680,41 @@ def get_mbti_compatibility(type1: str, type2: str) -> Dict:
     }
 
 
-def get_mbti_questions(count: int = None) -> List[Dict]:
-    """获取MBTI测试题目"""
-    questions = MBTI_QUESTIONS.copy()
-    if count:
-        questions = questions[:count]
-    return questions
+def get_mbti_questions(level: str = "master") -> List[Dict]:
+    """
+    获取MBTI测试题目
+    
+    Args:
+        level: 难度等级 (simple/professional/master)
+    """
+    if level == "master":
+        return MBTI_QUESTIONS.copy()
+    
+    # 定义不同等级每维度的题目数量
+    # simple: 20题 (5*4)
+    # professional: 48题 (12*4)
+    if level == "simple":
+        count_per_dim = 5
+    elif level == "professional":
+        count_per_dim = 12
+    else:
+        # Default to master if unknown
+        return MBTI_QUESTIONS.copy()
+
+    # 按维度分组
+    grouped = {"EI": [], "SN": [], "TF": [], "JP": []}
+    for q in MBTI_QUESTIONS:
+        if q["dimension"] in grouped:
+            grouped[q["dimension"]].append(q)
+    
+    result = []
+    for dim, questions in grouped.items():
+        # 选取前N题 (确保题目固定，避免每次刷新变动导致困惑)
+        # 实际生产中可能需要精心挑选最具代表性的题目
+        selected = questions[:count_per_dim]
+        result.extend(selected)
+        
+    # 按ID排序保持顺序
+    result.sort(key=lambda x: x["id"])
+    
+    return result
