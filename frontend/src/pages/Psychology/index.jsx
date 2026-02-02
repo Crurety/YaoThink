@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { Card, Row, Col, Button, Progress, Radio, Space, Typography, Tag, Tabs, Spin, message, Result, Modal } from 'antd';
 import {
@@ -300,7 +301,7 @@ const TestInProgress = ({ testType, questions, onComplete, onBack }) => {
 };
 
 // 结果展示页面
-const TestResult = ({ testType, result, onBack }) => {
+const TestResult = ({ testType, result, onBack, onSave }) => {
     const test = TEST_TYPES[testType];
 
     const renderMBTIResult = () => (
@@ -452,7 +453,12 @@ const TestResult = ({ testType, result, onBack }) => {
 
             <div className="result-actions">
                 <Button onClick={onBack} size="large">重新测试</Button>
-                <Button type="primary" size="large" style={{ background: test.color, borderColor: test.color }}>
+                <Button
+                    type="primary"
+                    size="large"
+                    style={{ background: test.color, borderColor: test.color }}
+                    onClick={onSave}
+                >
                     保存结果
                 </Button>
             </div>
@@ -462,6 +468,7 @@ const TestResult = ({ testType, result, onBack }) => {
 
 // 主页面组件
 const PsychologyPage = () => {
+    const navigate = useNavigate();
     const [testType, setTestType] = useState(null);
     const [stage, setStage] = useState('select'); // select, testing, result
     const [questions, setQuestions] = useState([]);
@@ -566,6 +573,10 @@ const PsychologyPage = () => {
                     testType={testType}
                     result={result}
                     onBack={handleBack}
+                    onSave={() => {
+                        message.success('结果已保存至个人中心');
+                        navigate('/profile');
+                    }}
                 />
             )}
         </div>
