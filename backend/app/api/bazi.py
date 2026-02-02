@@ -3,6 +3,8 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import date
@@ -43,41 +45,94 @@ class QuickBaZiRequest(BaseModel):
 
 
 @router.post("/analyze", summary="八字完整分析")
-async def analyze(request: BaZiRequest, current_user: TokenData = Depends(get_current_user)):
+async def analyze(
+    request: BaZiRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     八字完整分析（需要登录）
     
     包含：四柱排盘、五行分析、十神分析、格局判断、大运流年、神煞分析
     """
     try:
-        # 尝试从缓存获取
+        # 1. 计算分析结果
         from app.core.cache import cache, CacheService
         cache_key = CacheService.bazi_key(request.year, request.month, request.day, request.hour)
         
+        result = None
+        # 尝试从缓存获取
         try:
-            cached_result = await cache.get(cache_key)
-            if cached_result:
-                return {"success": True, "data": cached_result, "cached": True}
+            result = await cache.get(cache_key)
         except Exception:
-            pass  # 缓存失败不影响正常流程
+            pass
+            
+        if not result:
+            result = analyze_bazi(
+                year=request.year,
+                month=request.month,
+                day=request.day,
+                hour=request.hour,
+                gender=request.gender,
+                target_year=request.target_year
+            )
+            # 存入缓存
+            try:
+                await cache.set(cache_key, result, expire=3600)
+            except Exception:
+                pass
         
-        result = analyze_bazi(
-            year=request.year,
-            month=request.month,
-            day=request.day,
-            hour=request.hour,
-            gender=request.gender,
-            target_year=request.target_year
+        # 2. 保存到数据库 (新增逻辑)
+        from app.core.user_service import HistoryService
+        from app.core.database import BirthInfo
+        from sqlalchemy import select
+        
+        # 查找或创建出生信息
+        # 注意：这里简化逻辑，暂不复用旧的BirthInfo，每次都存新的或按需查找
+        # 为了统计准确，即使是同一个生辰，每次点击分析也算一次记录
+        
+        # 先简单创建一个BirthInfo记录关联到这次分析(或者查找已有的)
+        birth_info_result = await db.execute(
+            select(BirthInfo).where(
+                BirthInfo.user_id == current_user.user_id,
+                BirthInfo.birth_year == request.year,
+                BirthInfo.birth_month == request.month,
+                BirthInfo.birth_day == request.day,
+                BirthInfo.birth_hour == request.hour,
+                BirthInfo.gender == request.gender
+            )
         )
+        birth_info = birth_info_result.scalar_one_or_none()
         
-        # 存入缓存（1小时）
-        try:
-            await cache.set(cache_key, result, expire=3600)
-        except Exception:
-            pass  # 缓存失败不影响返回结果
+        if not birth_info:
+            birth_info = BirthInfo(
+                user_id=current_user.user_id,
+                name=f"八字-{request.year}{request.month:02d}{request.day:02d}",
+                birth_year=request.year,
+                birth_month=request.month,
+                birth_day=request.day,
+                birth_hour=request.hour,
+                gender=request.gender,
+                is_lunar=False, # 默认公历
+                timezone="Asia/Shanghai" 
+            )
+            db.add(birth_info)
+            await db.commit()
+            await db.refresh(birth_info)
+            
+        # 保存分析记录
+        history_service = HistoryService(db)
+        await history_service.save_analysis(
+            user_id=current_user.user_id,
+            analysis_type="bazi",
+            birth_info_id=birth_info.id,
+            result_data=result
+        )
         
         return {"success": True, "data": result}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 
