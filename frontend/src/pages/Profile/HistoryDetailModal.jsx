@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Descriptions, Tag, Typography, Divider, List, Card, Progress, Row, Col, Empty } from 'antd';
+import { Modal, Descriptions, Tag, Typography, Divider, List, Card, Progress, Row, Col, Empty, Space } from 'antd';
 
 const { Title, Text, Paragraph } = Typography;
 
