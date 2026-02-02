@@ -3,7 +3,8 @@ import { Modal, Descriptions, Tag, Typography, Divider, List, Card, Progress, Ro
 import {
     GoldOutlined, FireOutlined,
     ThunderboltOutlined, CloudOutlined,
-    ExperimentOutlined, DatabaseOutlined
+    ExperimentOutlined, DatabaseOutlined,
+    UserOutlined, RocketOutlined, HeartOutlined, StarOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import api from '../../services/api';
 
@@ -403,110 +404,211 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
 
     // --- 心理测试 (Psychology) ---
     const renderPsychologyDetail = (data) => {
-        const isMBTI = data.type_code; // MBTI structure check
-        const isBig5 = data.scores;    // Big5 structure check
+        // Determine type based on data structure if record.test_type not explicit
+        const safeTestType = record?.test_type || (data.type_code ? 'mbti' : data.scores && !data.primary ? 'big5' : data.primary && data.secondary ? 'archetype' : data.primary_type ? 'enneagram' : 'unknown');
 
-        if (isMBTI) {
-            return (
-                <div className="detail-content">
-                    <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                        <div style={{
-                            fontSize: 48, fontWeight: 900,
-                            background: 'linear-gradient(45deg, #1890ff, #a0d911)',
-                            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'
-                        }}>
-                            {data.type_code}
-                        </div>
-                        <Title level={4} style={{ marginTop: 8 }}>{data.type_name}</Title>
+        const COLORS = {
+            mbti: '#722ed1',
+            big5: '#13c2c2',
+            archetype: '#eb2f96',
+            enneagram: '#fa8c16'
+        };
+
+        const themeColor = COLORS[safeTestType] || token.colorPrimary;
+
+        const renderMBTI = () => (
+            <div className="detail-content">
+                <div style={{ textAlign: 'center', padding: '32px 0 24px', background: `linear-gradient(180deg, ${themeColor}15 0%, rgba(0,0,0,0) 100%)`, borderRadius: token.borderRadiusLG, marginBottom: 24 }}>
+                    <div style={{
+                        fontSize: 48, fontWeight: 900,
+                        color: themeColor,
+                        marginBottom: 8
+                    }}>
+                        {data.type_code}
                     </div>
-                    <Divider>维度倾向</Divider>
-                    {data.dimensions && Object.entries(data.dimensions).map(([k, v]) => (
-                        <div key={k} style={{ marginBottom: 12 }}>
-                            <Row align="middle" gutter={8}>
-                                <Col span={4}><Text strong>{k}</Text></Col>
-                                <Col span={16}><Progress percent={v.clarity || 0} showInfo={false} strokeColor={token.colorPrimary} /></Col>
-                                <Col span={4} style={{ textAlign: 'right' }}>
-                                    {v.preference && <Tag style={{ marginRight: 4 }}>{v.preference}</Tag>}
-                                    {typeof v.clarity === 'number' ? v.clarity.toFixed(1) : 0}%
-                                </Col>
-                            </Row>
-                        </div>
-                    ))}
-                    <Paragraph style={{ marginTop: 24, fontSize: 16, lineHeight: 1.8 }}>
+                    <Title level={3} style={{ margin: 0 }}>{data.type_name}</Title>
+                    <Paragraph type="secondary" style={{ maxWidth: 600, margin: '12px auto 0' }}>
                         {data.description?.description || data.description}
                     </Paragraph>
-
-                    {data.description?.strengths && (
-                        <div style={{ marginTop: 16 }}>
-                            <Text strong>优势：</Text>
-                            <Space wrap style={{ marginTop: 8 }}>
-                                {Array.isArray(data.description.strengths) ?
-                                    data.description.strengths.map((s, i) => <Tag key={i} color="green">{s}</Tag>) :
-                                    data.description.strengths
-                                }
-                            </Space>
-                        </div>
-                    )}
-
-                    {data.description?.weaknesses && (
-                        <div style={{ marginTop: 16 }}>
-                            <Text strong>劣势：</Text>
-                            <Space wrap style={{ marginTop: 8 }}>
-                                {Array.isArray(data.description.weaknesses) ?
-                                    data.description.weaknesses.map((s, i) => <Tag key={i} color="red">{s}</Tag>) :
-                                    data.description.weaknesses
-                                }
-                            </Space>
-                        </div>
-                    )}
-
-                    {data.description?.career && (
-                        <div style={{ marginTop: 16 }}>
-                            <Text strong>适合职业：</Text>
-                            <Space wrap style={{ marginTop: 8 }}>
-                                {Array.isArray(data.description.career) ?
-                                    data.description.career.map((c, i) => <Tag key={i} color="blue">{c}</Tag>) :
-                                    data.description.career
-                                }
-                            </Space>
-                        </div>
-                    )}
                 </div>
-            )
-        }
 
-        if (isBig5) {
-            return (
-                <div className="detail-content">
-                    <List
-                        grid={{ gutter: 16, column: 2 }}
-                        dataSource={Object.entries(data.scores || {})}
-                        renderItem={([trait, score]) => (
+                <Divider>维度倾向</Divider>
+                <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                    {data.dimensions && Object.entries(data.dimensions).map(([dim, val]) => (
+                        <Col span={12} sm={6} key={dim}>
+                            <Card size="small" style={{ ...getCardStyle(), textAlign: 'center' }}>
+                                <Text strong>{dim}</Text>
+                                <Progress
+                                    percent={val.clarity || 0}
+                                    showInfo={false}
+                                    strokeColor={themeColor}
+                                    size="small"
+                                    style={{ margin: '8px 0' }}
+                                />
+                                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                                    <Tag color={themeColor} bordered={false} style={{ margin: 0 }}>{val.preference}</Tag>
+                                    <Text type="secondary">{Math.round(val.clarity)}%</Text>
+                                </div>
+                            </Card>
+                        </Col>
+                    ))}
+                </Row>
+
+                {data.description?.strengths && (
+                    <Card size="small" title="性格优势" style={{ ...getCardStyle(), marginBottom: 16 }}>
+                        <Space wrap>
+                            {Array.isArray(data.description.strengths) ?
+                                data.description.strengths.map((s, i) => <Tag key={i} color="green">{s}</Tag>) :
+                                <Text>{data.description.strengths}</Text>
+                            }
+                        </Space>
+                    </Card>
+                )}
+
+                {data.description?.career && (
+                    <Card size="small" title="职业建议" style={getCardStyle()}>
+                        <Space wrap>
+                            {Array.isArray(data.description.career) ?
+                                data.description.career.map((c, i) => <Tag key={i} color="blue">{c}</Tag>) :
+                                <Text>{data.description.career}</Text>
+                            }
+                        </Space>
+                    </Card>
+                )}
+            </div>
+        );
+
+        const renderBig5 = () => (
+            <div className="detail-content">
+                <Card style={{ ...getCardStyle(), marginBottom: 24 }}>
+                    <Title level={4} style={{ textAlign: 'center', marginBottom: 16 }}>人格画像</Title>
+                    <Paragraph style={{ textAlign: 'center' }}>{data.profile?.summary}</Paragraph>
+                </Card>
+
+                <List
+                    grid={{ gutter: 16, column: 1, sm: 2 }}
+                    dataSource={Object.entries(data.scores || {})}
+                    renderItem={([trait, score]) => {
+                        const level = data.levels?.[trait];
+                        const levelColor = level === '高' ? 'green' : level === '低' ? 'red' : 'orange';
+                        return (
                             <List.Item>
-                                <Card size="small" style={{ background: token.colorFillAlter, border: 'none' }}>
-                                    <Statistic
-                                        title={trait}
-                                        value={score}
-                                        suffix="/ 50"
-                                        valueStyle={{ color: score > 35 ? token.colorSuccess : token.colorText }}
+                                <Card size="small" style={getCardStyle()}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                        <Text strong>{data.interpretation?.[trait]?.dimension || trait}</Text>
+                                        <Tag color={levelColor}>{level}</Tag>
+                                    </div>
+                                    <Progress
+                                        percent={score}
+                                        steps={5}
+                                        strokeColor={themeColor}
+                                        format={(p) => <Text style={{ fontSize: 12 }}>{p}分</Text>}
                                     />
-                                    <Progress percent={score * 2} showInfo={false} size="small" style={{ marginTop: 8 }} />
+                                    <Paragraph type="secondary" style={{ fontSize: 12, marginTop: 12, marginBottom: 0 }} ellipsis={{ rows: 2, expandable: true, symbol: '展开' }}>
+                                        {data.interpretation?.[trait]?.description || data.interpretation?.[trait]}
+                                    </Paragraph>
                                 </Card>
                             </List.Item>
-                        )}
-                    />
-                    <Divider orientation="left">详细解读</Divider>
-                    {data.interpretation && Object.entries(data.interpretation).map(([k, v]) => (
-                        <div key={k} style={{ marginBottom: 16 }}>
-                            <Text strong>{k}</Text>
-                            <Paragraph type="secondary">{v}</Paragraph>
-                        </div>
-                    ))}
-                </div>
-            )
-        }
+                        );
+                    }}
+                />
+            </div>
+        );
 
-        return <Paragraph>{JSON.stringify(data)}</Paragraph>;
+        const renderArchetype = () => (
+            <div className="detail-content">
+                <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                    <Card style={{ ...getCardStyle(), borderColor: themeColor, borderTopWidth: 4 }}>
+                        <Tag color={themeColor} style={{ marginBottom: 16 }}>主要原型</Tag>
+                        <Title level={2} style={{ color: themeColor, margin: '0 0 8px' }}>{data.primary?.name}</Title>
+                        <Text type="secondary" style={{ fontSize: 16 }}>{data.primary?.english}</Text>
+                        <Paragraph style={{ marginTop: 16, fontSize: 16 }}>
+                            “{data.primary?.motto}”
+                        </Paragraph>
+                        <div style={{ marginTop: 16 }}>
+                            {data.primary?.keywords?.map((k, i) => (
+                                <Tag key={i} color="purple">{k}</Tag>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
+
+                <Row gutter={[16, 16]}>
+                    <Col span={24} md={12}>
+                        <Card size="small" title="原型特质" style={getCardStyle()}>
+                            <Descriptions column={1} size="small">
+                                <Descriptions.Item label="渴望">{data.primary?.core_desire}</Descriptions.Item>
+                                <Descriptions.Item label="目标">{data.primary?.goal}</Descriptions.Item>
+                                <Descriptions.Item label="恐惧">{data.primary?.fear}</Descriptions.Item>
+                                <Descriptions.Item label="天赋">{data.primary?.gift}</Descriptions.Item>
+                            </Descriptions>
+                        </Card>
+                    </Col>
+                    <Col span={24} md={12}>
+                        {data.secondary && (
+                            <Card size="small" title="次要原型" style={getCardStyle()}>
+                                <Title level={4} style={{ marginTop: 0 }}>{data.secondary.name}</Title>
+                                <Text type="secondary">{data.secondary.english}</Text>
+                                <Paragraph style={{ marginTop: 12 }} ellipsis={{ rows: 3 }}>
+                                    {data.secondary.description}
+                                </Paragraph>
+                                <Progress percent={Math.round(data.secondary.score)} size="small" strokeColor={token.colorTextSecondary} />
+                            </Card>
+                        )}
+                    </Col>
+                </Row>
+
+                <Card size="small" title="详细分析" style={{ ...getCardStyle(), marginTop: 16 }}>
+                    <Paragraph>{data.profile}</Paragraph>
+                </Card>
+            </div>
+        );
+
+        const renderEnneagram = () => (
+            <div className="detail-content">
+                <div style={{ textAlign: 'center', padding: '32px 0', background: `linear-gradient(135deg, ${themeColor}15 0%, rgba(0,0,0,0) 100%)`, borderRadius: token.borderRadiusLG, marginBottom: 24 }}>
+                    <div style={{
+                        width: 80, height: 80, lineHeight: '80px',
+                        background: themeColor, color: '#fff',
+                        fontSize: 36, fontWeight: 'bold',
+                        borderRadius: '50%', margin: '0 auto 16px'
+                    }}>
+                        {data.primary_type}号
+                    </div>
+                    <Title level={3} style={{ margin: 0 }}>{data.primary_info?.name}</Title>
+                    <Text type="secondary">{data.primary_info?.english}</Text>
+                </div>
+
+                <Row gutter={[16, 16]}>
+                    <Col span={24} md={14}>
+                        <Card size="small" title="核心动力" style={getCardStyle()}>
+                            <Paragraph><strong>核心渴望：</strong>{data.primary_info?.core_desire}</Paragraph>
+                            <Paragraph><strong>核心恐惧：</strong>{data.primary_info?.core_fear}</Paragraph>
+                            <Paragraph><strong>基本动机：</strong>{data.primary_info?.core_motivation}</Paragraph>
+                        </Card>
+                    </Col>
+                    <Col span={24} md={10}>
+                        <Card size="small" title="侧翼与状态" style={getCardStyle()}>
+                            {data.wing && <div style={{ marginBottom: 12 }}><Text strong>侧翼：</Text><Tag color="orange">{data.wing}号</Tag></div>}
+                            {data.stress_direction && <div style={{ marginBottom: 12 }}><Text strong>压力方向：</Text><Tag color="red">{data.stress_direction}号</Tag></div>}
+                            {data.growth_direction && <div><Text strong>成长方向：</Text><Tag color="green">{data.growth_direction}号</Tag></div>}
+                        </Card>
+                    </Col>
+                </Row>
+
+                <Card size="small" title="成长建议" style={{ ...getCardStyle(), marginTop: 16 }}>
+                    <Paragraph>{data.primary_info?.growth_advice}</Paragraph>
+                </Card>
+            </div>
+        );
+
+        switch (safeTestType) {
+            case 'mbti': return renderMBTI();
+            case 'big5': return renderBig5();
+            case 'archetype': return renderArchetype();
+            case 'enneagram': return renderEnneagram();
+            default: return <Empty description="未知心理测试类型" />;
+        }
     };
 
     // --- 融合分析 (Fusion) ---
