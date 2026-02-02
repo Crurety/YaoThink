@@ -402,8 +402,44 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                         </div>
                     ))}
                     <Paragraph style={{ marginTop: 24, fontSize: 16, lineHeight: 1.8 }}>
-                        {data.description}
+                        {data.description?.description || data.description}
                     </Paragraph>
+
+                    {data.description?.strengths && (
+                        <div style={{ marginTop: 16 }}>
+                            <Text strong>优势：</Text>
+                            <Space wrap style={{ marginTop: 8 }}>
+                                {Array.isArray(data.description.strengths) ?
+                                    data.description.strengths.map((s, i) => <Tag key={i} color="green">{s}</Tag>) :
+                                    data.description.strengths
+                                }
+                            </Space>
+                        </div>
+                    )}
+
+                    {data.description?.weaknesses && (
+                        <div style={{ marginTop: 16 }}>
+                            <Text strong>劣势：</Text>
+                            <Space wrap style={{ marginTop: 8 }}>
+                                {Array.isArray(data.description.weaknesses) ?
+                                    data.description.weaknesses.map((s, i) => <Tag key={i} color="red">{s}</Tag>) :
+                                    data.description.weaknesses
+                                }
+                            </Space>
+                        </div>
+                    )}
+
+                    {data.description?.career && (
+                        <div style={{ marginTop: 16 }}>
+                            <Text strong>适合职业：</Text>
+                            <Space wrap style={{ marginTop: 8 }}>
+                                {Array.isArray(data.description.career) ?
+                                    data.description.career.map((c, i) => <Tag key={i} color="blue">{c}</Tag>) :
+                                    data.description.career
+                                }
+                            </Space>
+                        </div>
+                    )}
                 </div>
             )
         }
