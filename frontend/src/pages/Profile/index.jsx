@@ -30,7 +30,8 @@ const ProfilePage = () => {
     const [settings, setSettings] = useState(null);
 
     // History Data
-    const [analyses, setAnalyses] = useState([]);
+    const [baziList, setBaziList] = useState([]);
+    const [ziweiList, setZiweiList] = useState([]);
     const [divinations, setDivinations] = useState([]);
     const [psychologyTests, setPsychologyTests] = useState([]);
     const [fusions, setFusions] = useState([]);
@@ -81,9 +82,13 @@ const ProfilePage = () => {
         try {
             let res;
             switch (type) {
-                case 'analyses':
-                    res = await api.get('/api/user/history/analyses');
-                    setAnalyses(res.data.data);
+                case 'bazi':
+                    res = await api.get('/api/user/history/analyses', { params: { analysis_type: 'bazi' } });
+                    setBaziList(res.data.data);
+                    break;
+                case 'ziwei':
+                    res = await api.get('/api/user/history/analyses', { params: { analysis_type: 'ziwei' } });
+                    setZiweiList(res.data.data);
                     break;
                 case 'divinations':
                     res = await api.get('/api/user/history/divinations');
@@ -110,16 +115,16 @@ const ProfilePage = () => {
 
     const handleTabChange = (key) => {
         setActiveTab(key);
-        if (['analyses', 'divinations', 'psychology', 'fusions', 'favorites'].includes(key)) {
+        if (['bazi', 'ziwei', 'divinations', 'psychology', 'fusions', 'favorites'].includes(key)) {
             loadHistory(key);
         }
     };
 
-    const handleDelete = async (type, id) => {
+    const handleDelete = async (apiType, id, refreshType) => {
         try {
-            await api.delete(`/api/user/history/${type}/${id}`);
+            await api.delete(`/api/user/history/${apiType}/${id}`);
             message.success('删除成功');
-            loadHistory(type);
+            loadHistory(refreshType || apiType);
             // Refresh stats if needed
             const statsRes = await api.get('/api/user/stats');
             setStats(statsRes.data.data);
@@ -241,7 +246,7 @@ const ProfilePage = () => {
         </div>
     );
 
-    const renderHistoryList = (data, type) => {
+    const renderHistoryList = (data, listType) => {
         if (!data || data.length === 0) {
             return <Empty description="暂无记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
         }
@@ -252,9 +257,12 @@ const ProfilePage = () => {
                     <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.id}>
                         <HistoryCard
                             record={item}
-                            type={type}
-                            onClick={(item) => handleViewDetail(item, type)}
-                            onDelete={(id) => handleDelete(type === 'psychology' ? 'psychology' : 'analyses', id)} // Note: 'analyses' is a broad type delete alias usually
+                            type={listType === 'bazi' || listType === 'ziwei' ? 'analyses' : listType} // Pass 'analyses' for HistoryCard internal logic if it expects it
+                            onClick={(item) => handleViewDetail(item, listType)}
+                            onDelete={(id) => {
+                                const apiType = ['bazi', 'ziwei'].includes(listType) ? 'analyses' : listType;
+                                handleDelete(apiType, id, listType);
+                            }}
                         />
                     </Col>
                 ))}
@@ -324,8 +332,12 @@ const ProfilePage = () => {
                     {renderOverview()}
                 </TabPane>
 
-                <TabPane tab={<span><HistoryOutlined />命理分析</span>} key="analyses">
-                    {renderHistoryList(analyses, 'analyses')}
+                <TabPane tab={<span><HistoryOutlined />八字命理</span>} key="bazi">
+                    {renderHistoryList(baziList, 'bazi')}
+                </TabPane>
+
+                <TabPane tab={<span><StarOutlined />紫微斗数</span>} key="ziwei">
+                    {renderHistoryList(ziweiList, 'ziwei')}
                 </TabPane>
 
                 <TabPane tab={<span><StarOutlined />易经占卜</span>} key="divinations">
