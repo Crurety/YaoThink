@@ -138,15 +138,14 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                     <Col span={6}>{renderPillar("时柱", sizhu.hour?.[0], sizhu.hour?.[1], 'hour')}</Col>
                 </Row>
 
-                {/* 五行能量分布 */}
                 <Card size="small" title="五行能量分布" style={{ marginBottom: 24, ...getCardStyle() }} bordered={false}>
                     <Row gutter={[24, 12]}>
                         {['gold', 'wood', 'water', 'fire', 'earth'].map(key => {
                             const colorMap = { gold: '#fbbf24', wood: '#34d399', water: '#60a5fa', fire: '#f87171', earth: '#a8a29e' };
                             const labelMap = { gold: '金', wood: '木', water: '水', fire: '火', earth: '土' };
-                            const score = wuxingScores[key];
+                            const score = Number(wuxingScores[key] || 0);
                             // Re-calculate total properly
-                            const totalScore = Object.values(wuxingScores).reduce((a, b) => a + b, 0);
+                            const totalScore = Object.values(wuxingScores).reduce((a, b) => a + Number(b || 0), 0);
                             const percent = totalScore > 0 ? Math.min(100, (score / totalScore) * 100) : 0;
 
                             return (
@@ -173,6 +172,17 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                         <Tag color="blue">最弱: {wuxing.weakest?.[0] || wuxing.weakest || '-'}</Tag>
                         <Tag color="green">喜用: {data.xi_yong_shen?.yong_shen?.[0] || '-'}</Tag>
                     </div>
+                    {/* DEBUG SECTION - Remove after fix */}
+                    <div style={{ marginTop: 12, padding: 8, background: '#000', borderRadius: 4, display: 'none' }}>
+                        <Text type="secondary" style={{ fontSize: 10 }}>Debug: {JSON.stringify(wuxing)}</Text>
+                    </div>
+                    <details style={{ marginTop: 8 }}>
+                        <summary style={{ color: token.colorTextSecondary, cursor: 'pointer', fontSize: 12 }}>显示调试数据</summary>
+                        <pre style={{ fontSize: 10, overflow: 'auto', maxHeight: 100, marginTop: 4 }}>
+                            OriginScores Keys: {JSON.stringify(Object.keys(originScores))}
+                            Full Wuxing: {JSON.stringify(wuxing, null, 2)}
+                        </pre>
+                    </details>
                 </Card>
 
                 {/* 大运 & 神煞 (New Sections) */}
