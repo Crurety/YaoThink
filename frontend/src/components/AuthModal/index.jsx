@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Modal, Form, Input, Button, Tabs, message, Divider } from 'antd'
+import { Modal, Form, Input, Button, Tabs, message, Divider, theme } from 'antd'
 import { MobileOutlined, SafetyOutlined, LockOutlined, MailOutlined } from '@ant-design/icons'
 import { useUserStore } from '../../stores'
 import api from '../../services/api'
 
+const { useToken } = theme
+
 function AuthModal({ visible, onClose }) {
+    const { token } = useToken()
     const [activeTab, setActiveTab] = useState('phone-sms')
     const [mode, setMode] = useState('login')  // login / register
     const [loading, setLoading] = useState(false)
@@ -128,6 +131,80 @@ function AuthModal({ visible, onClose }) {
         }
     }
 
+    // --- Style Injection for Autofill ---
+    // Using a very dark color for autofill background to match dark theme. 
+    // The transition delay is the primary fix, the shadow is fallback.
+    const autofillStyles = `
+        .dark-autofill input:-webkit-autofill,
+        .dark-autofill input:-webkit-autofill:hover, 
+        .dark-autofill input:-webkit-autofill:focus, 
+        .dark-autofill input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 1000px #2a2a2a inset !important;
+            -webkit-text-fill-color: ${token.colorText} !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+        
+        /* Remove double borders/focus outlines if any */
+        .custom-auth-input .ant-input-affix-wrapper {
+             background: transparent !important;
+             border: none !important;
+             box-shadow: none !important;
+        }
+        
+        /* The container itself */
+        .custom-input-container {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 8px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            padding: 4px 11px;
+        }
+        
+        .custom-input-container:hover {
+            border-color: ${token.colorPrimary}80;
+        }
+
+        .custom-input-container:focus-within {
+            border-color: ${token.colorPrimary};
+            box-shadow: 0 0 0 2px ${token.colorPrimary}20;
+        }
+        
+        .custom-input-container input {
+            background: transparent !important;
+        }
+    `
+
+    const iconStyle = { color: token.colorTextSecondary, fontSize: 18, marginRight: 8 }
+
+    // Wrapper component to handle the container style cleanly
+    const CustomInput = ({ prefix, ...props }) => {
+        return (
+            <div className="custom-input-container dark-autofill">
+                {prefix && React.cloneElement(prefix, { style: iconStyle })}
+                <Input
+                    {...props}
+                    bordered={false}
+                    style={{ padding: '8px 0', background: 'transparent' }} // reset internal styles
+                />
+            </div>
+        )
+    }
+
+    const CustomPassword = ({ prefix, ...props }) => {
+        return (
+            <div className="custom-input-container dark-autofill">
+                {prefix && React.cloneElement(prefix, { style: iconStyle })}
+                <Input.Password
+                    {...props}
+                    bordered={false}
+                    style={{ padding: '8px 0', background: 'transparent' }}
+                />
+            </div>
+        )
+    }
+
     // 手机号+验证码表单
     const PhoneSmsForm = () => (
         <>
@@ -138,10 +215,9 @@ function AuthModal({ visible, onClose }) {
                     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }
                 ]}
             >
-                <Input
-                    prefix={<MobileOutlined style={{ color: 'var(--text-muted)' }} />}
+                <CustomInput
+                    prefix={<MobileOutlined />}
                     placeholder="请输入手机号"
-                    size="large"
                     maxLength={11}
                 />
             </Form.Item>
@@ -153,20 +229,29 @@ function AuthModal({ visible, onClose }) {
                     { len: 6, message: '请输入6位验证码' }
                 ]}
             >
-                <div style={{ display: 'flex', gap: 12 }}>
-                    <Input
-                        prefix={<SafetyOutlined style={{ color: 'var(--text-muted)' }} />}
-                        placeholder="请输入验证码"
-                        size="large"
-                        maxLength={6}
-                        style={{ flex: 1 }}
-                    />
+                <div style={{ display: 'flex', gap: 12, alignItems: 'stretch' }}>
+                    <Form.Item noStyle name="code">
+                        <div style={{ flex: 1 }}>
+                            <CustomInput
+                                prefix={<SafetyOutlined />}
+                                placeholder="请输入验证码"
+                                maxLength={6}
+                            />
+                        </div>
+                    </Form.Item>
                     <Button
                         size="large"
                         onClick={handleSendCode}
                         loading={sendingCode}
                         disabled={countdown > 0}
-                        style={{ width: 120 }}
+                        style={{
+                            width: 120,
+                            borderRadius: 8,
+                            height: 'auto',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.15)',
+                            color: token.colorPrimary
+                        }}
                     >
                         {countdown > 0 ? `${countdown}s` : '获取验证码'}
                     </Button>
@@ -182,14 +267,13 @@ function AuthModal({ visible, onClose }) {
                             { min: 6, message: '密码至少6位' }
                         ]}
                     >
-                        <Input.Password
-                            prefix={<LockOutlined style={{ color: 'var(--text-muted)' }} />}
+                        <CustomPassword
+                            prefix={<LockOutlined />}
                             placeholder="设置密码（便于下次登录）"
-                            size="large"
                         />
                     </Form.Item>
                     <Form.Item name="nickname">
-                        <Input placeholder="昵称（可选）" size="large" />
+                        <CustomInput placeholder="昵称（可选）" />
                     </Form.Item>
                 </>
             )}
@@ -206,10 +290,9 @@ function AuthModal({ visible, onClose }) {
                     { pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }
                 ]}
             >
-                <Input
-                    prefix={<MobileOutlined style={{ color: 'var(--text-muted)' }} />}
+                <CustomInput
+                    prefix={<MobileOutlined />}
                     placeholder="请输入手机号"
-                    size="large"
                     maxLength={11}
                 />
             </Form.Item>
@@ -220,10 +303,9 @@ function AuthModal({ visible, onClose }) {
                     { min: 6, message: '密码至少6位' }
                 ]}
             >
-                <Input.Password
-                    prefix={<LockOutlined style={{ color: 'var(--text-muted)' }} />}
+                <CustomPassword
+                    prefix={<LockOutlined />}
                     placeholder="请输入密码"
-                    size="large"
                 />
             </Form.Item>
         </>
@@ -239,10 +321,9 @@ function AuthModal({ visible, onClose }) {
                     { type: 'email', message: '请输入正确的邮箱格式' }
                 ]}
             >
-                <Input
-                    prefix={<MailOutlined style={{ color: 'var(--text-muted)' }} />}
+                <CustomInput
+                    prefix={<MailOutlined />}
                     placeholder="请输入邮箱"
-                    size="large"
                 />
             </Form.Item>
             <Form.Item
@@ -252,15 +333,14 @@ function AuthModal({ visible, onClose }) {
                     { min: 6, message: '密码至少6位' }
                 ]}
             >
-                <Input.Password
-                    prefix={<LockOutlined style={{ color: 'var(--text-muted)' }} />}
+                <CustomPassword
+                    prefix={<LockOutlined />}
                     placeholder="请输入密码"
-                    size="large"
                 />
             </Form.Item>
             {mode === 'register' && (
                 <Form.Item name="nickname">
-                    <Input placeholder="昵称（可选）" size="large" />
+                    <CustomInput placeholder="昵称（可选）" />
                 </Form.Item>
             )}
         </>
@@ -286,17 +366,20 @@ function AuthModal({ visible, onClose }) {
             open={visible}
             onCancel={onClose}
             footer={null}
-            width={420}
+            width={400}
             centered
             destroyOnClose
+            maskStyle={{ backdropFilter: 'blur(5px)' }}
+            bodyStyle={{ padding: '32px 24px' }}
         >
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+            <style>{autofillStyles}</style>
+            <div style={{ textAlign: 'center', marginBottom: 32 }}>
                 <div style={{ fontSize: 48, marginBottom: 8 }}>☯</div>
-                <div style={{ fontSize: 22, fontWeight: 'bold', color: 'var(--accent-gold)' }}>
+                <div style={{ fontSize: 24, fontWeight: 'bold', background: 'linear-gradient(45deg, #FFD700, #FFA500)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
                     玄心理命
                 </div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 4 }}>
-                    {mode === 'login' ? '欢迎回来' : '创建账号'}
+                <div style={{ fontSize: 14, color: token.colorTextSecondary, marginTop: 8 }}>
+                    {mode === 'login' ? '欢迎回来' : '开启您的命理之旅'}
                 </div>
             </div>
 
@@ -305,7 +388,7 @@ function AuthModal({ visible, onClose }) {
                 onFinish={handleSubmit}
                 onFinishFailed={(errorInfo) => {
                     console.error('[Auth] Validation failed:', errorInfo)
-                    message.error('请检查填写的信息（是否有未填项）')
+                    message.error('请检查填写的信息')
                 }}
                 layout="vertical"
                 requiredMark={false}
@@ -315,8 +398,9 @@ function AuthModal({ visible, onClose }) {
                     onChange={setActiveTab}
                     items={tabItems}
                     centered
-                    size="small"
+                    size="large"
                     destroyInactiveTabPane={true}
+                    tabBarStyle={{ marginBottom: 24 }}
                 />
 
                 <Form.Item style={{ marginBottom: 16, marginTop: 8 }}>
@@ -326,29 +410,28 @@ function AuthModal({ visible, onClose }) {
                         loading={loading}
                         block
                         size="large"
+                        style={{ height: 44, borderRadius: 8, fontSize: 16 }}
                         onClick={() => console.log('[Auth] Login button clicked')}
                     >
-                        {mode === 'login' ? '登录' : '注册'}
+                        {mode === 'login' ? '立即登录' : '立即注册'}
                     </Button>
                 </Form.Item>
             </Form>
 
-            <Divider style={{ margin: '12px 0' }}>
-                <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>
+            <Divider style={{ margin: '16px 0', borderColor: 'rgba(255,255,255,0.1)' }}>
+                <span style={{ color: token.colorTextSecondary, fontSize: 12 }}>
                     {mode === 'login' ? '还没有账号？' : '已有账号？'}
                 </span>
             </Divider>
 
             <Button
+                type="text"
                 block
+                style={{ color: token.colorPrimary }}
                 onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
             >
-                {mode === 'login' ? '立即注册' : '返回登录'}
+                {mode === 'login' ? '免费注册账号' : '返回登录'}
             </Button>
-
-            <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: 11, marginTop: 16 }}>
-                {activeTab === 'phone-sms' && mode === 'login' && '未注册的手机号将自动创建账号'}
-            </div>
         </Modal>
     )
 }

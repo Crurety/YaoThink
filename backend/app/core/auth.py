@@ -264,31 +264,42 @@ class AuthService:
     
     async def login_by_phone_sms(self, phone: str, code: str) -> dict:
         """手机号+验证码登录（自动注册）"""
+        # [DEBUG] Limit scope of imports to avoid circular dependency potential
+        import traceback
         from sqlalchemy import select
         from app.core.database import User
         
-        if not await self.verify_sms_code(phone, code):
-            raise HTTPException(status_code=400, detail="验证码错误或已过期")
-        
-        result = await self.db.execute(select(User).where(User.phone == phone))
-        user = result.scalar_one_or_none()
-        
-        is_new_user = False
-        if not user:
-            user = User(phone=phone, nickname=f"用户{phone[-4:]}", is_active=True)
-            self.db.add(user)
-            await self.db.commit()
-            await self.db.refresh(user)
-            is_new_user = True
-        
-        if not user.is_active:
-            raise HTTPException(status_code=403, detail="账户已被禁用")
-        
-        return {
-            "user": self._user_response(user),
-            "token": self._generate_token(user),
-            "is_new_user": is_new_user
-        }
+        try:
+            if not await self.verify_sms_code(phone, code):
+                raise HTTPException(status_code=400, detail="验证码错误或已过期")
+            
+            result = await self.db.execute(select(User).where(User.phone == phone))
+            user = result.scalar_one_or_none()
+            
+            is_new_user = False
+            if not user:
+                user = User(phone=phone, nickname=f"用户{phone[-4:]}", is_active=True)
+                self.db.add(user)
+                await self.db.commit()
+                await self.db.refresh(user)
+                is_new_user = True
+            
+            if not user.is_active:
+                raise HTTPException(status_code=403, detail="账户已被禁用")
+            
+            return {
+                "user": self._user_response(user),
+                "token": self._generate_token(user),
+                "is_new_user": is_new_user
+            }
+        except HTTPException:
+            raise
+        except Exception as e:
+            # [DEBUG] Print stack trace and return error for debugging
+            traceback.print_exc()
+            error_msg = f"Login Error: {str(e)}"
+            print(f"[ERROR] {error_msg}")
+            raise HTTPException(status_code=500, detail=error_msg)
     
     # ========== 手机号+密码登录 ==========
     

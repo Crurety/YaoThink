@@ -6,8 +6,8 @@ services:
       dockerfile: Dockerfile
     container_name: yaothink-backend
     restart: unless-stopped
-    # ports:
-    #   - "8000:8000"
+    ports:
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/yaothink
       - REDIS_URL=redis://redis:6379/0
