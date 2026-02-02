@@ -53,7 +53,6 @@ const features = [
         color: '#60a5fa', // Blue
         bgGradient: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.05) 100%)',
         gridArea: 'span 1 / span 2', // Wide card
-        disabled: true
     }
 ]
 
