@@ -213,32 +213,62 @@ const ProfilePage = () => {
 
             <Row gutter={[16, 16]} className="stats-row">
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('bazi')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="八字" value={stats?.bazi_analyses || 0} prefix={<CompassOutlined />} />
                     </Card>
                 </Col>
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('ziwei')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="紫微" value={stats?.ziwei_analyses || 0} prefix={<StarOutlined />} />
                     </Card>
                 </Col>
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('divinations')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="占卜" value={stats?.divinations || 0} prefix={<ExperimentOutlined />} />
                     </Card>
                 </Col>
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('psychology')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="测试" value={stats?.psychology_tests || 0} prefix={<UserOutlined />} />
                     </Card>
                 </Col>
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('fusions')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="融合" value={stats?.fusion_analyses || 0} prefix={<StarOutlined />} />
                     </Card>
                 </Col>
                 <Col xs={12} sm={8} md={4}>
-                    <Card className="stat-card">
+                    <Card
+                        className="stat-card"
+                        hoverable
+                        onClick={() => handleTabChange('favorites')}
+                        style={{ cursor: 'pointer' }}
+                    >
                         <Statistic title="收藏" value={stats?.favorites || 0} prefix={<HeartOutlined />} valueStyle={{ color: '#cf1322' }} />
                     </Card>
                 </Col>
