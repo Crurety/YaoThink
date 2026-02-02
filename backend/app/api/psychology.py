@@ -3,6 +3,9 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
+from app.core.auth import get_current_user, TokenData
 from pydantic import BaseModel, Field
 from typing import List, Dict, Optional
 
@@ -90,7 +93,11 @@ async def get_mbti_test_questions(level: str = "master"):
 
 
 @router.post("/mbti/submit")
-async def submit_mbti_test(request: SubmitMBTIRequest):
+async def submit_mbti_test(
+    request: SubmitMBTIRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """提交MBTI测试并获取结果"""
     try:
         answers = [{"question_id": a.question_id, "option_index": a.option_index} 
@@ -98,6 +105,21 @@ async def submit_mbti_test(request: SubmitMBTIRequest):
         
         result = calculate_mbti(answers)
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_psychology_test(
+            user_id=current_user.user_id,
+            test_type="mbti",
+            result_data={
+                "type_code": result.type_code,
+                "type_name": result.type_name,
+                "dimensions": result.dimensions,
+                "description": result.description,
+                "confidence": result.confidence
+            }
+        )
+
         return {
             "success": True,
             "result": {
@@ -174,7 +196,11 @@ async def get_big5_test_questions(level: str = "master"):
 
 
 @router.post("/big5/submit")
-async def submit_big5_test(request: SubmitTestRequest):
+async def submit_big5_test(
+    request: SubmitTestRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """提交大五人格测试并获取结果"""
     try:
         answers = [{"question_id": a.question_id, "value": a.value} 
@@ -183,6 +209,22 @@ async def submit_big5_test(request: SubmitTestRequest):
         result = calculate_big5(answers)
         interpretation = get_big5_interpretation(result.scores)
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_psychology_test(
+            user_id=current_user.user_id,
+            test_type="big5",
+            result_data={
+                "scores": result.scores,
+                "percentiles": result.percentiles,
+                "levels": result.levels,
+                "profile": result.profile,
+                "interpretation": interpretation,
+                "reliability": result.reliability
+            }
+        )
+
         return {
             "success": True,
             "result": {
@@ -231,7 +273,11 @@ async def get_archetype_test_questions(level: str = "master"):
 
 
 @router.post("/archetype/submit")
-async def submit_archetype_test(request: SubmitTestRequest):
+async def submit_archetype_test(
+    request: SubmitTestRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """提交荣格原型测试并获取结果"""
     try:
         answers = [{"question_id": a.question_id, "value": a.value} 
@@ -239,6 +285,20 @@ async def submit_archetype_test(request: SubmitTestRequest):
         
         result = calculate_archetype(answers)
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_psychology_test(
+            user_id=current_user.user_id,
+            test_type="archetype",
+            result_data={
+                "primary": result.primary,
+                "secondary": result.secondary,
+                "all_scores": result.all_scores,
+                "profile": result.profile
+            }
+        )
+
         return {
             "success": True,
             "result": {
@@ -298,7 +358,11 @@ async def get_enneagram_test_questions(level: str = "master"):
 
 
 @router.post("/enneagram/submit")
-async def submit_enneagram_test(request: SubmitTestRequest):
+async def submit_enneagram_test(
+    request: SubmitTestRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """提交九型人格测试并获取结果"""
     try:
         answers = [{"question_id": a.question_id, "value": a.value} 
@@ -306,6 +370,23 @@ async def submit_enneagram_test(request: SubmitTestRequest):
         
         result = calculate_enneagram(answers)
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_psychology_test(
+            user_id=current_user.user_id,
+            test_type="enneagram",
+            result_data={
+                "primary_type": result.primary_type,
+                "primary_info": result.primary_info,
+                "wing": result.wing,
+                "all_scores": result.all_scores,
+                "stress_direction": result.stress_direction,
+                "growth_direction": result.growth_direction,
+                "profile": result.profile
+            }
+        )
+
         return {
             "success": True,
             "result": {

@@ -3,6 +3,8 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -51,14 +53,18 @@ class ZiWeiFromSolarRequest(BaseModel):
 
 
 @router.post("/analyze", summary="紫微斗数分析")
-async def analyze(request: ZiWeiRequest, current_user: TokenData = Depends(get_current_user)):
+async def analyze(
+    request: ZiWeiRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     紫微斗数命盘分析（需要登录）
     
     包含：十二宫排列、主星安排、格局判断、运势分析
     """
     try:
-        # 尝试从缓存获取
+        # 1. 计算结果
         from app.core.cache import cache, CacheService
         cache_key = CacheService.ziwei_key(
             request.year_gan, request.year_zhi, 
@@ -66,26 +72,52 @@ async def analyze(request: ZiWeiRequest, current_user: TokenData = Depends(get_c
             request.birth_hour_zhi
         )
         
+        result = None
         try:
-            cached_result = await cache.get(cache_key)
-            if cached_result:
-                return {"success": True, "data": cached_result, "cached": True}
+            result = await cache.get(cache_key)
         except Exception:
             pass
+            
+        if not result:
+            result = analyze_ziwei(
+                year_gan=request.year_gan,
+                year_zhi=request.year_zhi,
+                lunar_month=request.lunar_month,
+                lunar_day=request.lunar_day,
+                birth_hour_zhi=request.birth_hour_zhi
+            )
+            try:
+                await cache.set(cache_key, result, expire=3600)
+            except Exception:
+                pass
         
-        result = analyze_ziwei(
-            year_gan=request.year_gan,
-            year_zhi=request.year_zhi,
-            lunar_month=request.lunar_month,
-            lunar_day=request.lunar_day,
-            birth_hour_zhi=request.birth_hour_zhi
+        # 2. 保存到数据库 (尝试保存，虽然没有具体年份)
+        # 由于手动输入没有具体年份，我们创建一个特殊的BirthInfo或者仅记录分析
+        # 这里为了统计，我们创建一个标记性的BirthInfo，年份设为0
+        from app.core.user_service import HistoryService
+        from app.core.database import BirthInfo
+        
+        birth_info = BirthInfo(
+            user_id=current_user.user_id,
+            name=f"紫微排盘-{request.year_gan}{request.year_zhi}年",
+            birth_year=0, # 标记为无特定年份
+            birth_month=request.lunar_month,
+            birth_day=request.lunar_day,
+            birth_hour=0,
+            gender="未知",
+            is_lunar=True
         )
+        db.add(birth_info)
+        await db.commit()
+        await db.refresh(birth_info)
         
-        # 存入缓存（1小时）
-        try:
-            await cache.set(cache_key, result, expire=3600)
-        except Exception:
-            pass
+        history_service = HistoryService(db)
+        await history_service.save_analysis(
+            user_id=current_user.user_id,
+            analysis_type="ziwei",
+            birth_info_id=birth_info.id,
+            result_data=result
+        )
         
         return {"success": True, "data": result}
     except Exception as e:
@@ -93,7 +125,11 @@ async def analyze(request: ZiWeiRequest, current_user: TokenData = Depends(get_c
 
 
 @router.post("/analyze_solar", summary="紫微斗数分析（公历输入）")
-async def analyze_from_solar(request: ZiWeiFromSolarRequest):
+async def analyze_from_solar(
+    request: ZiWeiFromSolarRequest,
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     紫微斗数命盘分析（自动转换公历为农历）
     """
@@ -128,6 +164,48 @@ async def analyze_from_solar(request: ZiWeiFromSolarRequest):
             lunar_month=lunar_month,
             lunar_day=lunar_day,
             birth_hour_zhi=birth_hour_zhi
+        )
+        
+        # 保存到数据库
+        from app.core.user_service import HistoryService
+        from app.core.database import BirthInfo
+        from sqlalchemy import select
+        
+        # 查找或创建出生信息
+        birth_info_result = await db.execute(
+            select(BirthInfo).where(
+                BirthInfo.user_id == current_user.user_id,
+                BirthInfo.birth_year == request.year,
+                BirthInfo.birth_month == request.month,
+                BirthInfo.birth_day == request.day,
+                BirthInfo.birth_hour == request.hour,
+                BirthInfo.is_lunar == False
+            )
+        )
+        birth_info = birth_info_result.scalar_one_or_none()
+        
+        if not birth_info:
+            birth_info = BirthInfo(
+                user_id=current_user.user_id,
+                name=f"紫微-{request.year}{request.month:02d}{request.day:02d}",
+                birth_year=request.year,
+                birth_month=request.month,
+                birth_day=request.day,
+                birth_hour=request.hour,
+                gender="未知",
+                is_lunar=False,
+                timezone="Asia/Shanghai"
+            )
+            db.add(birth_info)
+            await db.commit()
+            await db.refresh(birth_info)
+            
+        history_service = HistoryService(db)
+        await history_service.save_analysis(
+            user_id=current_user.user_id,
+            analysis_type="ziwei",
+            birth_info_id=birth_info.id,
+            result_data=result
         )
         
         return {"success": True, "data": result}

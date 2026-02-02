@@ -3,6 +3,8 @@
 """
 
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.ext.asyncio import AsyncSession
+from app.core.database import get_db
 from pydantic import BaseModel, Field
 from typing import Optional
 from datetime import datetime
@@ -73,7 +75,11 @@ class LiuYaoRequest(BaseModel):
 
 
 @router.post("/meihua/time", summary="梅花易数 - 时间起卦")
-async def meihua_time(request: MeihuaTimeRequest, current_user: TokenData = Depends(get_current_user)):
+async def meihua_time(
+    request: MeihuaTimeRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     梅花易数时间起卦法（需要登录）
     
@@ -88,13 +94,27 @@ async def meihua_time(request: MeihuaTimeRequest, current_user: TokenData = Depe
         hexagram = meihua_by_time(dt)
         result = analyze_hexagram(hexagram, request.question or "")
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_divination(
+            user_id=current_user.user_id,
+            method="meihua_time",
+            question=request.question or "时间起卦",
+            result_data=result
+        )
+
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/meihua/number", summary="梅花易数 - 数字起卦")
-async def meihua_number(request: MeihuaNumberRequest, current_user: TokenData = Depends(get_current_user)):
+async def meihua_number(
+    request: MeihuaNumberRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     梅花易数数字起卦法（需要登录）
     
@@ -104,13 +124,27 @@ async def meihua_number(request: MeihuaNumberRequest, current_user: TokenData = 
         hexagram = meihua_by_numbers(request.number1, request.number2)
         result = analyze_hexagram(hexagram, request.question or "")
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_divination(
+            user_id=current_user.user_id,
+            method="meihua_number",
+            question=request.question or f"数字起卦: {request.number1}, {request.number2}",
+            result_data=result
+        )
+
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/meihua/text", summary="梅花易数 - 文字起卦")
-async def meihua_text(request: MeihuaTextRequest, current_user: TokenData = Depends(get_current_user)):
+async def meihua_text(
+    request: MeihuaTextRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     梅花易数文字起卦法（需要登录）
     
@@ -120,13 +154,27 @@ async def meihua_text(request: MeihuaTextRequest, current_user: TokenData = Depe
         hexagram = meihua_by_text(request.text)
         result = analyze_hexagram(hexagram, request.question or request.text)
         
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_divination(
+            user_id=current_user.user_id,
+            method="meihua_text",
+            question=request.question or request.text,
+            result_data=result
+        )
+        
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/liuyao", summary="六爻 - 摇钱起卦")
-async def liuyao(request: LiuYaoRequest, current_user: TokenData = Depends(get_current_user)):
+async def liuyao(
+    request: LiuYaoRequest, 
+    current_user: TokenData = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db)
+):
     """
     六爻摇钱起卦法（需要登录）
     
@@ -135,6 +183,16 @@ async def liuyao(request: LiuYaoRequest, current_user: TokenData = Depends(get_c
     try:
         hexagram = liuyao_by_coins()
         result = analyze_hexagram(hexagram, request.question or "")
+        
+        # 保存记录
+        from app.core.user_service import HistoryService
+        history_service = HistoryService(db)
+        await history_service.save_divination(
+            user_id=current_user.user_id,
+            method="liuyao",
+            question=request.question or "六爻起卦",
+            result_data=result
+        )
         
         return {"success": True, "data": result}
     except Exception as e:
