@@ -218,9 +218,9 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                     renderItem={([pillar, shas]) => (
                                         <List.Item>
                                             <Card size="small" type="inner" title={`${pillar === 'year' ? '年柱' : pillar === 'month' ? '月柱' : pillar === 'day' ? '日柱' : '时柱'}`}>
-                                                {shas && shas.length > 0 ? shas.map((sha, idx) => (
+                                                {Array.isArray(shas) && shas.length > 0 ? shas.map((sha, idx) => (
                                                     <Tag key={idx} color="purple" style={{ marginBottom: 4 }}>{sha}</Tag>
-                                                )) : <Text type="secondary">无</Text>}
+                                                )) : <Text type="secondary">{typeof shas === 'string' ? shas : '无'}</Text>}
                                             </Card>
                                         </List.Item>
                                     )}
