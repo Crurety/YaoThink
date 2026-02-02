@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons';
 import api from '../../services/api';
 import HistoryDetailModal from './HistoryDetailModal';
+import HistoryCard from './components/HistoryCard';
 import './index.css';
 
 const { Title, Text, Paragraph } = Typography;
@@ -240,39 +241,26 @@ const ProfilePage = () => {
         </div>
     );
 
-    const renderHistoryList = (data, type) => (
-        <List
-            className="history-list"
-            dataSource={data}
-            locale={{ emptyText: <Empty description="暂无记录" /> }}
-            renderItem={(item) => (
-                <List.Item
-                    actions={[
-                        <Button icon={<EyeOutlined />} type="text" onClick={() => handleViewDetail(item, type)}>查看</Button>,
-                        <Button icon={<DeleteOutlined />} type="text" danger onClick={() => handleDelete(type === 'psychology' ? 'psychology' : 'analyses', item.id)}>删除</Button>
-                    ]}
-                >
-                    <List.Item.Meta
-                        avatar={<Avatar icon={<HistoryOutlined />} style={{ backgroundColor: '#1890ff' }} />}
-                        title={
-                            <Space>
-                                <Text strong>{item.title || item.question || `${item.type || item.test_type}分析`}</Text>
-                                {item.confidence && <Tag color="orange">{item.confidence}%</Tag>}
-                            </Space>
-                        }
-                        description={
-                            <Space direction="vertical" size={2}>
-                                <Text type="secondary" style={{ fontSize: 13 }}>
-                                    {item.result_summary || item.hexagram || (item.test_type ? item.test_type.toUpperCase() : '')}
-                                </Text>
-                                <Text type="secondary" style={{ fontSize: 12 }}>{new Date(item.created_at).toLocaleString()}</Text>
-                            </Space>
-                        }
-                    />
-                </List.Item>
-            )}
-        />
-    );
+    const renderHistoryList = (data, type) => {
+        if (!data || data.length === 0) {
+            return <Empty description="暂无记录" image={Empty.PRESENTED_IMAGE_SIMPLE} />;
+        }
+
+        return (
+            <Row gutter={[16, 16]}>
+                {data.map((item) => (
+                    <Col xs={24} sm={24} md={12} lg={12} xl={8} key={item.id}>
+                        <HistoryCard
+                            record={item}
+                            type={type}
+                            onClick={(item) => handleViewDetail(item, type)}
+                            onDelete={(id) => handleDelete(type === 'psychology' ? 'psychology' : 'analyses', id)} // Note: 'analyses' is a broad type delete alias usually
+                        />
+                    </Col>
+                ))}
+            </Row>
+        );
+    };
 
     const renderSettings = () => (
         <Card className="settings-card" title="应用设置">

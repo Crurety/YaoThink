@@ -133,7 +133,7 @@ async def get_analysis_history(
                     "id": r.id,
                     "type": r.analysis_type,
                     "birth_info_id": r.birth_info_id,
-                    "result_summary": r.result_data.get("summary", "") if r.result_data else "",
+                    "result_data": r.result_data,
                     "created_at": r.created_at.isoformat()
                 }
                 for r in records
@@ -206,7 +206,7 @@ async def get_divination_history(
                     "id": r.id,
                     "method": r.method,
                     "question": r.question,
-                    "hexagram": r.result_data.get("hexagram_name", "") if r.result_data else "",
+                    "result_data": r.result_data,
                     "created_at": r.created_at.isoformat()
                 }
                 for r in records
@@ -262,7 +262,7 @@ async def get_psychology_history(
                 {
                     "id": r.id,
                     "test_type": r.test_type,
-                    "result_summary": _get_psychology_summary(r.test_type, r.result_data),
+                    "result_data": r.result_data,
                     "created_at": r.created_at.isoformat()
                 }
                 for r in records
@@ -331,6 +331,7 @@ async def get_fusion_history(
                     "id": r.id,
                     "title": r.title,
                     "confidence": r.confidence,
+                    "fusion_result": r.fusion_result, 
                     "created_at": r.created_at.isoformat()
                 }
                 for r in records
