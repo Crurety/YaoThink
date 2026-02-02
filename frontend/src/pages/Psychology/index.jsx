@@ -209,12 +209,12 @@ const TestInProgress = ({ testType, questions, onComplete, onBack }) => {
         if (testType === 'mbti') {
             formattedAnswers = Object.entries(answers).map(([qId, optIdx]) => ({
                 question_id: parseInt(qId),
-                option_index: optIdx
+                option_index: parseInt(optIdx)
             }));
         } else {
             formattedAnswers = Object.entries(answers).map(([qId, value]) => ({
                 question_id: parseInt(qId),
-                value: value
+                value: parseInt(value)
             }));
         }
         onComplete(formattedAnswers);
