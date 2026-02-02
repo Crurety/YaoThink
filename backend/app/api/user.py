@@ -50,11 +50,11 @@ class PaginationParams(BaseModel):
 # ==================== 用户资料 ====================
 
 @router.get("/profile")
-async def get_user_profile(current_user: dict = Depends(get_current_user)):
+async def get_user_profile(current_user: Any = Depends(get_current_user)):
     """获取当前用户资料"""
     async with async_session() as db:
         service = UserService(db)
-        user = await service.get_user_by_id(current_user["id"])
+        user = await service.get_user_by_id(current_user.user_id)
         
         if not user:
             raise HTTPException(status_code=404, detail="用户不存在")
@@ -79,14 +79,14 @@ async def get_user_profile(current_user: dict = Depends(get_current_user)):
 @router.put("/profile")
 async def update_user_profile(
     data: UserProfileUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """更新用户资料"""
     async with async_session() as db:
         service = UserService(db)
         
         update_data = data.dict(exclude_unset=True, exclude_none=True)
-        user = await service.update_user_profile(current_user["id"], **update_data)
+        user = await service.update_user_profile(current_user.user_id, **update_data)
         
         return {
             "success": True,
@@ -95,11 +95,11 @@ async def update_user_profile(
 
 
 @router.get("/stats")
-async def get_user_stats(current_user: dict = Depends(get_current_user)):
+async def get_user_stats(current_user: Any = Depends(get_current_user)):
     """获取用户统计数据"""
     async with async_session() as db:
         service = UserService(db)
-        stats = await service.get_user_stats(current_user["id"])
+        stats = await service.get_user_stats(current_user.user_id)
         
         return {
             "success": True,
@@ -114,13 +114,13 @@ async def get_analysis_history(
     analysis_type: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取命理分析历史"""
     async with async_session() as db:
         service = HistoryService(db)
         records = await service.get_user_analyses(
-            current_user["id"], 
+            current_user.user_id, 
             analysis_type=analysis_type,
             limit=limit, 
             offset=offset
@@ -144,12 +144,12 @@ async def get_analysis_history(
 @router.get("/history/analyses/{record_id}")
 async def get_analysis_detail(
     record_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取分析记录详情"""
     async with async_session() as db:
         service = HistoryService(db)
-        record = await service.get_analysis_by_id(record_id, current_user["id"])
+        record = await service.get_analysis_by_id(record_id, current_user.user_id)
         
         if not record:
             raise HTTPException(status_code=404, detail="记录不存在")
@@ -169,12 +169,12 @@ async def get_analysis_detail(
 @router.delete("/history/analyses/{record_id}")
 async def delete_analysis(
     record_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """删除分析记录"""
     async with async_session() as db:
         service = HistoryService(db)
-        success = await service.delete_analysis(record_id, current_user["id"])
+        success = await service.delete_analysis(record_id, current_user.user_id)
         
         if not success:
             raise HTTPException(status_code=404, detail="记录不存在")
@@ -187,13 +187,13 @@ async def get_divination_history(
     method: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取占卜历史"""
     async with async_session() as db:
         service = HistoryService(db)
         records = await service.get_user_divinations(
-            current_user["id"],
+            current_user.user_id,
             method=method,
             limit=limit,
             offset=offset
@@ -219,13 +219,13 @@ async def get_psychology_history(
     test_type: Optional[str] = None,
     limit: int = 20,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取心理测试历史"""
     async with async_session() as db:
         service = HistoryService(db)
         records = await service.get_user_psychology_tests(
-            current_user["id"],
+            current_user.user_id,
             test_type=test_type,
             limit=limit,
             offset=offset
@@ -247,12 +247,12 @@ async def get_psychology_history(
 
 @router.get("/history/psychology/latest")
 async def get_latest_psychology_results(
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取最新的各类心理测试结果"""
     async with async_session() as db:
         service = HistoryService(db)
-        results = await service.get_latest_psychology_results(current_user["id"])
+        results = await service.get_latest_psychology_results(current_user.user_id)
         
         return {
             "success": True,
@@ -264,13 +264,13 @@ async def get_latest_psychology_results(
 async def get_fusion_history(
     limit: int = 20,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取融合分析历史"""
     async with async_session() as db:
         service = HistoryService(db)
         records = await service.get_user_fusions(
-            current_user["id"],
+            current_user.user_id,
             limit=limit,
             offset=offset
         )
@@ -294,7 +294,7 @@ async def get_fusion_history(
 @router.post("/favorites")
 async def add_favorite(
     data: FavoriteRequest,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """添加收藏"""
     async with async_session() as db:
@@ -302,7 +302,7 @@ async def add_favorite(
         
         try:
             favorite = await service.add_favorite(
-                current_user["id"],
+                current_user.user_id,
                 data.item_type,
                 data.item_id,
                 data.note
@@ -320,13 +320,13 @@ async def add_favorite(
 async def remove_favorite(
     item_type: str,
     item_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """取消收藏"""
     async with async_session() as db:
         service = FavoriteService(db)
         success = await service.remove_favorite(
-            current_user["id"],
+            current_user.user_id,
             item_type,
             item_id
         )
@@ -342,13 +342,13 @@ async def get_favorites(
     item_type: Optional[str] = None,
     limit: int = 50,
     offset: int = 0,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """获取收藏列表"""
     async with async_session() as db:
         service = FavoriteService(db)
         favorites = await service.get_user_favorites(
-            current_user["id"],
+            current_user.user_id,
             item_type=item_type,
             limit=limit,
             offset=offset
@@ -373,13 +373,13 @@ async def get_favorites(
 async def check_favorite(
     item_type: str,
     item_id: int,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """检查是否已收藏"""
     async with async_session() as db:
         service = FavoriteService(db)
         is_favorited = await service.is_favorited(
-            current_user["id"],
+            current_user.user_id,
             item_type,
             item_id
         )
@@ -390,11 +390,11 @@ async def check_favorite(
 # ==================== 用户设置 ====================
 
 @router.get("/settings")
-async def get_settings(current_user: dict = Depends(get_current_user)):
+async def get_settings(current_user: Any = Depends(get_current_user)):
     """获取用户设置"""
     async with async_session() as db:
         service = SettingsService(db)
-        settings = await service.get_or_create_settings(current_user["id"])
+        settings = await service.get_or_create_settings(current_user.user_id)
         
         return {
             "success": True,
@@ -411,14 +411,14 @@ async def get_settings(current_user: dict = Depends(get_current_user)):
 @router.put("/settings")
 async def update_settings(
     data: SettingsUpdate,
-    current_user: dict = Depends(get_current_user)
+    current_user: Any = Depends(get_current_user)
 ):
     """更新用户设置"""
     async with async_session() as db:
         service = SettingsService(db)
         
         update_data = data.dict(exclude_unset=True, exclude_none=True)
-        settings = await service.update_settings(current_user["id"], **update_data)
+        settings = await service.update_settings(current_user.user_id, **update_data)
         
         return {
             "success": True,
