@@ -214,6 +214,31 @@ async def get_divination_history(
         }
 
 
+@router.get("/history/divinations/{record_id}")
+async def get_divination_detail(
+    record_id: int,
+    current_user: Any = Depends(get_current_user)
+):
+    """获取占卜记录详情"""
+    async with async_session() as db:
+        service = HistoryService(db)
+        record = await service.get_divination_by_id(record_id, current_user.user_id)
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="记录不存在")
+        
+        return {
+            "success": True,
+            "data": {
+                "id": record.id,
+                "method": record.method,
+                "question": record.question,
+                "result_data": record.result_data,
+                "created_at": record.created_at.isoformat()
+            }
+        }
+
+
 @router.get("/history/psychology")
 async def get_psychology_history(
     test_type: Optional[str] = None,
@@ -242,6 +267,30 @@ async def get_psychology_history(
                 }
                 for r in records
             ]
+        }
+
+
+@router.get("/history/psychology/{record_id}")
+async def get_psychology_detail(
+    record_id: int,
+    current_user: Any = Depends(get_current_user)
+):
+    """获取心理测试详情"""
+    async with async_session() as db:
+        service = HistoryService(db)
+        record = await service.get_psychology_test_by_id(record_id, current_user.user_id)
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="记录不存在")
+        
+        return {
+            "success": True,
+            "data": {
+                "id": record.id,
+                "test_type": record.test_type,
+                "result_data": record.result_data,
+                "created_at": record.created_at.isoformat()
+            }
         }
 
 
@@ -286,6 +335,32 @@ async def get_fusion_history(
                 }
                 for r in records
             ]
+        }
+
+
+@router.get("/history/fusions/{record_id}")
+async def get_fusion_detail(
+    record_id: int,
+    current_user: Any = Depends(get_current_user)
+):
+    """获取融合分析详情"""
+    async with async_session() as db:
+        service = HistoryService(db)
+        record = await service.get_fusion_by_id(record_id, current_user.user_id)
+        
+        if not record:
+            raise HTTPException(status_code=404, detail="记录不存在")
+        
+        return {
+            "success": True,
+            "data": {
+                "id": record.id,
+                "title": record.title,
+                "fusion_result": record.fusion_result,
+                "report_markdown": record.report_markdown,
+                "confidence": record.confidence,
+                "created_at": record.created_at.isoformat()
+            }
         }
 
 

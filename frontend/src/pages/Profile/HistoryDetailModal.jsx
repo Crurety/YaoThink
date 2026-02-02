@@ -1,16 +1,72 @@
-import React from 'react';
-import { Modal, Descriptions, Tag, Typography, Divider, List, Card, Progress, Row, Col, Empty, Space, Statistic, theme } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Modal, Descriptions, Tag, Typography, Divider, List, Card, Progress, Row, Col, Empty, Space, Statistic, theme, Spin, message } from 'antd';
 import {
     GoldOutlined, FireOutlined,
     ThunderboltOutlined, CloudOutlined,
     ExperimentOutlined, DatabaseOutlined
 } from '@ant-design/icons';
+import api from '../../services/api';
 
 const { Title, Text, Paragraph } = Typography;
 const { useToken } = theme;
 
 const HistoryDetailModal = ({ visible, onClose, record, type }) => {
     const { token } = useToken();
+    const [loading, setLoading] = useState(false);
+    const [detailData, setDetailData] = useState(null);
+
+    // Fetch full detail when modal opens or record changes
+    useEffect(() => {
+        if (visible && record) {
+            // If record already has result_data, use it (and ensure we don't fetch if not needed, 
+            // though currently list items strip it, so we likely always fetch for detailed views)
+            if (record.result_data && Object.keys(record.result_data).length > 0) {
+                setDetailData(record.result_data);
+            } else {
+                fetchDetail(record.id, type);
+            }
+        } else {
+            setDetailData(null);
+        }
+    }, [visible, record, type]);
+
+    const fetchDetail = async (id, recordType) => {
+        setLoading(true);
+        try {
+            let endpoint = '';
+            // Determine endpoint based on type
+            // Note: 'analyses' type in Profile page maps to specific analysis types like 'bazi' or 'ziwei'
+            // 'divinations' -> /history/divinations/{id}
+            // 'psychology' -> /history/psychology/{id}
+            // 'fusions' -> /history/fusions/{id}
+
+            // For 'analyses', the record.type holds 'bazi' or 'ziwei'
+            if (recordType === 'analyses') {
+                endpoint = `/api/user/history/analyses/${id}`;
+            } else if (recordType === 'divinations' || recordType === 'meihua' || recordType === 'liuyao') {
+                endpoint = `/api/user/history/divinations/${id}`;
+            } else if (recordType === 'psychology') {
+                endpoint = `/api/user/history/psychology/${id}`;
+            } else if (recordType === 'fusions') {
+                endpoint = `/api/user/history/fusions/${id}`;
+            }
+
+            if (!endpoint) {
+                // If type is confusing, try to guess or just fail gracefully
+                throw new Error("Unknown record type");
+            }
+
+            const res = await api.get(endpoint);
+            if (res.data.success) {
+                setDetailData(res.data.data.result_data || res.data.data.fusion_result || {}); // Fusion might be different
+            }
+        } catch (err) {
+            console.error(err);
+            message.error("获取详情失败");
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!record) return null;
 
@@ -184,9 +240,7 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                     borderRadius: token.borderRadiusLG,
                     marginBottom: 24
                 }}>
-                    <GuaSymbol symbol={mainGua.lower?.symbol} />
-                    {/* Note: Ideally we want hexagram symbol. If unavailable, use name */}
-
+                    <GuaSymbol symbol={mainGua.lower?.symbol} big />
                     <Title level={2} style={{ marginTop: 16, marginBottom: 4 }}>{mainGua.name}</Title>
                     <Text type="secondary">{mainGua.upper?.name}上 {mainGua.lower?.name}下</Text>
                 </div>
@@ -282,7 +336,15 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
     };
 
     const renderContent = () => {
-        const data = record.result_data || {};
+        if (loading) {
+            return <div style={{ textAlign: 'center', padding: '40px' }}><Spin size="large" tip="加载详细数据..." /></div>;
+        }
+
+        if (!detailData) {
+            return <Empty description="无法获取详细数据" />;
+        }
+
+        const data = detailData;
         const safeType = type === 'analyses' ? record.type : type; // Handle type variation
 
         switch (safeType) {
@@ -302,7 +364,7 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
     return (
         <Modal
             title={<Space>
-                <Tag color={token.colorPrimary}>{record.type || record.method || '详情'}</Tag>
+                <Tag color={token.colorPrimary}>{record.type || record.method || record.test_type || '详情'}</Tag>
                 <Text>历史记录详情</Text>
             </Space>}
             open={visible}

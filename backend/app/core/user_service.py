@@ -211,6 +211,34 @@ class HistoryService:
         
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def get_divination_by_id(
+        self,
+        record_id: int,
+        user_id: int
+    ) -> Optional[DivinationRecord]:
+        """获取特定占卜记录"""
+        result = await self.db.execute(
+            select(DivinationRecord).where(
+                DivinationRecord.id == record_id,
+                DivinationRecord.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()
+
+    async def get_divination_by_id(
+        self,
+        record_id: int,
+        user_id: int
+    ) -> Optional[DivinationRecord]:
+        """获取特定占卜记录"""
+        result = await self.db.execute(
+            select(DivinationRecord).where(
+                DivinationRecord.id == record_id,
+                DivinationRecord.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()
     
     # ==================== 心理测试记录 ====================
     
@@ -253,6 +281,20 @@ class HistoryService:
         
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def get_psychology_test_by_id(
+        self,
+        record_id: int,
+        user_id: int
+    ) -> Optional[PsychologyTest]:
+        """获取特定心理测试记录"""
+        result = await self.db.execute(
+            select(PsychologyTest).where(
+                PsychologyTest.id == record_id,
+                PsychologyTest.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()
     
     async def get_latest_psychology_results(self, user_id: int) -> Dict:
         """获取用户最新的各类心理测试结果"""
@@ -316,6 +358,20 @@ class HistoryService:
         
         result = await self.db.execute(query)
         return result.scalars().all()
+
+    async def get_fusion_by_id(
+        self,
+        record_id: int,
+        user_id: int
+    ) -> Optional[FusionRecord]:
+        """获取特定融合分析记录"""
+        result = await self.db.execute(
+            select(FusionRecord).where(
+                FusionRecord.id == record_id,
+                FusionRecord.user_id == user_id
+            )
+        )
+        return result.scalar_one_or_none()
 
 
 class FavoriteService:
