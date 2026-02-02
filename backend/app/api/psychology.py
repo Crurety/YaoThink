@@ -111,6 +111,7 @@ async def submit_mbti_test(
         await history_service.save_psychology_test(
             user_id=current_user.user_id,
             test_type="mbti",
+            answers=answers,
             result_data={
                 "type_code": result.type_code,
                 "type_name": result.type_name,
@@ -215,6 +216,7 @@ async def submit_big5_test(
         await history_service.save_psychology_test(
             user_id=current_user.user_id,
             test_type="big5",
+            answers=answers,
             result_data={
                 "scores": result.scores,
                 "percentiles": result.percentiles,
@@ -291,6 +293,7 @@ async def submit_archetype_test(
         await history_service.save_psychology_test(
             user_id=current_user.user_id,
             test_type="archetype",
+            answers=answers,
             result_data={
                 "primary": result.primary,
                 "secondary": result.secondary,
@@ -376,6 +379,7 @@ async def submit_enneagram_test(
         await history_service.save_psychology_test(
             user_id=current_user.user_id,
             test_type="enneagram",
+            answers=answers,
             result_data={
                 "primary_type": result.primary_type,
                 "primary_info": result.primary_info,
