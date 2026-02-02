@@ -184,38 +184,104 @@ const HistoryCard = ({ record, type, onClick, onDelete }) => {
 
     // 4. Psychology Card
     const renderPsychology = () => {
+        const testType = record.test_type;
+        const themeColor = {
+            mbti: '#722ed1',
+            big5: '#13c2c2',
+            archetype: '#eb2f96',
+            enneagram: '#fa8c16'
+        }[testType] || token.colorPrimary;
+
+        // Render specific content based on test type
+        const renderInner = () => {
+            if (testType === 'mbti') {
+                return (
+                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                        <div style={{
+                            fontSize: 36,
+                            fontWeight: 900,
+                            color: themeColor,
+                            marginBottom: 4,
+                            lineHeight: 1.2
+                        }}>
+                            {data.type_code}
+                        </div>
+                        <Text strong style={{ fontSize: 16 }}>{data.type_name}</Text>
+                        <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                            {data.dimensions && Object.entries(data.dimensions).slice(0, 3).map(([k, v]) => (
+                                <Progress key={k} percent={v.clarity} strokeColor={themeColor} size="small" showInfo={false} />
+                            ))}
+                        </div>
+                    </div>
+                );
+            }
+            if (testType === 'big5') {
+                return (
+                    <div>
+                        <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                            <div style={{ fontSize: 24, fontWeight: 'bold', color: themeColor }}>完成</div>
+                            <Text type="secondary">大五人格评估</Text>
+                        </div>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, justifyContent: 'center' }}>
+                            {data.levels && Object.entries(data.levels).slice(0, 4).map(([k, v]) => (
+                                <Tag key={k} color={v === '高' ? 'green' : v === '低' ? 'red' : 'default'} style={{ margin: 0 }}>
+                                    {k}:{v}
+                                </Tag>
+                            ))}
+                        </div>
+                    </div>
+                )
+            }
+            if (testType === 'archetype') {
+                return (
+                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                        <Text type="secondary" style={{ fontSize: 12 }}>主原型</Text>
+                        <div style={{
+                            fontSize: 28,
+                            fontWeight: 'bold',
+                            color: themeColor,
+                            margin: '4px 0 8px'
+                        }}>
+                            {data.primary?.name || '-'}
+                        </div>
+                        {data.secondary && (
+                            <Tag color="purple">次: {data.secondary.name}</Tag>
+                        )}
+                    </div>
+                )
+            }
+            if (testType === 'enneagram') {
+                return (
+                    <div style={{ textAlign: 'center', padding: '12px 0' }}>
+                        <div style={{
+                            fontSize: 36,
+                            fontWeight: 900,
+                            color: themeColor,
+                            marginBottom: 4
+                        }}>
+                            {data.primary_type}号
+                        </div>
+                        <Text strong>{data.primary_info?.name}</Text>
+                        <div style={{ marginTop: 8 }}>
+                            {data.wing && <Tag color="orange">侧翼 {data.wing}w</Tag>}
+                        </div>
+                    </div>
+                )
+            }
+            // Fallback
+            return (
+                <div style={{ textAlign: 'center', padding: '20px 0' }}>
+                    <Text type="secondary">查看测试结果</Text>
+                </div>
+            )
+        };
+
         return (
             <>
-                <div style={{ marginBottom: 16 }}>
-                    <Tag color="cyan">{record.test_type.toUpperCase()}</Tag>
+                <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Tag color={themeColor} style={{ marginRight: 0 }}>{record.test_type.toUpperCase()}</Tag>
                 </div>
-
-                <div style={{ textAlign: 'center', padding: '12px 0' }}>
-                    <div style={{
-                        fontSize: 32,
-                        fontWeight: 900,
-                        background: 'linear-gradient(45deg, #36cfc9, #4096ff)',
-                        WebkitBackgroundClip: 'text',
-                        WebkitTextFillColor: 'transparent',
-                        marginBottom: 4
-                    }}>
-                        {data.type_code || (data.scores ? '完成' : '-')}
-                    </div>
-                    <Text type="secondary">{data.type_name || '测试结果'}</Text>
-                </div>
-
-                {data.dimensions && (
-                    <div style={{ marginTop: 12 }}>
-                        {Object.entries(data.dimensions).slice(0, 3).map(([k, v]) => (
-                            <Row key={k} gutter={8} align="middle" style={{ marginBottom: 4 }}>
-                                <Col span={6}><Text style={{ fontSize: 12 }}>{k}</Text></Col>
-                                <Col span={18}>
-                                    <Progress percent={v} size="small" showInfo={false} strokeColor={token.colorInfo} />
-                                </Col>
-                            </Row>
-                        ))}
-                    </div>
-                )}
+                {renderInner()}
             </>
         );
     };
@@ -261,8 +327,20 @@ const HistoryCard = ({ record, type, onClick, onDelete }) => {
     return (
         <Card
             hoverable
-            style={cardStyle}
-            bodyStyle={{ padding: 20 }}
+            style={{
+                ...cardStyle,
+                display: 'flex',
+                flexDirection: 'column',
+                overflow: 'hidden', // Ensure footer is clipped to corners
+                padding: 0 // Remove default card padding to control it manually
+            }}
+            bodyStyle={{
+                padding: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                height: '100%',
+                flex: 1
+            }}
             onClick={() => onClick(record)}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = hoverStyle.transform;
@@ -274,20 +352,46 @@ const HistoryCard = ({ record, type, onClick, onDelete }) => {
                 e.currentTarget.style.boxShadow = 'none';
                 e.currentTarget.style.borderColor = token.colorBorderSecondary;
             }}
-            actions={[
-                <Tooltip title="查看详情">
-                    <Button type="text" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onClick(record); }} />
-                </Tooltip>,
-                <div style={{ fontSize: 12, color: token.colorTextSecondary, cursor: 'default' }}>
-                    {dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss')}
-                </div>,
-                <Tooltip title="删除记录">
-                    <Button type="text" danger icon={<DeleteOutlined />} onClick={(e) => { e.stopPropagation(); onDelete(record.id); }} />
-                </Tooltip>
-            ]}
         >
-            <div style={{ minHeight: 180 }}>
-                {renderContent()}
+            {/* Content Area */}
+            <div style={{ padding: '20px 20px 12px 20px', flex: 1 }}>
+                <div style={{ minHeight: 160 }}>
+                    {renderContent()}
+                </div>
+            </div>
+
+            {/* Custom Seamless Footer */}
+            <div style={{
+                borderTop: `1px solid ${token.colorBorderSecondary}`,
+                padding: '12px 16px',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                background: 'rgba(0,0,0,0.02)', // Slightly different bg for footer if needed, or transparent
+            }}>
+                <Tooltip title="查看详情">
+                    <Button
+                        type="text"
+                        size="small"
+                        icon={<EyeOutlined />}
+                        style={{ color: token.colorTextSecondary }}
+                        onClick={(e) => { e.stopPropagation(); onClick(record); }}
+                    />
+                </Tooltip>
+
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                    {dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss')}
+                </Text>
+
+                <Tooltip title="删除记录">
+                    <Button
+                        type="text"
+                        size="small"
+                        danger
+                        icon={<DeleteOutlined />}
+                        onClick={(e) => { e.stopPropagation(); onDelete(record.id); }}
+                    />
+                </Tooltip>
             </div>
         </Card>
     );
