@@ -282,36 +282,67 @@ async def submit_archetype_test(
 ):
     """提交荣格原型测试并获取结果"""
     try:
+        from app.core.logging import logger
+        logger.info(f"User {current_user.user_id} submitting archetype test with {len(request.answers)} answers")
+        
         answers = [{"question_id": a.question_id, "value": a.value} 
                    for a in request.answers]
         
-        result = calculate_archetype(answers)
+        # Calculate result
+        try:
+            result = calculate_archetype(answers)
+            logger.info(f"Archetype calculation success: Primary={result.primary.get('name')}")
+        except Exception as e:
+            logger.error(f"Archetype calculation failed: {e}")
+            raise HTTPException(status_code=500, detail=f"Calculation Error: {str(e)}")
         
-        # 保存记录
-        from app.core.user_service import HistoryService
-        history_service = HistoryService(db)
-        await history_service.save_psychology_test(
-            user_id=current_user.user_id,
-            test_type="archetype",
-            answers=answers,
-            result_data={
-                "primary": result.primary,
-                "secondary": result.secondary,
-                "all_scores": result.all_scores,
-                "profile": result.profile
-            }
-        )
+        # Prepare result data
+        result_data = {
+            "primary": result.primary,
+            "secondary": result.secondary,
+            "all_scores": result.all_scores,
+            "profile": result.profile
+        }
+        
+        # Helper to clean JSON (handle NaN/Infinity)
+        import math
+        def clean_json(obj):
+            if isinstance(obj, float):
+                if math.isnan(obj) or math.isinf(obj):
+                    return 0.0
+                return obj
+            if isinstance(obj, dict):
+                return {k: clean_json(v) for k, v in obj.items()}
+            if isinstance(obj, list):
+                return [clean_json(v) for v in obj]
+            return obj
+            
+        result_data = clean_json(result_data)
+        
+        # Save record
+        try:
+            from app.core.user_service import HistoryService
+            history_service = HistoryService(db)
+            await history_service.save_psychology_test(
+                user_id=current_user.user_id,
+                test_type="archetype",
+                answers=answers,
+                result_data=result_data
+            )
+            logger.info("Archetype test saved to history")
+        except Exception as e:
+            logger.error(f"Failed to save history: {e}")
+            raise HTTPException(status_code=500, detail=f"Database Error: {str(e)}")
 
         return {
             "success": True,
-            "result": {
-                "primary": result.primary,
-                "secondary": result.secondary,
-                "all_scores": result.all_scores,
-                "profile": result.profile
-            }
+            "result": result_data
         }
+    except HTTPException:
+        raise
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=400, detail=str(e))
 
 
