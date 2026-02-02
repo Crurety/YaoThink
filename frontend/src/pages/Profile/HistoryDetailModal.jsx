@@ -393,8 +393,11 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                         <div key={k} style={{ marginBottom: 12 }}>
                             <Row align="middle" gutter={8}>
                                 <Col span={4}><Text strong>{k}</Text></Col>
-                                <Col span={16}><Progress percent={v} showInfo={false} strokeColor={token.colorPrimary} /></Col>
-                                <Col span={4} style={{ textAlign: 'right' }}>{v}%</Col>
+                                <Col span={16}><Progress percent={v.clarity || 0} showInfo={false} strokeColor={token.colorPrimary} /></Col>
+                                <Col span={4} style={{ textAlign: 'right' }}>
+                                    {v.preference && <Tag style={{ marginRight: 4 }}>{v.preference}</Tag>}
+                                    {typeof v.clarity === 'number' ? v.clarity.toFixed(1) : 0}%
+                                </Col>
                             </Row>
                         </div>
                     ))}
