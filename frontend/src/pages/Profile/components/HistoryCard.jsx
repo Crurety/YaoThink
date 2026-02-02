@@ -279,7 +279,7 @@ const HistoryCard = ({ record, type, onClick, onDelete }) => {
                     <Button type="text" icon={<EyeOutlined />} onClick={(e) => { e.stopPropagation(); onClick(record); }} />
                 </Tooltip>,
                 <div style={{ fontSize: 12, color: token.colorTextSecondary, cursor: 'default' }}>
-                    {dayjs(record.created_at).format('MM-DD HH:mm')}
+                    {dayjs(record.created_at).format('YYYY-MM-DD HH:mm:ss')}
                 </div>,
                 <Tooltip title="删除记录">
                     <Button type="text" danger icon={<DeleteOutlined />} onClick={(e) => { e.stopPropagation(); onDelete(record.id); }} />
