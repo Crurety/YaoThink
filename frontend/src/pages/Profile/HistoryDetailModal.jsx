@@ -303,14 +303,45 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                 <Title level={5}>核心宫位分析</Title>
                 <List
                     grid={{ gutter: 16, column: 1 }}
-                    dataSource={Object.entries(analysis.palace_scores || {}).slice(0, 3)} // Show top 3 or specific ones
-                    renderItem={([name, score]) => (
+                    dataSource={Object.entries(analysis.palace_scores || {}).sort(([, a], [, b]) => b.score - a.score).slice(0, 3)} // Sort by score desc, show top 3
+                    renderItem={([name, data]) => (
                         <List.Item>
-                            <Card size="small" style={{ background: 'rgba(255,255,255,0.02)' }} bordered={false}>
-                                <Row justify="space-between">
-                                    <Col>{name}</Col>
-                                    <Col><Text type="warning">能量指数: {score}</Text></Col>
+                            <Card size="small" style={{ background: 'rgba(255,255,255,0.02)', borderColor: token.colorBorderSecondary }} bordered={true}>
+                                <Row justify="space-between" align="middle" style={{ marginBottom: 8 }}>
+                                    <Col>
+                                        <Space>
+                                            <Text strong>{name}</Text>
+                                            <Tag color={data.level === '极佳' || data.level === '良好' ? 'green' : data.level === '中等' ? 'orange' : 'red'}>
+                                                {data.level}
+                                            </Tag>
+                                        </Space>
+                                    </Col>
+                                    <Col>
+                                        <Text type="warning" strong style={{ fontSize: 16 }}>{data.score}分</Text>
+                                    </Col>
                                 </Row>
+
+                                {data.positive_factors && data.positive_factors.length > 0 && (
+                                    <div style={{ marginBottom: 4 }}>
+                                        <Text type="secondary" style={{ fontSize: 12 }}>加分项：</Text>
+                                        <Space wrap size={[4, 4]}>
+                                            {data.positive_factors.map((f, i) => (
+                                                <Tag key={i} color="blue" bordered={false} style={{ fontSize: 10 }}>{f}</Tag>
+                                            ))}
+                                        </Space>
+                                    </div>
+                                )}
+
+                                {data.negative_factors && data.negative_factors.length > 0 && (
+                                    <div>
+                                        <Text type="secondary" style={{ fontSize: 12 }}>减分项：</Text>
+                                        <Space wrap size={[4, 4]}>
+                                            {data.negative_factors.map((f, i) => (
+                                                <Tag key={i} color="red" bordered={false} style={{ fontSize: 10 }}>{f}</Tag>
+                                            ))}
+                                        </Space>
+                                    </div>
+                                )}
                             </Card>
                         </List.Item>
                     )}
