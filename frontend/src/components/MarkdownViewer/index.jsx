@@ -82,7 +82,7 @@ const MarkdownViewer = ({
     return (
         <div style={{ ...style }}>
             {/* 结构化多维度内容 */}
-            {structured && (
+            {structured ? (
                 <div>
                     {showDividers && Object.keys(structured).length > 0 && (
                         <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8', margin: '16px 0' }}>
@@ -103,7 +103,20 @@ const MarkdownViewer = ({
                         .map(key => renderDimensionCard(key, structured[key]))
                     }
                 </div>
-            )}
+            ) : content ? (
+                <div
+                    style={{
+                        color: '#e2e8f0',
+                        fontSize: 14,
+                        lineHeight: 1.8,
+                        padding: 16,
+                        borderRadius: 8,
+                        background: 'rgba(255,255,255,0.05)',
+                        border: '1px solid rgba(255,255,255,0.1)'
+                    }}
+                    dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
+                />
+            ) : null}
         </div>
     )
 }

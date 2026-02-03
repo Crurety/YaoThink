@@ -5,6 +5,7 @@ import {
 } from 'antd'
 import { StarOutlined } from '@ant-design/icons'
 import ZiWeiChart from '../../components/ZiWeiChart'
+import MarkdownViewer from '../../components/MarkdownViewer'
 import api from '../../services/api'
 
 const { Title, Paragraph, Text } = Typography
@@ -168,9 +169,11 @@ function ZiWei() {
                                             {result.extra_info?.ai_analysis_structured?.core && (
                                                 <div style={{ marginTop: 12, padding: 8, background: 'rgba(167, 139, 250, 0.1)', borderRadius: 8, border: '1px solid rgba(167, 139, 250, 0.2)' }}>
                                                     <Tag color="purple" style={{ marginBottom: 4 }}>AI 深度透视</Tag>
-                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
-                                                        {result.extra_info.ai_analysis_structured.core.join('\n')}
-                                                    </Paragraph>
+                                                    <MarkdownViewer
+                                                        content={result.extra_info.ai_analysis_structured.core.join('\n')}
+                                                        showDividers={false}
+                                                        style={{ marginTop: 8 }}
+                                                    />
                                                 </div>
                                             )}
                                         </>
@@ -196,9 +199,11 @@ function ZiWei() {
                                             {result.extra_info?.ai_analysis_structured?.wealth && (
                                                 <div style={{ marginTop: 12, padding: 8, background: 'rgba(251, 191, 36, 0.1)', borderRadius: 8, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
                                                     <Tag color="gold" style={{ marginBottom: 4 }}>AI 财运洞察</Tag>
-                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
-                                                        {result.extra_info.ai_analysis_structured.wealth.join('\n')}
-                                                    </Paragraph>
+                                                    <MarkdownViewer
+                                                        content={result.extra_info.ai_analysis_structured.wealth.join('\n')}
+                                                        showDividers={false}
+                                                        style={{ marginTop: 8 }}
+                                                    />
                                                 </div>
                                             )}
                                         </>
@@ -220,9 +225,11 @@ function ZiWei() {
                                             {result.extra_info?.ai_analysis_structured?.career && (
                                                 <div style={{ marginTop: 12, padding: 8, background: 'rgba(52, 211, 153, 0.1)', borderRadius: 8, border: '1px solid rgba(52, 211, 153, 0.2)' }}>
                                                     <Tag color="green" style={{ marginBottom: 4 }}>AI 职场建议</Tag>
-                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
-                                                        {result.extra_info.ai_analysis_structured.career.join('\n')}
-                                                    </Paragraph>
+                                                    <MarkdownViewer
+                                                        content={result.extra_info.ai_analysis_structured.career.join('\n')}
+                                                        showDividers={false}
+                                                        style={{ marginTop: 8 }}
+                                                    />
                                                 </div>
                                             )}
                                         </>
@@ -244,9 +251,11 @@ function ZiWei() {
                                             {result.extra_info?.ai_analysis_structured?.love && (
                                                 <div style={{ marginTop: 12, padding: 8, background: 'rgba(244, 114, 182, 0.1)', borderRadius: 8, border: '1px solid rgba(244, 114, 182, 0.2)' }}>
                                                     <Tag color="magenta" style={{ marginBottom: 4 }}>AI 情感指引</Tag>
-                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
-                                                        {result.extra_info.ai_analysis_structured.love.join('\n')}
-                                                    </Paragraph>
+                                                    <MarkdownViewer
+                                                        content={result.extra_info.ai_analysis_structured.love.join('\n')}
+                                                        showDividers={false}
+                                                        style={{ marginTop: 8 }}
+                                                    />
                                                 </div>
                                             )}
                                         </>
