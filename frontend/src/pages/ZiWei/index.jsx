@@ -13,6 +13,13 @@ const { Option } = Select
 const TIAN_GAN = ['甲', '乙', '丙', '丁', '戊', '己', '庚', '辛', '壬', '癸']
 const DI_ZHI = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥']
 
+const renderContent = (content) => {
+    if (content && typeof content === 'object' && content.content) {
+        return content.content
+    }
+    return content
+}
+
 function ZiWei() {
     const [form] = Form.useForm()
     const [loading, setLoading] = useState(false)
@@ -131,7 +138,7 @@ function ZiWei() {
                                 </Descriptions>
                                 <div style={{ marginTop: 16, background: 'rgba(255,255,255,0.05)', padding: 12, borderRadius: 8 }}>
                                     <Paragraph style={{ fontSize: 13, color: '#e2e8f0', margin: 0 }}>
-                                        {result.analysis.pattern.description}
+                                        {renderContent(result.analysis.pattern.description)}
                                     </Paragraph>
                                 </div>
                             </Card>
@@ -156,7 +163,7 @@ function ZiWei() {
                                                 </div>
                                             </div>
                                             <Paragraph style={{ color: '#cbd5e1' }}>
-                                                {result.analysis.ming_analysis.description}
+                                                {renderContent(result.analysis.ming_analysis.description)}
                                             </Paragraph>
                                         </>
                                     ) : (
@@ -176,7 +183,7 @@ function ZiWei() {
                                                 {result.analysis.wealth_analysis.main_star}
                                             </Title>
                                             <Paragraph style={{ color: '#cbd5e1' }}>
-                                                {result.analysis.wealth_analysis.description}
+                                                {renderContent(result.analysis.wealth_analysis.description)}
                                             </Paragraph>
                                         </>
                                     ) : <div style={{ color: '#666' }}>财帛宫无主星，参考对宫（福德宫）</div>}
@@ -192,7 +199,7 @@ function ZiWei() {
                                                 {result.analysis.career_analysis.main_star}
                                             </Title>
                                             <Paragraph style={{ color: '#cbd5e1' }}>
-                                                {result.analysis.career_analysis.career_hint}
+                                                {renderContent(result.analysis.career_analysis.career_hint)}
                                             </Paragraph>
                                         </>
                                     ) : <div style={{ color: '#666' }}>官禄宫无主星，参考对宫（夫妻宫）</div>}
@@ -208,7 +215,7 @@ function ZiWei() {
                                                 {result.analysis.marriage_analysis.main_star}
                                             </Title>
                                             <Paragraph style={{ color: '#cbd5e1' }}>
-                                                {result.analysis.marriage_analysis.description}
+                                                {renderContent(result.analysis.marriage_analysis.description)}
                                             </Paragraph>
                                         </>
                                     ) : <div style={{ color: '#666' }}>夫妻宫无主星，参考对宫（官禄宫）</div>}
