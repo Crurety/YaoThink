@@ -1,7 +1,5 @@
 import React from 'react'
-import { Typography, Tag, Divider } from 'antd'
-
-const { Paragraph } = Typography
+import { Tag, Divider } from 'antd'
 
 /**
  * MarkdownViewer - AI分析数据Markdown展示器
@@ -14,7 +12,6 @@ const { Paragraph } = Typography
  * - \n 换行
  */
 const MarkdownViewer = ({
-    content,
     structured,
     style = {},
     showDividers = true
@@ -84,13 +81,6 @@ const MarkdownViewer = ({
 
     return (
         <div style={{ ...style }}>
-            {/* 纯文本内容 */}
-            {content && !structured && (
-                <Paragraph style={{ fontSize: 15, color: '#e2e8f0' }}>
-                    <div dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
-                </Paragraph>
-            )}
-
             {/* 结构化多维度内容 */}
             {structured && (
                 <div>
@@ -113,13 +103,6 @@ const MarkdownViewer = ({
                         .map(key => renderDimensionCard(key, structured[key]))
                     }
                 </div>
-            )}
-
-            {/* 纯文本补充（当有structured时） */}
-            {content && structured && (
-                <Paragraph style={{ fontSize: 14, color: '#94a3b8', marginTop: 16 }}>
-                    <div dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} />
-                </Paragraph>
             )}
         </div>
     )
