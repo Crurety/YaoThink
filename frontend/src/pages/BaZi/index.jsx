@@ -303,8 +303,8 @@ function BaZi() {
                             <Col span={24}>
                                 <Card title="大数据引擎分析报告" className="feature-card" style={{ border: '1px solid #DAA520' }}>
                                     <MarkdownViewer
-                                        content={typeof analysisResult === 'object' ? analysisResult.content : analysisResult}
                                         structured={typeof analysisResult === 'object' ? analysisResult.structured : null}
+                                        showDividers={false}
                                     />
                                     <div style={{ marginTop: 16, textAlign: 'right', fontSize: 12, color: '#64748b' }}>
                                         Power by Local Rule Engine (50MB Corpus)
