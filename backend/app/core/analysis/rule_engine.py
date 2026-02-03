@@ -57,6 +57,11 @@ class RuleEngine:
 
         self._is_loaded = True
         logger.info(f"Loaded {total_rules} rules.")
+        
+        # Inject rule provider to analysts
+        self.bazi_analyst.set_rule_provider(self.match)
+        self.ziwei_analyst.set_rule_provider(self.match)
+        self.yijing_analyst.set_rule_provider(self.match)
 
     def match(self, key: str) -> Optional[str]:
         """
