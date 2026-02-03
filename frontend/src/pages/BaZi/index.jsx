@@ -269,9 +269,61 @@ function BaZi() {
                         <Row style={{ marginTop: 24 }}>
                             <Col span={24}>
                                 <Card title="大数据引擎分析报告" className="feature-card" style={{ border: '1px solid #DAA520' }}>
-                                    <div style={{ whiteSpace: 'pre-wrap', lineHeight: 1.8, fontSize: 15, color: '#e2e8f0' }}>
-                                        {analysisResult}
-                                    </div>
+                                    <Paragraph style={{ fontSize: 15, color: '#e2e8f0', whiteSpace: 'pre-wrap' }}>
+                                        {typeof analysisResult === 'object' && analysisResult.content
+                                            ? analysisResult.content
+                                            : analysisResult}
+                                    </Paragraph>
+
+                                    {/* Render Structured Sections if available */}
+                                    {typeof analysisResult === 'object' && analysisResult.structured && (
+                                        <div style={{ marginTop: 24 }}>
+                                            <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>多维深度分析</Divider>
+                                            <Row gutter={[16, 16]}>
+                                                {analysisResult.structured.career && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(52, 211, 153, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(52, 211, 153, 0.2)' }}>
+                                                            <Tag color="green" style={{ marginBottom: 8 }}>事业格局</Tag>
+                                                            {analysisResult.structured.career.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                                {analysisResult.structured.personality && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(167, 139, 250, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(167, 139, 250, 0.2)' }}>
+                                                            <Tag color="purple" style={{ marginBottom: 8 }}>性格剖析</Tag>
+                                                            {analysisResult.structured.personality.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                                {analysisResult.structured.advice && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(251, 191, 36, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                                                            <Tag color="gold" style={{ marginBottom: 8 }}>发展建议</Tag>
+                                                            {analysisResult.structured.advice.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                                {analysisResult.structured.shensha && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(244, 114, 182, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(244, 114, 182, 0.2)' }}>
+                                                            <Tag color="magenta" style={{ marginBottom: 8 }}>神煞启示</Tag>
+                                                            {analysisResult.structured.shensha.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                            </Row>
+                                        </div>
+                                    )}
+
                                     <div style={{ marginTop: 16, textAlign: 'right', fontSize: 12, color: '#64748b' }}>
                                         Power by Local Rule Engine (50MB Corpus)
                                     </div>

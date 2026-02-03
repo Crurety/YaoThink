@@ -427,6 +427,37 @@ function HexagramResult({ result }) {
                             ))}
                         </div>
                     )}
+
+                    {/* AI Analysis Section */}
+                    {result.extra_info?.ai_analysis_structured && (
+                        <div style={{ marginTop: 24 }}>
+                            <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>AI 深度解析</Divider>
+                            <div style={{ background: 'rgba(255,255,255,0.02)', padding: 16, borderRadius: 8, border: '1px solid rgba(255,255,255,0.05)' }}>
+                                <Paragraph style={{ fontSize: 14, color: '#e2e8f0', whiteSpace: 'pre-wrap', marginBottom: 16 }}>
+                                    {result.extra_info.ai_analysis}
+                                </Paragraph>
+
+                                <Row gutter={[12, 12]}>
+                                    {result.extra_info.ai_analysis_structured.core && (
+                                        <Col span={24}>
+                                            <div style={{ background: 'rgba(167, 139, 250, 0.1)', padding: 8, borderRadius: 4 }}>
+                                                <Tag color="purple">核心启示</Tag>
+                                                <span style={{ color: '#d8b4fe', fontSize: 13 }}>{result.extra_info.ai_analysis_structured.core.join(' ')}</span>
+                                            </div>
+                                        </Col>
+                                    )}
+                                    {result.extra_info.ai_analysis_structured.advice && (
+                                        <Col span={24}>
+                                            <div style={{ background: 'rgba(52, 211, 153, 0.1)', padding: 8, borderRadius: 4 }}>
+                                                <Tag color="green">行动建议</Tag>
+                                                <span style={{ color: '#6ee7b7', fontSize: 13 }}>{result.extra_info.ai_analysis_structured.advice.join(' ')}</span>
+                                            </div>
+                                        </Col>
+                                    )}
+                                </Row>
+                            </div>
+                        </div>
+                    )}
                 </Col>
             </Row>
         </Card>
