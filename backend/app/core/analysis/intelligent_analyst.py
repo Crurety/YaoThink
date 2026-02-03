@@ -72,13 +72,36 @@ class BaseAnalyst:
         # 运势/具体建议
         if "advice" in categories:
             paragraphs.append("【发展建议】" + "；".join(categories["advice"]) + "。")
+
+        # 神煞 (Missing in original logic but good to have)
+        if "shensha" in categories:
+             paragraphs.append("【神煞启示】" + "；".join(categories["shensha"]) + "。")
             
         return "\n\n".join(paragraphs)
+
+    def generate_structured(self, items: List[AnalyticItem], threshold: float = 2.0) -> Dict[str, List[str]]:
+        """
+        生成结构化维度数据
+        """
+        # 1. 排序
+        sorted_items = sorted(items, key=lambda x: x.weight, reverse=True)
+        
+        # 2. 过滤
+        valid_items = [item for item in sorted_items if item.weight >= threshold]
+        
+        # 3. 分组
+        structured = {}
+        for item in valid_items:
+            if item.category not in structured:
+                structured[item.category] = []
+            structured[item.category].append(item.content)
+            
+        return structured
 
 class BaziAnalyst(BaseAnalyst):
     """八字智能分析器"""
     
-    def analyze(self, data: Dict[str, Any]) -> str:
+    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         items = []
         
         # 提取基础数据
@@ -202,7 +225,10 @@ class BaziAnalyst(BaseAnalyst):
                     category="shensha"
                 ))
 
-        return self.generate_narrative(items)
+        return {
+            "content": self.generate_narrative(items),
+            "structured": self.generate_structured(items)
+        }
     
     def _check_month_relation(self, dm: str, month: str) -> Optional[str]:
         # --- SERVICE LAYER LOGIC: FALLBACK ---
@@ -247,50 +273,88 @@ class BaziAnalyst(BaseAnalyst):
 class ZiweiAnalyst(BaseAnalyst):
     """紫微智能分析器"""
     
-    def analyze(self, data: Dict[str, Any]) -> str:
+    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         items = []
         features = data.get("features", [])
         
-        ming_stars = [f["star"] for f in features if f.get("palace") == "命宫"]
-        
-        if not ming_stars:
-            return "命宫无主星（命无正曜），不仅要看本宫，更要借对宫（迁移宫）星曜来分析。这类人通常可塑性极强，环境适应力好，但也易随波逐流。"
-            
-        # 1. 主星格局分析
-        star_str = "、".join(ming_stars)
-        
-        desc_list = []
-        for star in ming_stars:
-            # Fallsback: 1. Specific Star, 2. Maybe class if implemented
-            desc = self.get_rule([f"ziwei:theory:star:{star}"])
-            if desc:
-                desc_list.append(desc)
-            
-        content = f"命宫主星为{star_str}。\n" + "\n".join(desc_list)
-        items.append(AnalyticItem(
-            content=content, 
-            weight=10.0, 
-            category="core"
-        ))
-        
-        # 2. 组合逻辑 (双星组合)
-        if len(ming_stars) == 2:
-            sorted_stars = sorted(ming_stars)
-            key = f"ziwei:theory:dual:{sorted_stars[0]}_{sorted_stars[1]}"
-            dual_desc = self.get_rule([key])
-            if dual_desc:
-                items.append(AnalyticItem(
-                    content=dual_desc, 
-                    weight=9.5, 
-                    category="core"
-                ))
+        # 宫位 -> 维度映射
+        palace_map = {
+            "命宫": "core",           # 核心/命宫
+            "官禄宫": "career",       # 事业
+            "财帛宫": "wealth",       # 财运
+            "夫妻宫": "love",         # 婚姻
+            "迁移宫": "travel",       # 出行/人际
+            "福德宫": "spirit",       # 精神/福德
+            "疾厄宫": "health"        # 健康
+        }
 
-        return self.generate_narrative(items)
+        # 1. 遍历所有特征，按宫位归类
+        palace_stars = {}
+        for f in features:
+            palace = f.get("palace")
+            star = f.get("star")
+            if palace and star:
+                if palace not in palace_stars:
+                    palace_stars[palace] = []
+                palace_stars[palace].append(star)
+
+        # 2. 针对关键宫位进行分析
+        for palace, category in palace_map.items():
+            stars = palace_stars.get(palace, [])
+            if not stars:
+                continue
+
+            # 2.1 单星分析
+            star_descs = []
+            for star in stars:
+                desc = self.get_rule([f"ziwei:theory:star:{star}"])
+                if desc:
+                    # 简单处理：如果是命宫，权重高；其他宫位稍低
+                    weight = 10.0 if category == "core" else 8.5
+                    
+                    # 针对非命宫，尝试寻找特定宫位的星曜解释 (如果有的话)，否则通用解释
+                    # fallback: ziwei:theory:star:{star}:{palace} -> ziwei:theory:star:{star}
+                    specific_desc = self.get_rule([f"ziwei:theory:star:{star}:{palace}"])
+                    final_desc = specific_desc if specific_desc else desc
+                    
+                    items.append(AnalyticItem(
+                        content=f"**【{palace}】**\n{star}：{final_desc}",
+                        weight=weight,
+                        category=category
+                    ))
+
+            # 2.2 双星组合 (仅处理命宫，避免过于复杂)
+            if category == "core" and len(stars) >= 2:
+                # 简单的双星组合逻辑
+                sorted_stars = sorted(stars)
+                # 尝试查找前两颗主星的组合
+                if len(sorted_stars) >= 2:
+                    key = f"ziwei:theory:dual:{sorted_stars[0]}_{sorted_stars[1]}"
+                    dual_desc = self.get_rule([key])
+                    if dual_desc:
+                        items.append(AnalyticItem(
+                            content=f"**【双星格局】**\n{dual_desc}",
+                            weight=9.5,
+                            category="core"
+                        ))
+
+        # 若命宫无主星
+        if "命宫" not in palace_stars or not palace_stars["命宫"]:
+             items.append(AnalyticItem(
+                content="**【特殊格局】**\n命宫无主星（命无正曜），不仅要看本宫，更要借对宫（迁移宫）星曜来分析。这类人通常可塑性极强，环境适应力好，但也易随波逐流。",
+                weight=9.0,
+                category="core"
+            ))
+
+        return {
+            "content": self.generate_narrative(items),
+            "structured": self.generate_structured(items)
+        }
 
 class YijingAnalyst(BaseAnalyst):
     """易经智能分析器"""
     
-    def analyze(self, data: Dict[str, Any]) -> str:
+    def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         items = []
         
         main_gua = data.get("main_gua", {})
@@ -328,7 +392,10 @@ class YijingAnalyst(BaseAnalyst):
                 category="core"
             ))
 
-        return self.generate_narrative(items)
+        return {
+            "content": self.generate_narrative(items),
+            "structured": self.generate_structured(items)
+        }
 
 class AnalysisService:
     """
@@ -346,13 +413,13 @@ class AnalysisService:
         self._ziwei.set_rule_provider(provider)
         self._yijing.set_rule_provider(provider)
         
-    def analyze_bazi(self, data: Dict[str, Any]) -> str:
+    def analyze_bazi(self, data: Dict[str, Any]) -> Dict[str, Any]:
         return self._bazi.analyze(data)
         
-    def analyze_ziwei(self, data: Dict[str, Any]) -> str:
+    def analyze_ziwei(self, data: Dict[str, Any]) -> Dict[str, Any]:
         return self._ziwei.analyze(data)
         
-    def analyze_yijing(self, data: Dict[str, Any]) -> str:
+    def analyze_yijing(self, data: Dict[str, Any]) -> Dict[str, Any]:
         return self._yijing.analyze(data)
 
 

@@ -165,7 +165,9 @@ async def analyze(
                     
                     if "extra_info" not in result:
                         result["extra_info"] = {}
-                    result["extra_info"]["ai_analysis"] = ai_report
+                    # result["extra_info"]["ai_analysis"] = ai_report
+                    result["extra_info"]["ai_analysis"] = ai_report.get("content", "")
+                    result["extra_info"]["ai_analysis_structured"] = ai_report.get("structured", {})
             except Exception as e:
                 print(f"Bazi AI Analysis failed: {e}")
                 # Don't fail the whole request
