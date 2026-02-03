@@ -201,21 +201,51 @@ class BaziAnalyst(BaseAnalyst):
         if dy_gan and dy_zhi:
              content = f"**【当前大运】 ({dy_gan}{dy_zhi}运)**\n"
              
+             rule_found = False
              # 1. 尝试查找具体的大运十神规则
              if dy_shishen:
+                 # Clean up shishen string just in case (e.g. remove spaces)
+                 dy_shishen = dy_shishen.strip()
                  dy_rule = self.get_rule([f"bazi:theory:shishen:dayun:{dy_shishen}"])
                  if dy_rule:
                      content += dy_rule + "\n"
-                     
-             # 2. 尝试查找具体的日主大运规则 (Fallback)
-             if not dy_shishen or "bazi:theory" not in content:
+                     rule_found = True
+             
+             if not rule_found:
+                 content += f"行{dy_gan}{dy_zhi}运，天干为{dy_gan}，地支为{dy_zhi}。此运势对个人的影响需结合流年来看。\n"
+
+                 # 2. 尝试查找具体的日主大运规则 (Fallback)
                  dy_desc_gan = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_gan:{dy_gan}"])
-                 if dy_desc_gan: content += f"{dy_desc_gan}\n"
+                 if dy_desc_gan: content += f"\n{dy_desc_gan}\n"
              
-             # 3. 地支规则 (Optional, if specific rules exist)
+             # 3. 地支规则
              dy_desc_zhi = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_zhi:{dy_zhi}"])
-             if dy_desc_zhi: content += f"{dy_desc_zhi}\n"
+             if dy_desc_zhi: content += f"\n{dy_desc_zhi}\n"
              
+             # --- 流年分析 (Liu Nian) ---
+             ln_info = data.get("current_liunian", {})
+             if ln_info and ln_info.get("year"):
+                 ln_gan = ln_info.get("gan", "")
+                 ln_zhi = ln_info.get("zhi", "")
+                 ln_shishen = ln_info.get("shishen", "")
+                 ln_year = ln_info.get("year", "")
+                 ln_rating = ln_info.get("rating", "平")
+                 
+                 content += f"\n\n**【当前流年】 ({ln_year} {ln_gan}{ln_zhi}年)**\n"
+                 content += f"流年十神：{ln_shishen}。运势评级：{ln_rating}。\n"
+                 
+                 if ln_shishen:
+                     content += f"流年行{ln_shishen}运，重点在于应对该十神带来的机遇与挑战。\n"
+                     # 尝试查找流年十神规则（如果 corpus 有的话，目前复用大运规则的一般描述，或者通用十神描述）
+                     ln_rule = self.get_rule([
+                        f"bazi:theory:shishen:liunian:{ln_shishen}", # Specific Liunian
+                        f"bazi:theory:shishen:dominant:{ln_shishen}" # Fallback to general traits
+                     ])
+                     if ln_rule:
+                         # 提取第一段或者简要描述，避免太长
+                         short_desc = ln_rule.split('\n')[0]
+                         content += f"{short_desc}\n"
+
              items.append(AnalyticItem(content=content, weight=9.2, category="luck"))
 
         # --- 7. 神煞解读 (Shen Sha) ---

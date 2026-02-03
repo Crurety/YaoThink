@@ -51,19 +51,40 @@ function BaZi() {
                 },
                 // 五行能量分数
                 wuxing_scores: result.wuxing?.scores || {},
-                // 当前大运（修复：shishen格式为"正官/偏印"，取天干十神）
+                // 当前大运
                 current_dayun: (() => {
                     const currentDy = result.dayun_liunian?.dayun_list?.find(d => d.is_current)
                     if (!currentDy) return null
                     // ganzhi 是字符串如 "甲子"
                     const gz = currentDy.ganzhi || ''
-                    // shishen 格式为 "正官/偏印"，取斜杠前的天干十神
-                    const shishenStr = currentDy.shishen || ''
-                    const ganShishen = shishenStr.split('/')[0]
+                    // 优先取 shishen_gan，如果没有则尝试从 shishen 解析
+                    let ganShishen = currentDy.shishen_gan
+                    if (!ganShishen && currentDy.shishen) {
+                        ganShishen = currentDy.shishen.split('/')[0]
+                    }
                     return {
                         gan: gz[0] || null,
                         zhi: gz[1] || null,
                         shishen: ganShishen || null
+                    }
+                })(),
+                // 当前流年
+                current_liunian: (() => {
+                    const currentLn = result.dayun_liunian?.liunian_list?.find(ln => ln.is_current)
+                    if (!currentLn) return null
+                    const gz = currentLn.ganzhi || ''
+                    // 同理优先取 backend 直接给的（如果有），或者解析
+                    // 这里我们假设流年数据结构和 dayun 类似
+                    let ganShishen = currentLn.shishen_gan
+                    if (!ganShishen && currentLn.shishen) {
+                        ganShishen = currentLn.shishen.split('/')[0]
+                    }
+                    return {
+                        year: currentLn.year,
+                        gan: gz[0] || null,
+                        zhi: gz[1] || null,
+                        shishen: ganShishen || null,
+                        rating: currentLn.rating
                     }
                 })(),
                 // 神煞列表

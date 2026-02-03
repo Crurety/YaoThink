@@ -315,6 +315,7 @@ def analyze_dayun_liunian(sizhu: SiZhu, gender: Gender,
                 "range": f"{dy.start_age}-{dy.end_age}岁",
                 "ganzhi": str(dy.ganzhi),
                 "shishen": f"{dy.shishen_gan}/{dy.shishen_zhi}",
+                "shishen_gan": dy.shishen_gan,  # Add explicit shishen_gan
                 "is_current": dy == current_dayun
             }
             for dy in dayun_list
