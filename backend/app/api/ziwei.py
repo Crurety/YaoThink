@@ -10,6 +10,7 @@ from typing import Optional
 
 from app.core.ziwei import analyze_ziwei, MAIN_STAR_TRAITS
 from app.core.auth import get_current_user, TokenData
+from app.core.analysis.rule_engine import engine
 
 router = APIRouter()
 
@@ -90,8 +91,34 @@ async def analyze(
                 await cache.set(cache_key, result, expire=3600)
             except Exception:
                 pass
-        
-        # 2. 保存到数据库 (尝试保存，虽然没有具体年份)
+            except Exception:
+                pass
+                
+        # --- Big Data / AI Analysis ---
+        try:
+            # Extract features for Rule Engine
+            # result['palaces'] should contain the list of palaces
+            # We look for the one where "is_body" or "name" == "命宫" (usually index 0 or labeled)
+            
+            features = []
+            if result and "palaces" in result:
+                for palace in result["palaces"]:
+                    if palace.get("name") == "命宫":
+                        # Extract major stars
+                        for star in palace.get("major_stars", []):
+                            features.append({"star": star["name"], "palace": "命宫"})
+            
+            # Call Rule Engine
+            ai_report = engine.analyze_ziwei({"features": features})
+            if "extra_info" not in result:
+                result["extra_info"] = {}
+            result["extra_info"]["ai_analysis"] = ai_report
+            
+        except Exception as e:
+            print(f"AI Analysis failed: {e}")
+            # Do not fail the whole request
+            pass
+        # -----------------------------
         # 由于手动输入没有具体年份，我们创建一个特殊的BirthInfo或者仅记录分析
         # 这里为了统计，我们创建一个标记性的BirthInfo，年份设为0
         from app.core.user_service import HistoryService

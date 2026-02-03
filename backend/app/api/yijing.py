@@ -15,8 +15,31 @@ from app.core.yijing import (
     BAGUA, SIXTY_FOUR_GUA
 )
 from app.core.auth import get_current_user, TokenData
+from app.core.analysis.rule_engine import engine
 
 router = APIRouter()
+
+
+def _attach_ai_analysis(result: dict):
+    """附加大数据分析"""
+    try:
+        # Prepare data for rule engine
+        # result['original_hexagram'] contains 'name', 'code' etc.
+        # result['dong_yao'] is index (1-6)
+        
+        hex_data = {
+            "main_gua": result.get("original_hexagram", {}),
+            "dong_yao": result.get("dong_yao")
+        }
+        
+        ai_report = engine.analyze_yijing(hex_data)
+        if ai_report:
+           if "extra_info" not in result:
+               result["extra_info"] = {}
+           result["extra_info"]["ai_analysis"] = ai_report
+    except Exception as e:
+        print(f"Yijing AI Analysis failed: {e}")
+
 
 
 class MeihuaTimeRequest(BaseModel):
@@ -93,6 +116,9 @@ async def meihua_time(
         
         hexagram = meihua_by_time(dt)
         result = analyze_hexagram(hexagram, request.question or "")
+
+        # Attach AI Analysis
+        _attach_ai_analysis(result)
         
         # 保存记录
         from app.core.user_service import HistoryService
@@ -123,6 +149,9 @@ async def meihua_number(
     try:
         hexagram = meihua_by_numbers(request.number1, request.number2)
         result = analyze_hexagram(hexagram, request.question or "")
+
+        # Attach AI Analysis
+        _attach_ai_analysis(result)
         
         # 保存记录
         from app.core.user_service import HistoryService
@@ -152,7 +181,11 @@ async def meihua_text(
     """
     try:
         hexagram = meihua_by_text(request.text)
+        hexagram = meihua_by_text(request.text)
         result = analyze_hexagram(hexagram, request.question or request.text)
+        
+        # Attach AI Analysis
+        _attach_ai_analysis(result)
         
         # 保存记录
         from app.core.user_service import HistoryService
@@ -183,6 +216,9 @@ async def liuyao(
     try:
         hexagram = liuyao_by_coins()
         result = analyze_hexagram(hexagram, request.question or "")
+
+        # Attach AI Analysis
+        _attach_ai_analysis(result)
         
         # 保存记录
         from app.core.user_service import HistoryService
