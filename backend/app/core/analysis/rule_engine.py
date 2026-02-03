@@ -3,6 +3,7 @@ import json
 import os
 from typing import Dict, List, Optional
 import logging
+from app.core.analysis.intelligent_analyst import BaziAnalyst, ZiweiAnalyst, YijingAnalyst
 
 logger = logging.getLogger(__name__)
 
@@ -10,6 +11,11 @@ class RuleEngine:
     _instance = None
     _rules: Dict[str, str] = {}
     _is_loaded = False
+    
+    # Intelligent Analysts
+    bazi_analyst = BaziAnalyst()
+    ziwei_analyst = ZiweiAnalyst()
+    yijing_analyst = YijingAnalyst()
 
     def __new__(cls):
         if cls._instance is None:
@@ -72,141 +78,39 @@ class RuleEngine:
 
     def analyze_bazi(self, bazi_data: Dict) -> str:
         """
-        分析八字 - 多维模式匹配
+        分析八字 - 智能分析模式
         """
-        reports = []
-        
-        # --- 1. 数据提取与预处理 ---
-        day_master = bazi_data.get("day_master")
-        month_zhi = None
-        
-        # 尝试从对象结构提取月支
-        month = bazi_data.get("month")
-        if isinstance(month, dict):
-            month_zhi = month.get("zhi")
-        elif isinstance(month, str):
-            month_zhi = month
-            
-        # 尝试从字符串解析 (如 "甲子 丙寅...")
-        full_chart = bazi_data.get("bazi", "")
-        stems = []
-        if isinstance(full_chart, str) and len(full_chart.split()) >= 4:
-            parts = full_chart.split()
-            # 假设格式：年柱 月柱 日柱 时柱 (每柱2字)
-            # 例如: ["甲子", "丙寅", "戊辰", "庚申"]
-            if len(parts) >= 2 and len(parts[1]) >= 2:
-                month_zhi = month_zhi or parts[1][1]
-            
-            # 提取所有天干 (除了日主自己)
-            for idx, part in enumerate(parts):
-                if idx == 2: continue # 跳过日柱(日主)
-                if len(part) > 0:
-                    stems.append(part[0])
+        # 优先使用智能分析
+        try:
+            return self.bazi_analyst.analyze(bazi_data)
+        except Exception as e:
+            logger.error(f"Intelligent Bazi Analysis failed: {e}")
+            return "分析服务暂时忙碌，请稍后再试。"
 
-        if not day_master or not month_zhi:
-            return "数据不足，无法进行详细的大数据分析。"
+        # Legacy logic removed
+        return ""
 
-        # --- 2. 核心格局分析 [日主:月令] ---
-        # 对应 generate_knowledge_base.py 中的 PATTERN_COMMENTS
-        key_core = f"bazi:day_master:{day_master}:month:{month_zhi}"
-        res_core = self.match(key_core)
-        
-        if res_core:
-            reports.append(res_core)
-        else:
-            # 基础兜底
-            reports.append(f"### 基础分析\n日主**{day_master}**生于**{month_zhi}**月，格局需结合全局判断。")
 
-        # --- 3. 十神/五行配置分析 [日主:见:元素] ---
-        # 简单五行映射
-        gan_map = {
-            "甲": "木", "乙": "木", "丙": "火", "丁": "火", "戊": "土",
-            "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水"
-        }
-        
-        seen_elements = set()
-        supplementary_info = []
-        
-        for stem in stems:
-            element = gan_map.get(stem)
-            if element and element not in seen_elements:
-                key_supp = f"bazi:dm:{day_master}:see:{element}"
-                res_supp = self.match(key_supp)
-                if res_supp:
-                    supplementary_info.append(res_supp)
-                seen_elements.add(element)
-        
-        if supplementary_info:
-            reports.append("### 命局配置\n" + "\n".join(supplementary_info))
-
-        # --- 4. 生成最终报告 ---
-        final_report = "\n\n".join(reports)
-        
-        # 添加免责声明
-        final_report += "\n\n---\n*注：以上内容基于经典命理古籍（如《滴天髓》）的大数据匹配生成，不做封建迷信解读，仅供心理参考。*"
-        
-        return final_report
 
     def analyze_ziwei(self, chart_data: Dict) -> str:
         """
-        分析紫微斗数 - 星曜宫位模式匹配
+        分析紫微斗数 - 智能分析模式
         """
-        reports = []
-        
-        # chart_data 结构示例:
-        # {
-        #   "ming_gong": {"stars": ["紫微", "天府"], ...},
-        #   "palace_name": "命宫", ...
-        # }
-        # 实际调用时需确保传入的数据结构便于提取 "星曜" 和 "宫位"
-        
-        # 假设 chart_data 是一个包含主要宫位信息的字典列表或字典
-        # 这里简化处理：假设传入的是一个已提取好特征的列表
-        # features = [{"star": "紫微", "palace": "命宫"}, ...]
-        
-        features = chart_data.get("features", [])
-        
-        for feature in features:
-            star = feature.get("star")
-            palace = feature.get("palace")
-            
-            if star and palace:
-                key = f"ziwei:star:{star}:palace:{palace}"
-                res = self.match(key)
-                if res:
-                    reports.append(f"### {star}入{palace}\n{res}")
-        
-        if not reports:
-            return "暂无详细星曜分析数据。"
-            
-        return "\n\n".join(reports)
+        try:
+            return self.ziwei_analyst.analyze(chart_data)
+        except Exception as e:
+            logger.error(f"Intelligent Ziwei Analysis failed: {e}")
+            return "分析服务暂时忙碌，请稍后再试。"
 
     def analyze_yijing(self, hexagram_data: Dict) -> str:
         """
-        分析易经 - 卦爻辞大数据匹配
+        分析易经 - 智能分析模式
         """
-        reports = []
-        
-        main_gua = hexagram_data.get("main_gua", {}).get("name")
-        dong_yao = hexagram_data.get("dong_yao") # int or None
-        
-        # 1. 动爻大数据建议
-        if main_gua and dong_yao:
-            key = f"yijing:gua:{main_gua}:line:{dong_yao}"
-            res = self.match(key)
-            if res:
-                reports.append(res)
-        
-        # 2. 变卦趋势 (可扩展)
-        # changed_gua = hexagram_data.get("changed_gua", {}).get("name")
-        # if changed_gua:
-        #    ...
-        
-        if not reports:
-            # 如果没有大数据规则（例如未定义的卦），返回空字符串，前端只显示默认解读
-            return ""
-            
-        return "\n\n".join(reports)
+        try:
+            return self.yijing_analyst.analyze(hexagram_data)
+        except Exception as e:
+            logger.error(f"Intelligent Yijing Analysis failed: {e}")
+            return "分析服务暂时忙碌，请稍后再试。"
 
 # Global instance
 engine = RuleEngine()
