@@ -5,7 +5,7 @@
 import logging
 import sys
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from logging.handlers import RotatingFileHandler, TimedRotatingFileHandler
 import json
@@ -24,7 +24,7 @@ class JSONFormatter(logging.Formatter):
     
     def format(self, record):
         log_data = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": (datetime.utcnow() + timedelta(hours=8)).isoformat(),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),

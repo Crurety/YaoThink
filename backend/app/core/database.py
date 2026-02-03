@@ -5,8 +5,12 @@
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Float, JSON
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
+
+def get_beijing_time():
+    """获取北京时间"""
+    return datetime.utcnow() + timedelta(hours=8)
 
 # 数据库URL配置
 DATABASE_URL = os.getenv(
@@ -51,8 +55,8 @@ class User(Base):
     is_active = Column(Boolean, default=True, comment="是否激活")
     is_vip = Column(Boolean, default=False, comment="是否为VIP")
     vip_expire_date = Column(DateTime, nullable=True, comment="VIP过期时间")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
+    updated_at = Column(DateTime, default=get_beijing_time, onupdate=get_beijing_time, comment="更新时间")
 
 
 class BirthInfo(Base):
@@ -71,7 +75,7 @@ class BirthInfo(Base):
     gender = Column(String(10), default="男", comment="性别")
     birth_place = Column(String(100), comment="出生地点")
     timezone = Column(String(50), default="Asia/Shanghai", comment="时区")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 class AnalysisRecord(Base):
@@ -84,7 +88,7 @@ class AnalysisRecord(Base):
     birth_info_id = Column(Integer, index=True, comment="关联出生信息ID")
     analysis_type = Column(String(20), nullable=False, comment="分析类型(bazi/ziwei)")
     result_data = Column(JSON, comment="分析结果JSON")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 class DivinationRecord(Base):
@@ -97,7 +101,7 @@ class DivinationRecord(Base):
     method = Column(String(20), nullable=False, comment="占卜方式(meihua/liuyao)")
     question = Column(Text, comment="求测问题")
     result_data = Column(JSON, comment="占卜结果JSON")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 class PsychologyTest(Base):
@@ -110,7 +114,7 @@ class PsychologyTest(Base):
     test_type = Column(String(20), nullable=False, comment="测试类型(mbti/big5/archetype/enneagram)")
     answers = Column(JSON, comment="用户答案JSON")
     result_data = Column(JSON, comment="测试结果JSON")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 class FusionRecord(Base):
@@ -127,8 +131,8 @@ class FusionRecord(Base):
     fusion_result = Column(JSON, comment="融合计算结果JSON")
     report_markdown = Column(Text, comment="AI生成的文字报告")
     confidence = Column(Float, comment="置信度评分")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
+    updated_at = Column(DateTime, default=get_beijing_time, onupdate=get_beijing_time, comment="更新时间")
 
 
 class Favorite(Base):
@@ -141,7 +145,7 @@ class Favorite(Base):
     item_type = Column(String(30), nullable=False, comment="收藏项类型(bazi/ziwei/yijing/psychology/fusion)")
     item_id = Column(Integer, nullable=False, comment="对应记录ID")
     note = Column(Text, comment="收藏备注")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 class UserSettings(Base):
@@ -156,8 +160,8 @@ class UserSettings(Base):
     timezone = Column(String(50), default="Asia/Shanghai", comment="用户时区")
     notification_enabled = Column(Boolean, default=True, comment="是否开启通知")
     preferences = Column(JSON, comment="其他偏好设置JSON")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, comment="更新时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
+    updated_at = Column(DateTime, default=get_beijing_time, onupdate=get_beijing_time, comment="更新时间")
 
 
 class ExportHistory(Base):
@@ -171,7 +175,7 @@ class ExportHistory(Base):
     record_type = Column(String(30), nullable=False, comment="源记录类型")
     record_id = Column(Integer, comment="源记录ID")
     file_path = Column(String(255), comment="文件存储路径")
-    created_at = Column(DateTime, default=datetime.utcnow, comment="创建时间")
+    created_at = Column(DateTime, default=get_beijing_time, comment="创建时间")
 
 
 # ==================== 数据库操作 ====================
