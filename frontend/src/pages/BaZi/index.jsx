@@ -33,8 +33,40 @@ function BaZi() {
         if (!result) return
         setAnalysisLoading(true)
         try {
+            // 构建完整的多维度分析数据
+            const analysisData = {
+                // 基础信息
+                day_master: result.basic_info?.day_master,
+                day_master_wuxing: result.basic_info?.day_master_wuxing,
+                // 月支信息（用于季节分析）
+                month: {
+                    zhi: result.basic_info?.sizhu?.month?.zhi || result.basic_info?.sizhu?.month?.branch
+                },
+                // 格局信息
+                geju: result.geju?.main_geju,
+                // 十神分布（主导十神）
+                shishen_profile: {
+                    dominant: result.geju?.shishen_prominent || []
+                },
+                // 五行能量分数
+                wuxing_scores: result.wuxing?.scores || {},
+                // 当前大运
+                current_dayun: result.dayun_liunian?.dayun_list?.find(d => d.is_current)
+                    ? {
+                        gan: result.dayun_liunian.dayun_list.find(d => d.is_current).ganzhi?.[0],
+                        zhi: result.dayun_liunian.dayun_list.find(d => d.is_current).ganzhi?.[1],
+                        shishen: result.dayun_liunian.dayun_list.find(d => d.is_current).shishen
+                    }
+                    : null,
+                // 神煞列表
+                shensha: [
+                    ...(result.shensha?.ji_shensha?.map(s => s.name) || []),
+                    ...(result.shensha?.xiong_shensha?.map(s => s.name) || [])
+                ]
+            }
+
             const response = await api.post('/analysis/analyze', {
-                data: result.basic_info,
+                data: analysisData,
                 type: 'bazi'
             })
             if (response.data.success) {
@@ -269,11 +301,46 @@ function BaZi() {
                         <Row style={{ marginTop: 24 }}>
                             <Col span={24}>
                                 <Card title="大数据引擎分析报告" className="feature-card" style={{ border: '1px solid #DAA520' }}>
-                                    <Paragraph style={{ fontSize: 15, color: '#e2e8f0', whiteSpace: 'pre-wrap' }}>
-                                        {typeof analysisResult === 'object' && analysisResult.content
-                                            ? analysisResult.content
-                                            : analysisResult}
-                                    </Paragraph>
+
+                                    {/* 核心格局 - 最突出的展示区 */}
+                                    {typeof analysisResult === 'object' && analysisResult.structured?.core && (
+                                        <div style={{
+                                            background: 'linear-gradient(135deg, rgba(218, 165, 32, 0.15), rgba(218, 165, 32, 0.05))',
+                                            border: '1px solid rgba(218, 165, 32, 0.4)',
+                                            borderRadius: 12,
+                                            padding: 20,
+                                            marginBottom: 24
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
+                                                <Tag color="gold" style={{ fontSize: 14, padding: '4px 12px' }}>核心格局</Tag>
+                                                <span style={{ marginLeft: 8, fontSize: 12, color: '#94a3b8' }}>本命特质与当季得失</span>
+                                            </div>
+                                            {analysisResult.structured.core.map((text, i) => (
+                                                <div
+                                                    key={i}
+                                                    style={{
+                                                        color: '#f5f5f5',
+                                                        fontSize: 14,
+                                                        lineHeight: 1.8,
+                                                        marginBottom: i < analysisResult.structured.core.length - 1 ? 16 : 0
+                                                    }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: text
+                                                            .replace(/\n/g, '<br/>')
+                                                            .replace(/\*\*(.*?)\*\*/g, '<b style="color: #fbbf24">$1</b>')
+                                                            .replace(/##\s*(.*?)(<br\/>|$)/g, '<div style="font-size:16px;font-weight:bold;color:#DAA520;margin:8px 0">$1</div>')
+                                                    }}
+                                                />
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    {/* 其他内容补充 - 只在没有core时显示 */}
+                                    {typeof analysisResult === 'object' && analysisResult.content && !analysisResult.structured?.core && (
+                                        <Paragraph style={{ fontSize: 15, color: '#e2e8f0', whiteSpace: 'pre-wrap' }}>
+                                            {analysisResult.content}
+                                        </Paragraph>
+                                    )}
 
                                     {/* Render Structured Sections if available */}
                                     {typeof analysisResult === 'object' && analysisResult.structured && (
@@ -316,6 +383,28 @@ function BaZi() {
                                                             <Tag color="magenta" style={{ marginBottom: 8 }}>神煞启示</Tag>
                                                             {analysisResult.structured.shensha.map((text, i) => (
                                                                 <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                                {analysisResult.structured.wealth && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(245, 158, 11, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                                                            <Tag color="orange" style={{ marginBottom: 8 }}>财运格局</Tag>
+                                                            {analysisResult.structured.wealth.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}
+                                                                    dangerouslySetInnerHTML={{ __html: text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
+                                                {analysisResult.structured.relationship && (
+                                                    <Col span={24} md={12}>
+                                                        <div style={{ background: 'rgba(236, 72, 153, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(236, 72, 153, 0.2)' }}>
+                                                            <Tag color="pink" style={{ marginBottom: 8 }}>人际感情</Tag>
+                                                            {analysisResult.structured.relationship.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}
+                                                                    dangerouslySetInnerHTML={{ __html: text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
                                                             ))}
                                                         </div>
                                                     </Col>

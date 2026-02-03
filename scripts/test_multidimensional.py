@@ -52,7 +52,7 @@ def test_bazi_multidimensional():
         "geju": "正官格",
         "shishen_profile": {"dominant": ["偏财", "七杀"]},
         "wuxing_scores": {"火": 60, "木": 10}, # Excess Fire, Weak Wood
-        "current_dayun": {"gan": "丙", "zhi": "午"}
+        "current_dayun": {"gan": "丙", "zhi": "午", "shishen": "食神"}
     }
     
     engine.load_rules()
@@ -63,8 +63,8 @@ def test_bazi_multidimensional():
     print("\n--- Structured Output Keys ---")
     print(list(structured.keys()))
     
-    # Expect: core (Day Master), career (Geju), personality (Shishen), advice (Wuxing)
-    expected = ["core", "career", "personality", "advice"]
+    # Expect: core (Day Master), career (Geju), personality (Shishen), advice (Wuxing), luck (Dayun)
+    expected = ["core", "career", "personality", "advice", "luck"]
     present = [k for k in expected if k in structured]
     
     if len(present) == len(expected):

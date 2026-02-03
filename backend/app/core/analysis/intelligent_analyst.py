@@ -237,6 +237,58 @@ class BaziAnalyst(BaseAnalyst):
                     category="shensha"
                 ))
 
+        # --- 8. 财运分析 (Wealth) ---
+        wealth_shishens = ["正财", "偏财"]
+        wealth_items = [s for s in dominant_shishens if s in wealth_shishens]
+        if wealth_items:
+            wealth_descs = []
+            for ws in wealth_items:
+                w_desc = self.get_rule([f"bazi:theory:shishen:wealth:{ws}"])
+                if w_desc:
+                    wealth_descs.append(w_desc)
+                else:
+                    # 使用通用十神描述作为降级
+                    general = self.get_rule([f"bazi:theory:shishen:dominant:{ws}"])
+                    if general:
+                        wealth_descs.append(f"**{ws}**：{general}")
+            
+            if wealth_descs:
+                items.append(AnalyticItem(
+                    content="**【财运格局】**\n" + "\n".join(wealth_descs),
+                    weight=7.5,
+                    category="wealth"
+                ))
+        else:
+            # 如果没有财星突出，给出通用建议
+            items.append(AnalyticItem(
+                content="**【财运格局】**\n命局中正偏财星不显，财运需要通过后天努力和机遇来拓展。建议注重技能提升，财从官来或财从技来。",
+                weight=5.0,
+                category="wealth"
+            ))
+
+        # --- 9. 人际关系 (Relationship) ---
+        social_shishens = ["比肩", "劫财", "伤官", "食神"]
+        social_items = [s for s in dominant_shishens if s in social_shishens]
+        if social_items:
+            social_descs = []
+            for ss in social_items:
+                s_desc = self.get_rule([f"bazi:theory:shishen:relationship:{ss}"])
+                if s_desc:
+                    social_descs.append(s_desc)
+                else:
+                    # 降级到通用十神
+                    general = self.get_rule([f"bazi:theory:shishen:dominant:{ss}"])
+                    if general:
+                        social_descs.append(f"**{ss}**：{general}")
+            
+            if social_descs:
+                items.append(AnalyticItem(
+                    content="**【人际感情】**\n" + "\n".join(social_descs),
+                    weight=7.0,
+                    category="relationship"
+                ))
+
+
         return {
             "content": self.generate_narrative(items),
             "structured": self.generate_structured(items)
