@@ -12,6 +12,7 @@ import { Tag, Divider } from 'antd'
  * - \n 换行
  */
 const MarkdownViewer = ({
+    content,
     structured,
     style = {},
     showDividers = true
