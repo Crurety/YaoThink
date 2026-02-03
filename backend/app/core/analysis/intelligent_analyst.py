@@ -193,18 +193,30 @@ class BaziAnalyst(BaseAnalyst):
                 ))
 
         # --- 6. 大运分析 (Da Yun) ---
-        dy_gan = dayun.get("gan")
-        dy_zhi = dayun.get("zhi")
+        dy_info = dayun if dayun else {}
+        dy_gan = dy_info.get("gan")
+        dy_zhi = dy_info.get("zhi")
+        dy_shishen = dy_info.get("shishen") # Computed in API
+
         if dy_gan and dy_zhi:
-             dy_desc_gan = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_gan:{dy_gan}"])
-             dy_desc_zhi = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_zhi:{dy_zhi}"])
-             
              content = f"**【当前大运】 ({dy_gan}{dy_zhi}运)**\n"
-             if dy_desc_gan: content += f"{dy_desc_gan}\n"
+             
+             # 1. 尝试查找具体的大运十神规则
+             if dy_shishen:
+                 dy_rule = self.get_rule([f"bazi:theory:shishen:dayun:{dy_shishen}"])
+                 if dy_rule:
+                     content += dy_rule + "\n"
+                     
+             # 2. 尝试查找具体的日主大运规则 (Fallback)
+             if not dy_shishen or "bazi:theory" not in content:
+                 dy_desc_gan = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_gan:{dy_gan}"])
+                 if dy_desc_gan: content += f"{dy_desc_gan}\n"
+             
+             # 3. 地支规则 (Optional, if specific rules exist)
+             dy_desc_zhi = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_zhi:{dy_zhi}"])
              if dy_desc_zhi: content += f"{dy_desc_zhi}\n"
              
-             if dy_desc_gan or dy_desc_zhi:
-                 items.append(AnalyticItem(content=content, weight=9.2, category="luck"))
+             items.append(AnalyticItem(content=content, weight=9.2, category="luck"))
 
         # --- 7. 神煞解读 (Shen Sha) ---
         if shensha:

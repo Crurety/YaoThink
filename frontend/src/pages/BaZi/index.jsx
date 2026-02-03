@@ -320,6 +320,18 @@ function BaZi() {
                                                         </div>
                                                     </Col>
                                                 )}
+                                                {analysisResult.structured.luck && (
+                                                    <Col span={24}>
+                                                        <div style={{ background: 'rgba(56, 189, 248, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                                                            <Tag color="cyan" style={{ marginBottom: 8 }}>大运流年</Tag>
+                                                            {analysisResult.structured.luck.map((text, i) => (
+                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>
+                                                                    <div dangerouslySetInnerHTML={{ __html: text.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                    </Col>
+                                                )}
                                             </Row>
                                         </div>
                                     )}

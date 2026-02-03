@@ -152,7 +152,18 @@ async def analyze(
                         cur_dy = result["dayun_liunian"].get("current_dayun", {})
                         dy_gz = cur_dy.get("ganzhi", "")
                         if dy_gz and len(dy_gz) >= 2:
-                             ai_data["current_dayun"] = {"gan": dy_gz[0], "zhi": dy_gz[1]}
+                             from app.core.bazi.shishen import get_shishen
+                             dy_gan = dy_gz[0]
+                             dy_zhi = dy_gz[1]
+                             
+                             # 计算大运天干十神
+                             dy_shishen = get_shishen(sizhu.day_master, dy_gan)
+                             
+                             ai_data["current_dayun"] = {
+                                 "gan": dy_gan, 
+                                 "zhi": dy_zhi,
+                                 "shishen": dy_shishen
+                             }
                     
                     # 6. Shensha
                     if "shensha" in result:
