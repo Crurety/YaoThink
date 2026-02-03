@@ -501,7 +501,7 @@ const PsychologyPage = () => {
     const loadQuestions = async (type, level = 'master') => {
         setLoading(true);
         try {
-            const res = await api.get(`/api/psychology/${type}/questions`, {
+            const res = await api.get(`/psychology/${type}/questions`, {
                 params: { level }
             });
             setQuestions(res.data.questions);
@@ -519,7 +519,7 @@ const PsychologyPage = () => {
     const submitTest = async (answers) => {
         setLoading(true);
         try {
-            const res = await api.post(`/api/psychology/${testType}/submit`, { answers });
+            const res = await api.post(`/psychology/${testType}/submit`, { answers });
             setResult(res.data.result);
             setStage('result');
         } catch (err) {
