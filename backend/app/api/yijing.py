@@ -15,7 +15,7 @@ from app.core.yijing import (
     BAGUA, SIXTY_FOUR_GUA
 )
 from app.core.auth import get_current_user, TokenData
-from app.core.analysis.rule_engine import engine
+# from app.core.analysis.rule_engine import engine (Removed)
 
 router = APIRouter()
 
@@ -32,7 +32,8 @@ def _attach_ai_analysis(result: dict):
             "dong_yao": result.get("dong_yao")
         }
         
-        ai_report = engine.analyze_yijing(hex_data)
+        from app.core.analysis.intelligent_analyst import analysis_service
+        ai_report = analysis_service.analyze_yijing(hex_data)
         if ai_report:
            if "extra_info" not in result:
                result["extra_info"] = {}

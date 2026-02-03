@@ -10,7 +10,8 @@ from typing import Optional
 
 from app.core.ziwei import analyze_ziwei, MAIN_STAR_TRAITS
 from app.core.auth import get_current_user, TokenData
-from app.core.analysis.rule_engine import engine
+from app.core.auth import get_current_user, TokenData
+# from app.core.analysis.rule_engine import engine (Removed)
 
 router = APIRouter()
 
@@ -108,8 +109,10 @@ async def analyze(
                         for star in palace.get("major_stars", []):
                             features.append({"star": star["name"], "palace": "命宫"})
             
-            # Call Rule Engine
-            ai_report = engine.analyze_ziwei({"features": features})
+            # Call Analysis Service
+            # Local import to avoid circular dependency if any, or just for clarity
+            from app.core.analysis.intelligent_analyst import analysis_service
+            ai_report = analysis_service.analyze_ziwei({"features": features})
             if "extra_info" not in result:
                 result["extra_info"] = {}
             result["extra_info"]["ai_analysis"] = ai_report

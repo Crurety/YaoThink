@@ -1,0 +1,445 @@
+"""
+Script to rebuild large_corpus.json with high-quality classic theories.
+Sources:
+- BaZi: Di Tian Sui (滴天髓) - Complete 10 Stems
+- Ziwei: Ziwei Doushu Quan Shu (紫微斗数全书) - 14 Major Stars
+- YiJing: Zhou Yi (周易) - Key Hexagrams
+"""
+import json
+import os
+
+CORPUS_PATH = "backend/app/data/rules/large_corpus.json"
+
+# === 1. BAZI (Eight Characters) ===
+# Source: Di Tian Sui (Essence of Day Master x Season)
+BAZI_DATA = {}
+
+# Template for BaZi
+def create_bazi_entry(classic_quote, essence, strategy):
+    return f"""## 1. 经典依据《滴天髓》
+> **经文**：{classic_quote}
+
+## 2. 命理精要 (Essence)
+{essence}
+
+## 3. 处世哲学 (Strategy)
+{strategy}"""
+
+# JIA (Wood)
+BAZI_DATA["bazi:theory:day_master:甲:season:spring"] = create_bazi_entry(
+    "甲木参天，脱胎要火。春不容金，秋不容土。",
+    "**【生于春季】**：木气最旺。甲木如参天大树，春季正是生长之时。此时需要火（阳光）来宣泄秀气，不喜金（斧头）来砍伐，因为此时木质尚嫩。",
+    "**【顺势而为】**：此时正是展示才华、积极进取的时候，不宜过分自我压抑。"
+)
+BAZI_DATA["bazi:theory:day_master:甲:season:summer"] = create_bazi_entry(
+    "火炽乘龙，水宕骑虎。",
+    "**【生于夏季】**：火炎土燥。木被火焚，急需水来滋润，否则木性枯焦。湿土（辰龙）能晦火生木，最为宝贵。",
+    "**【韬光养晦】**：环境压力大（泄耗重），需要寻找资源（印星）支持，切忌盲目扩张。"
+)
+BAZI_DATA["bazi:theory:day_master:甲:season:autumn"] = create_bazi_entry(
+    "秋不容土，土润金生。",
+    "**【生于秋季】**：木气凋零。金气当令，甲木处于休囚之地。此时若有土生金，则压力倍增；若有水化金生木，则绝处逢生。",
+    "**【借力打力】**：面对严峻的竞争环境，硬碰硬只会折断，需懂得以柔克刚，寻求更强者的庇护。"
+)
+BAZI_DATA["bazi:theory:day_master:甲:season:winter"] = create_bazi_entry(
+    "地润天和，植立千古。",
+    "**【生于冬季】**：水旺木漂。寒木向阳，最喜火来温暖，怕水多木浮。若有土止水，确实根基，方能长久。",
+    "**【扎根深造】**：此时不宜妄动，应沉淀积累，等待时机（春天）的到来。"
+)
+
+# YI (Wood)
+BAZI_DATA["bazi:theory:day_master:乙:season:spring"] = create_bazi_entry(
+    "乙木虽柔，刲羊解牛。怀丁抱丙，跨凤乘猴。",
+    "**【生于春季】**：藤萝系甲。乙木生于春季，木气虽旺但性柔。若遇甲木（兄长/平台）可扶摇直上。",
+    "**【合作共赢】**：善于依附强者或利用平台资源，是乙木的最佳生存策略。"
+)
+BAZI_DATA["bazi:theory:day_master:乙:season:summer"] = create_bazi_entry(
+    "怀丁抱丙，跨凤乘猴。",
+    "**【生于夏季】**：火旺木焚。乙木怕火太旺，最喜水来滋润（印星）。",
+    "**【保持冷静】**：在狂热的环境中保持清醒，不要被情绪或表象烧毁了理智。"
+)
+BAZI_DATA["bazi:theory:day_master:乙:season:autumn"] = create_bazi_entry(
+    "虚湿之地，骑马亦忧。",
+    "**【生于秋季】**：金克木。乙木最怕秋后的肃杀之气。喜火制金，或水化金。",
+    "**【灵活应变】**：环境严苛，生存第一。不要固执己见，要学会像草一样随风且韧。"
+)
+BAZI_DATA["bazi:theory:day_master:乙:season:winter"] = create_bazi_entry(
+    "藤萝系甲，可春可秋。",
+    "**【生于冬季】**：水冷木寒。喜火温暖。",
+    "**【寻找温暖】**：寒冬之中，人情冷暖自知。寻找那些能给你带来希望（火）的人和事。"
+)
+
+# BING (Fire)
+BAZI_DATA["bazi:theory:day_master:丙:season:spring"] = create_bazi_entry(
+    "丙火猛烈，欺霜侮雪。能煅庚金，逢辛反怯。",
+    "**【生于春季】**：母旺子相。木火通明之象，丙火如太阳，不畏寒霜。此时喜金来劈木引火，忌木多火塞。",
+    "**【光芒万丈】**：此时不仅要展示自己，更要通过成就他人（金）来体现价值。"
+)
+BAZI_DATA["bazi:theory:day_master:丙:season:summer"] = create_bazi_entry(
+    "土众成慈，水猖显节。",
+    "**【生于夏季】**：火炎土燥。日主过旺，最喜水来既济（水火既济），或者用土来泄其秀气（火土伤官）。",
+    "**【刚柔并济】**：过刚则折，在强势时懂得示弱（用土泄）或接受约束（用水克），才是长久之道。"
+)
+BAZI_DATA["bazi:theory:day_master:丙:season:autumn"] = create_bazi_entry(
+    "虎马犬乡，甲来成灭。",
+    "**【生于秋季】**：火气渐退，金气当令。丙火至秋，如夕阳西下，但这正是因为金（财）旺，通过提炼金（财富/成果）来体现价值。",
+    "**【价值兑现】**：秋天是收获的季节，重点在于将之前的积累转化为实际成果。"
+)
+BAZI_DATA["bazi:theory:day_master:丙:season:winter"] = create_bazi_entry(
+    "水猖显节。",
+    "**【生于冬季】**：水旺火死。最怕水多灭火。此时急需木来通关（水生木，木生火），或者燥土（未/戌）来制水。",
+    "**【绝处逢生】**：环境虽险恶，但只要有一线生机（木/印），就能反败为胜，展现高尚的气节。"
+)
+
+# DING (Fire)
+BAZI_DATA["bazi:theory:day_master:丁:season:spring"] = create_bazi_entry(
+    "丁火柔中，内性昭融。抱乙而孝，合壬而忠。",
+    "**【生于春季】**：木火通明。丁火为灯烛之火，生于春季，木旺火塞，不喜甲木太大，反喜乙木（柔木）引火。",
+    "**【温和力量】**：丁火的力量在于'柔'，通过细腻、温和的方式去影响他人，而非强力压制。"
+)
+BAZI_DATA["bazi:theory:day_master:丁:season:summer"] = create_bazi_entry(
+    "旺而不烈，衰而不穷。",
+    "**【生于夏季】**：火势正旺。丁火虽旺但不像丙火那样猛烈。喜湿土（辰/丑）散热，忌木火助燃。",
+    "**【中庸之道】**：保持内心的平静，不被外界的狂热所裹挟，是丁火在旺季的生存智慧。"
+)
+BAZI_DATA["bazi:theory:day_master:丁:season:autumn"] = create_bazi_entry(
+    "如有嫡母，可秋可冬。",
+    "**【生于秋季】**：财旺身弱。秋风起，烛火易灭。最喜甲木（嫡母）生助，便不怕金水。",
+    "**【寻找靠山】**：在充满诱惑和挑战（财旺）的环境中，只要有强大的后盾（印/知识），就能立于不败之地。"
+)
+BAZI_DATA["bazi:theory:day_master:丁:season:winter"] = create_bazi_entry(
+    "如有嫡母，可秋可冬。",
+    "**【生于冬季】**：水克火。丁火最怕寒风（水）。必须要有印（木）来化煞生身。",
+    "**【守住本心】**：外界环境虽冷酷，但只要内心有信仰（印），星星之火亦可燎原。"
+)
+
+# WU (Earth)
+BAZI_DATA["bazi:theory:day_master:戊:season:spring"] = create_bazi_entry(
+    "戊土固重，既中且正。静翕动辟，万物司命。",
+    "**【生于春季】**：土虚木盛。春季木旺克土，戊土压力极大。喜火来化木生土（杀印相生）。",
+    "**【承载压力】**：压力是成长的催化剂。通过学习和修养（因）来转化外界的压力（木），将其变为自己的权威。"
+)
+BAZI_DATA["bazi:theory:day_master:戊:season:summer"] = create_bazi_entry(
+    "水润物生，火燥物病。",
+    "**【生于夏季】**：火炎土燥。戊土变成了焦土，无法生养万物。最急需水来滋润。",
+    "**【调节身心】**：在过度亢奋或焦躁的环境中，保持冷静（水）和灵活性，才能发挥真正的价值。"
+)
+BAZI_DATA["bazi:theory:day_master:戊:season:autumn"] = create_bazi_entry(
+    "若在艮坤，怕冲宜静。",
+    "**【生于秋季】**：土虚金泄。才华（金）外露，但自身空虚。喜火土帮身。",
+    "**【厚积薄发】**：不要因为急于展示才华而掏空自己，随时补充能量（学习）是必要的。"
+)
+BAZI_DATA["bazi:theory:day_master:戊:season:winter"] = create_bazi_entry(
+    "地润天和。",
+    "**【生于冬季】**：土冻水冷。戊土冻结，无用武之地。喜火温暖解冻。",
+    "**【温暖人心】**：在冷漠的环境中，做一个温暖的人，能为你赢得核心竞争力。"
+)
+
+# JI (Earth)
+BAZI_DATA["bazi:theory:day_master:己:season:spring"] = create_bazi_entry(
+    "己土卑湿，中正蓄藏。不愁木盛，不畏水狂。",
+    "**【生于春季】**：木旺土虚。但己土柔顺，能顺应木的生长（如同田园养育庄稼）。不惧怕压力。",
+    "**【包容顺从】**：以柔克刚，通过包容和养育他人来实现自己的价值。"
+)
+BAZI_DATA["bazi:theory:day_master:己:season:summer"] = create_bazi_entry(
+    "火少火晦，金多金光。",
+    "**【生于夏季】**：火炎土燥。喜水润土养金。",
+    "**【润物无声】**：在燥热的环境中，保持内心的清凉和滋润，做一个默默贡献的耕耘者。"
+)
+BAZI_DATA["bazi:theory:day_master:己:season:autumn"] = create_bazi_entry(
+    "金多金光。",
+    "**【生于秋季】**：土生金旺。己土能生金，适合通过展示才华获得认可。",
+    "**【成就他人】**：你的价值体现在你的作品或你培养的人身上。"
+)
+BAZI_DATA["bazi:theory:day_master:己:season:winter"] = create_bazi_entry(
+    "不畏水狂。",
+    "**【生于冬季】**：水旺湿寒。己土能纳水，但这需要火来暖局。",
+    "**【外圆内方】**：表面随和（纳水），内心要有原则和温度（火）。"
+)
+
+# GENG (Metal)
+BAZI_DATA["bazi:theory:day_master:庚:season:spring"] = create_bazi_entry(
+    "庚金带煞，刚健为最。得水而清，得火而锐。",
+    "**【生于春季】**：金弱木旺。此时庚金如钝铁，需要土生或比劫帮身，或者火来炼。",
+    "**【磨砺成器】**：处于弱势时，不要急于锋芒毕露，先通过锻炼（火）来提升自己的核心竞争力。"
+)
+BAZI_DATA["bazi:theory:day_master:庚:season:summer"] = create_bazi_entry(
+    "得火而锐。",
+    "**【生于夏季】**：火旺金熔。庚金最喜丁火锻炼，但忌火过旺熔化。需水来调候。",
+    "**【千锤百炼】**：现在的艰难困苦（火）正是将你从铁块炼成宝剑的必要过程，坚持住。"
+)
+BAZI_DATA["bazi:theory:day_master:庚:season:autumn"] = create_bazi_entry(
+    "土润则生，土干则脆。",
+    "**【生于秋季】**：金气当令。刚强之极。最喜火炼（官杀）或水泄（食伤）。",
+    "**【刚柔相济】**：强者切忌霸道，要么通过制度（火）自我约束，要么通过才华（水）服务大众。"
+)
+BAZI_DATA["bazi:theory:day_master:庚:season:winter"] = create_bazi_entry(
+    "得水而清。",
+    "**【生于冬季】**：金寒水冷。金沉水底，才华难以施展。喜火解冻。",
+    "**【候时而动】**：只有才华（水）是不够的，还需要热情和机遇（火）来破冰。"
+)
+
+# XIN (Metal)
+BAZI_DATA["bazi:theory:day_master:辛:season:spring"] = create_bazi_entry(
+    "辛金软弱，温润而清。畏土之叠，乐水之盈。",
+    "**【生于春季】**：金弱木旺。辛金如珠玉，不喜厚土埋没，喜水清洗。",
+    "**【如切如磋】**：保持自身的灵气和光泽，不要被世俗的繁杂（厚土）所掩盖。"
+)
+BAZI_DATA["bazi:theory:day_master:辛:season:summer"] = create_bazi_entry(
+    "能扶社稷，能救生灵。",
+    "**【生于夏季】**：火克柔金。辛金最怕火烧（珠玉尽毁）。急需水来制火护金。",
+    "**【柔能克刚】**：面对强权（火），硬抗必死。用智慧（水）化解危机才是上策。"
+)
+BAZI_DATA["bazi:theory:day_master:辛:season:autumn"] = create_bazi_entry(
+    "热则喜母，寒则喜丁。",
+    "**【生于秋季】**：金旺。珠玉出匣，光芒四射。喜水洗涤。",
+    "**【尽情展示】**：现在是你最好的舞台，尽情展示你的才华和独特魅力。"
+)
+BAZI_DATA["bazi:theory:day_master:辛:season:winter"] = create_bazi_entry(
+    "乐水之盈。",
+    "**【生于冬季】**：金水相涵，但易金冷水寒。喜火温暖。",
+    "**【温暖的理性】**：理智（金水）固然重要，但不仅要有智商，更要有情商（火）。"
+)
+
+# REN (Water)
+BAZI_DATA["bazi:theory:day_master:壬:season:spring"] = create_bazi_entry(
+    "壬水通河，能泄金气。刚中之德，周流不滞。",
+    "**【生于春季】**：水生木。水气泄弱。喜金生水。",
+    "**【源远流长】**：付出（生木）是好事，但要保证自己有源源不断的补给（金），否则会枯竭。"
+)
+BAZI_DATA["bazi:theory:day_master:壬:season:summer"] = create_bazi_entry(
+    "化则有情，从则相济。",
+    "**【生于夏季】**：火旺水干。壬水面临干涸。最喜金生，或比劫助。",
+    "**【开源节流】**：在资源匮乏（火旺耗身）的时期，整合资源（金）和寻找盟友（水）是生存关键。"
+)
+BAZI_DATA["bazi:theory:day_master:壬:season:autumn"] = create_bazi_entry(
+    "能泄金气。",
+    "**【生于秋季】**：金白水清。母旺子相。水势浩大，喜戊土堤防。",
+    "**【规范力量】**：力量越大，责任越大。没有约束（土）的力量（水）只能带来灾难。"
+)
+BAZI_DATA["bazi:theory:day_master:壬:season:winter"] = create_bazi_entry(
+    "冲奔之性。",
+    "**【生于冬季】**：汪洋大水。极难控制，只能顺势疏导（木）或强力阻挡（才/土）。",
+    "**【大势所趋】**：顺应时代的洪流，做冲浪者而不是拦路石。"
+)
+
+# GUI (Water)
+BAZI_DATA["bazi:theory:day_master:癸:season:spring"] = create_bazi_entry(
+    "癸水至弱，达于天津。得龙而运，功化斯神。",
+    "**【生于春季】**：水生木。柔水滋养万物。喜辛金发源。",
+    "**【润物细无声】**：由于力量微弱，你的影响力体现在潜移默化的渗透中，而非轰轰烈烈。"
+)
+BAZI_DATA["bazi:theory:day_master:癸:season:summer"] = create_bazi_entry(
+    "不愁火土，不论庚辛。",
+    "**【生于夏季】**：火炎水涸。癸水至弱，容易蒸发。喜金生水。",
+    "**【以柔克刚】**：在极度恶劣的环境中，保持灵活性和适应性，像水蒸气一样无处不在。"
+)
+BAZI_DATA["bazi:theory:day_master:癸:season:autumn"] = create_bazi_entry(
+    "合戊见火，化象斯真。",
+    "**【生于秋季】**：金清水白。源远流长。",
+    "**【清澈透明】**：保持内心的纯净，你的智慧（水）将如同水晶般透彻。"
+)
+BAZI_DATA["bazi:theory:day_master:癸:season:winter"] = create_bazi_entry(
+    "达于天津。",
+    "**【生于冬季】**：水冻成冰。喜火解冻。",
+    "**【等待春天】**：在寒冬中，储备能量，保持希望（火），等待解冻的那一刻。"
+)
+
+# === 2. ZIWEI DOUSHU ===
+# Source: Ziwei Doushu Quan Shu (Star Essence)
+ZIWEI_DATA = {}
+
+def create_ziwei_entry(star_name, classic_def, modern_desc, advice):
+    return f"""## 1. 星曜本义《紫微斗数全书》
+> **全书云**：{classic_def}
+
+## 2. 现代全息 (Modern Interpretation)
+**【{star_name}】**：{modern_desc}
+
+## 3. 命盘指引 (Guidance)
+{advice}"""
+
+# 14 Major Stars
+ZIWEI_DATA["ziwei:theory:star:紫微"] = create_ziwei_entry(
+    "紫微",
+    "紫微帝座，以辅弼为佐，以天相为印，以魁钺为盖。",
+    "紫微星代表尊贵、领导力与统御欲。它需要'群臣'（辅助星）的拥护，否则便是'孤君'。",
+    "**【领导哲学】**：领导力的核心不是权力，而是不仅能高瞻远瞩，更能知人善任。若命盘中缺乏辅弼，需刻意培养团队，避免独断专行。"
+)
+ZIWEI_DATA["ziwei:theory:star:天机"] = create_ziwei_entry(
+    "天机",
+    "天机姜子牙，化气为善，主兄弟，亦主智慧。",
+    "天机星代表智慧、变动与谋略。它是一颗动星，思维敏捷但容易多虑，适合策划与分析。",
+    "**【决策之道】**：你的优势在于思考，但劣势也在于思考过多。在关键时刻，需要更多的决断力（可借助于团队中的行动派）。"
+)
+ZIWEI_DATA["ziwei:theory:star:太阳"] = create_ziwei_entry(
+    "太阳",
+    "太阳司官禄，主博爱，在数主人。",
+    "太阳星代表光明、奉献与公共事务。它燃烧自己照亮他人，具有极强的感召力，但也易劳心劳力。",
+    "**【奉献与索取】**：付出是你的本能，但要学会设定边界。你的价值往往体现在公众认可和名声上，而非直接的利益。"
+)
+ZIWEI_DATA["ziwei:theory:star:武曲"] = create_ziwei_entry(
+    "武曲",
+    "武曲周武王，化气为财，主财帛，亦主刚毅。",
+    "武曲星代表执行力、决断与金融。它是一颗刚毅之星，对数字敏感，行事果断，但稍显不近人情。",
+    "**【执行法则】**：商业世界的硬通货是结果。你的强项是直接切入核心解决问题，适合处理财务和硬核任务。"
+)
+ZIWEI_DATA["ziwei:theory:star:天同"] = create_ziwei_entry(
+    "天同",
+    "天同周文王，化气为福，主福德，亦主融洽。",
+    "天同星代表福气、享受与孩童般的纯真。它能协调人际关系，但也容易因为安逸而缺乏进取心。",
+    "**【幸福哲学】**：知足常乐是你的天赋。在竞争激烈的环境中，你的平和反而是稀缺的调节剂，但要警惕'温水煮青蛙'。"
+)
+ZIWEI_DATA["ziwei:theory:star:廉贞"] = create_ziwei_entry(
+    "廉贞",
+    "廉贞费仲，化气为囚，主杀，亦主次桃花。",
+    "廉贞星代表精密、秩序与情感的纠葛。它既是严于律己的'囚'，也是才华横溢的'桃花'。",
+    "**【自我管理】**：你拥有极强的自律性和个人魅力。成功的关键在于将这种能量引导向事业（构建规则），而非消耗在情绪内耗中。"
+)
+ZIWEI_DATA["ziwei:theory:star:天府"] = create_ziwei_entry(
+    "天府",
+    "天府姜皇后，化气为贤，主财帛，亦主田宅。",
+    "天府星代表库藏、包容与稳重。它是南斗帝星，具有守成和管理的才能，性格宽厚但稍显保守。",
+    "**【管理艺术】**：你天生适合做一个守护者或管理者。稳健是你的标签，但在这个快速变化的时代，适当的冒险也是必要的。"
+)
+ZIWEI_DATA["ziwei:theory:star:太阴"] = create_ziwei_entry(
+    "太阴",
+    "太阴贾夫人，化气为富，主田宅，亦主财帛。",
+    "太阴星代表柔顺、积蓄与女性特质。它如月光般细腻，擅长财务计划和内部管理，注重精神生活。",
+    "**【温柔的力量】**：温柔不是软弱，而是一种坚韧。你的力量在于细腻的感知力和长期的坚持（滴水穿石）。"
+)
+ZIWEI_DATA["ziwei:theory:star:贪狼"] = create_ziwei_entry(
+    "贪狼",
+    "贪狼妲己，化气为桃花，主祸福，亦主欲望。",
+    "贪狼星代表欲望、多才多艺与社交。它是第一桃花星，具有极强的生命力和竞争欲，善于交际。",
+    "**【欲望管理】**：欲望是前进的动力。关键在于你是驾驭欲望（成为动力），还是被欲望驾驭（沦为贪婪）。"
+)
+ZIWEI_DATA["ziwei:theory:star:巨门"] = create_ziwei_entry(
+    "巨门",
+    "巨门马千金，化气为暗，主口舌，亦主是非。",
+    "巨门星代表口才、沟通与钻研。它具有'隔阂'的特质，擅长发现问题，但也容易招致口舌是非。",
+    "**【沟通的艺术】**：你的嘴可以伤人也可以救人。将这种洞察力用于学术研究或专业分析，而非人际争执，是巨门入世的最佳途径。"
+)
+ZIWEI_DATA["ziwei:theory:star:天相"] = create_ziwei_entry(
+    "天相",
+    "天相闻太师，化气为印，主官禄，亦主慈爱。",
+    "天相星代表辅助、公正与形象。它是印星，代表权力的行使者，注重外表和信誉，善于协调。",
+    "**【辅助的智慧】**：你可能不是那个发号施令的人，但你是那个让命令得以完美执行的人。公正和信誉是你的金字招牌。"
+)
+ZIWEI_DATA["ziwei:theory:star:天梁"] = create_ziwei_entry(
+    "天梁",
+    "天梁李天王，化气为荫，主寿，亦主刑。",
+    "天梁星代表荫庇、原则与长者风范。它能逢凶化吉，但前提是先由'凶'。具有孤高和宗教情怀。",
+    "**【超脱与担当】**：你有一种由于阅历而产生的沧桑感。利用这种成熟去指导和帮助他人，是你价值的最大化。"
+)
+ZIWEI_DATA["ziwei:theory:star:七杀"] = create_ziwei_entry(
+    "七杀",
+    "七杀黄飞虎，化气为将，主肃杀，亦主孤克。",
+    "七杀星代表刚烈、开创与独断。它是将星，要在前线冲锋陷阵，人生往往大起大落。",
+    "**【破局者】**：你是天生的战士，适合在动荡和困难中开疆拓土。安逸的环境会让你生锈，挑战才是你的磨刀石。"
+)
+ZIWEI_DATA["ziwei:theory:star:破军"] = create_ziwei_entry(
+    "破军",
+    "破军纣王，化气为耗，主夫妻，亦主子女。",
+    "破军星代表破坏、消耗与重建。它是先破后立的力量，不破不立，具有极强的叛逆性和创造力。",
+    "**【不破不立】**：你的使命就是打破旧秩序。不要害怕破坏，因为所有的创新都始于对旧事物的否定。但要确保你有重建的能力。"
+)
+
+# === 3. YIJING (Zhou Yi) ===
+# Source: Zhou Yi (Original Text + Philosophy)
+YIJING_DATA = {}
+
+def create_yijing_entry(gua_name, quote, essence, wisdom):
+    return f"""## 1. 易经原文《周易》
+> **卦辞**：{quote}
+
+## 2. 卦象真意 (Essence)
+{essence}
+
+## 3. 决策智慧 (Decision Logic)
+{wisdom}"""
+
+YIJING_DATA["yijing:theory:gua:乾为天"] = create_yijing_entry(
+    "建",
+    "天行健，君子以自强不息。元亨利贞。",
+    "**【纯阳之象】**：乾卦象征天道，刚健有力，周而复始。它代表了无限的创造力和生生不息的能量。",
+    "**【领袖法则】**：处于此时段，必须保持刚健进取的心态。但'亢龙有悔'，在进取的同时要保持警惕，不可傲慢过极。"
+)
+YIJING_DATA["yijing:theory:gua:坤为地"] = create_yijing_entry(
+    "顺",
+    "地势坤，君子以厚德载物。利牝马之贞。",
+    "**【纯阴之象】**：坤卦象征大地，包容万物，顺应天道。它代表了柔顺、承载和执行。",
+    "**【配合之道】**：此时不宜主动领头，而应寻找'明主'配合。以静制动，先迷后得，顺势而为方能大吉。"
+)
+YIJING_DATA["yijing:theory:gua:水雷屯"] = create_yijing_entry(
+    "难",
+    "屯，元亨利贞。勿用有攸往，利建侯。",
+    "**【初始之难】**：万物草创，始生艰难。如种子萌芽试图破土，充满生机但也阻力重重。",
+    "**【创业初期】**：不要急于四处出击（勿用有攸往），而应该先建立根据地和团队（利建侯），积蓄力量。"
+)
+YIJING_DATA["yijing:theory:gua:山水蒙"] = create_yijing_entry(
+    "蒙",
+    "蒙，亨。匪我求童蒙，童蒙求我。",
+    "**【启蒙之象】**：蒙昧未开，需要教化。不是老师求学生，而是学生求教老师。",
+    "**【求教之道】**：承认自己的无知是智慧的开始。此时最需要的是寻找导师指点方向，切忌盲目乱撞。"
+)
+YIJING_DATA["yijing:theory:gua:天雷无妄"] = create_yijing_entry(
+    "妄",
+    "无妄，元亨利贞。其匪正有眚，不利有攸往。",
+    "**【真实无虚】**：无妄即不妄，顺应天理自然，不存虚妄之心。",
+    "**【守正防灾】**：只要动机纯正，合乎天理，便可亨通。若心存邪念或行为不正，即使努力也会招致灾祸。"
+)
+YIJING_DATA["yijing:theory:gua:水天需"] = create_yijing_entry(
+    "需",
+    "需，有孚，光亨，贞吉。利涉大川。",
+    "**【等待时机】**：需者，须也。饮食宴乐，等待时机。不是消极等待，而是积蓄力量。",
+    "**【耐心之智】**：目前时机未到，前面的危险（坎水）尚未消除。此时应像在郊外野餐一样从容，耐心等待云开雾散。"
+)
+YIJING_DATA["yijing:theory:gua:天水讼"] = create_yijing_entry(
+    "讼",
+    "讼，有孚，窒惕，中吉，终凶。利见大人，不利涉大川。",
+    "**【争执之象】**：上下一条心（天与水背道而驰）。因为立场不同而产生争讼。",
+    "**【止讼为贵】**：即便有理（有孚），也要警惕和克制。争赢了也是输（终凶）。最好的办法是寻求公正的裁决者（大人）调解。"
+)
+
+def main():
+    final_corpus = {}
+    
+    # 1. Expand BaZi Mappings
+    stems = ["甲", "乙", "丙", "丁", "戊", "己", "庚", "辛", "壬", "癸"]
+    months = ["寅", "卯", "辰", "巳", "午", "未", "申", "酉", "戌", "亥", "子", "丑"]
+    # Mapping months to seasons for simplification
+    season_map = {
+        "寅": "spring", "卯": "spring", "辰": "spring",
+        "巳": "summer", "午": "summer", "未": "summer",
+        "申": "autumn", "酉": "autumn", "戌": "autumn",
+        "亥": "winter", "子": "winter", "丑": "winter"
+    }
+    
+    # Generate generic month entries pointing to seasonal theories
+    for stem in stems:
+        for month in months:
+            season = season_map[month]
+            # Standardized Key: bazi:theory:day_master:{stem}:month:{month}
+            key = f"bazi:theory:day_master:{stem}:month:{month}"
+            
+            # Lookup Key: bazi:theory:day_master:{stem}:season:{season}
+            theory_key = f"bazi:theory:day_master:{stem}:season:{season}"
+            
+            if theory_key in BAZI_DATA:
+               final_corpus[key] = BAZI_DATA[theory_key]
+
+    # 2. Add Ziwei
+    final_corpus.update(ZIWEI_DATA)
+    
+    # 3. Add YiJing
+    final_corpus.update(YIJING_DATA)
+
+    # Save
+    with open(CORPUS_PATH, "w", encoding="utf-8") as f:
+        json.dump(final_corpus, f, ensure_ascii=False, indent=2)
+    
+    print(f"Rebuilt corpus with {len(final_corpus)} entries based on classics.")
+
+if __name__ == "__main__":
+    main()

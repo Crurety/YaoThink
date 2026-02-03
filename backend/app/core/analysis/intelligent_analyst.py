@@ -1,6 +1,6 @@
 
 import logging
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional, Any, Callable, Union
 from dataclasses import dataclass
 
 logger = logging.getLogger(__name__)
@@ -22,10 +22,19 @@ class BaseAnalyst:
         """设置规则提供者 (通常是 RuleEngine.match)"""
         self.rule_provider = provider
         
-    def _get_rule(self, key: str) -> Optional[str]:
-        """获取规则内容的便捷方法"""
+    def get_rule(self, keys: Union[str, List[str]]) -> Optional[str]:
+        """
+        智能获取规则 (Support Retry/Fallback)
+        If keys is a list, try each key in order until a match is found.
+        """
+        if isinstance(keys, str):
+            keys = [keys]
+            
         if self.rule_provider:
-            return self.rule_provider(key)
+            for key in keys:
+                val = self.rule_provider(key)
+                if val:
+                    return val
         return None
     
     def generate_narrative(self, items: List[AnalyticItem], threshold: float = 2.0) -> str:
@@ -81,6 +90,7 @@ class BaziAnalyst(BaseAnalyst):
             items.append(AnalyticItem(content=relation, weight=10.0, category="core"))
             
         # 2. 五行平衡分析 (权重: 8)
+        # Try specific rule first, then generic
         items.append(AnalyticItem(
             content=f"日主{day_master}生于{month_zhi}月，气候与五行流转决定了命局的基础底色", 
             weight=5.0, 
@@ -90,32 +100,39 @@ class BaziAnalyst(BaseAnalyst):
         # 3. 十神/五行建议
         dm_wuxing = self._get_wuxing(day_master)
         if dm_wuxing:
-             # 这里可以尝试查找通用的五行建议
-             # 也可以通过 set_rule_provider 传入的机制查找
+             # Example of future expansion
              pass
 
         return self.generate_narrative(items)
     
     def _check_month_relation(self, dm: str, month: str) -> Optional[str]:
-        # 五行对应：寅卯木，巳午火，申酉金，亥子水，辰戌丑未土
+        # --- SERVICE LAYER LOGIC: FALLBACK ---
         
+        # 1. 尝试 L1 精确匹配 (Classic: Di Tian Sui)
+        specific_key = f"bazi:theory:day_master:{dm}:month:{month}"
+        theory = self.get_rule([specific_key])
+        if theory:
+            return f"【经典月令论】：{theory}"
+
+        # 2. 尝试 L2 降级匹配 (General Season Theory)
         dm_wx = self._get_wuxing(dm)
-        # 获取五行+季节的key
-        season_season = "spring" # default
-        if month in ["寅", "卯", "辰"]: season_season = "spring"
-        elif month in ["巳", "午", "未"]: season_season = "summer"
-        elif month in ["申", "酉", "戌"]: season_season = "autumn"
-        elif month in ["亥", "子", "丑"]: season_season = "winter"
-        
-        # Mapping for wuxing key
+        season_map = {
+            "寅": "spring", "卯": "spring", "辰": "spring",
+            "巳": "summer", "午": "summer", "未": "summer",
+            "申": "autumn", "酉": "autumn", "戌": "autumn",
+            "亥": "winter", "子": "winter", "丑": "winter"
+        }
         wuxing_en = {"木":"wood", "火":"fire", "土":"earth", "金":"metal", "水":"water"}
         
-        if dm_wx in wuxing_en:
-            key = f"bazi:theory:season:{wuxing_en[dm_wx]}_{season_season}"
-            theory = self._get_rule(key)
+        season = season_map.get(month, "unknown")
+        wx_en = wuxing_en.get(dm_wx)
+        
+        if wx_en and season != "unknown":
+            fallback_key = f"bazi:theory:season:{wx_en}_{season}"
+            theory = self.get_rule([fallback_key])
             if theory:
-                return f"【月令理论】：{theory}"
-                 
+                return f"【五行季节论】：{theory}" 
+                
         return None
 
     def _get_wuxing(self, stems: str) -> Optional[str]:
@@ -140,11 +157,10 @@ class ZiweiAnalyst(BaseAnalyst):
         # 1. 主星格局分析
         star_str = "、".join(ming_stars)
         
-        # 查找单星理论
         desc_list = []
         for star in ming_stars:
-            # key example: ziwei:theory:star:紫微
-            desc = self._get_rule(f"ziwei:theory:star:{star}")
+            # Fallsback: 1. Specific Star, 2. Maybe class if implemented
+            desc = self.get_rule([f"ziwei:theory:star:{star}"])
             if desc:
                 desc_list.append(desc)
             
@@ -155,20 +171,17 @@ class ZiweiAnalyst(BaseAnalyst):
             category="core"
         ))
         
-        # 2. 组合逻辑 (双星组合) - 查表
+        # 2. 组合逻辑 (双星组合)
         if len(ming_stars) == 2:
             sorted_stars = sorted(ming_stars)
             key = f"ziwei:theory:dual:{sorted_stars[0]}_{sorted_stars[1]}"
-            dual_desc = self._get_rule(key)
+            dual_desc = self.get_rule([key])
             if dual_desc:
                 items.append(AnalyticItem(
                     content=dual_desc, 
                     weight=9.5, 
                     category="core"
                 ))
-        
-        # 3. 这里的硬编码逻辑可以逐步移除，依赖 JSON 即可
-        # 为兼容性保留一些简单的 fallback，或者如果 JSON 没查到则不显示
 
         return self.generate_narrative(items)
 
@@ -184,8 +197,8 @@ class YijingAnalyst(BaseAnalyst):
         gua_name = main_gua.get("name", "未知")
         
         # 1. 本卦大象分析
-        # key example: yijing:theory:gua:乾为天
-        gua_desc = self._get_rule(f"yijing:theory:gua:{gua_name}")
+        # Strategy: 1. Specific Gua Name
+        gua_desc = self.get_rule([f"yijing:theory:gua:{gua_name}"])
         if not gua_desc:
             gua_desc = f"【{gua_name}】：此卦象征当前的处境。"
             
@@ -203,8 +216,7 @@ class YijingAnalyst(BaseAnalyst):
                 category="core"
             ))
             
-            # key example: yijing:theory:yao:1
-            yao_theory = self._get_rule(f"yijing:theory:yao:{dong_yao}")
+            yao_theory = self.get_rule([f"yijing:theory:yao:{dong_yao}"])
             if yao_theory:
                  items.append(AnalyticItem(content=yao_theory, weight=7.0, category="advice"))
         else:
@@ -215,3 +227,33 @@ class YijingAnalyst(BaseAnalyst):
             ))
 
         return self.generate_narrative(items)
+
+class AnalysisService:
+    """
+    智能分析服务入口
+    Main Service Façade that orchestrates sub-analysts.
+    """
+    def __init__(self, rule_engine_instance):
+        self._bazi = BaziAnalyst()
+        self._ziwei = ZiweiAnalyst()
+        self._yijing = YijingAnalyst()
+        
+        # Inject dependencies
+        provider = rule_engine_instance.match
+        self._bazi.set_rule_provider(provider)
+        self._ziwei.set_rule_provider(provider)
+        self._yijing.set_rule_provider(provider)
+        
+    def analyze_bazi(self, data: Dict[str, Any]) -> str:
+        return self._bazi.analyze(data)
+        
+    def analyze_ziwei(self, data: Dict[str, Any]) -> str:
+        return self._ziwei.analyze(data)
+        
+    def analyze_yijing(self, data: Dict[str, Any]) -> str:
+        return self._yijing.analyze(data)
+
+
+# Global Service Instance
+from app.core.analysis.rule_engine import engine
+analysis_service = AnalysisService(engine)

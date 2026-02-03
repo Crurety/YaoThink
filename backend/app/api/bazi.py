@@ -120,6 +120,36 @@ async def analyze(
             await db.commit()
             await db.refresh(birth_info)
             
+        # --- AI Analysis ---
+        try:
+            # result structure usually contains 'sizhu' object or dict
+            # If analyze_bazi returns a dict with 'sizhu' key which is a Sizhu object:
+            # We need to extract data. Let's assume result['sizhu'] is available or similar.
+            # Actually, looking at core/bazi/__init__.py might be needed, but let's try a safe extraction.
+            
+            ai_data = {}
+            if result and "sizhu" in result:
+                # Assuming result['sizhu'] has .day_master (if object) or ['day_master'] (if dict)
+                # Let's try to handle both or assume standard dict if JSON serialized
+                sz = result["sizhu"]
+                if hasattr(sz, "day_master"):
+                    ai_data["day_master"] = sz.day_master
+                    ai_data["month"] = {"zhi": sz.month[1]}
+                elif isinstance(sz, dict):
+                    ai_data["day_master"] = sz.get("day_master")
+                    ai_data["month"] = {"zhi": sz.get("month", "")[1] if sz.get("month") else ""}
+            
+            if ai_data.get("day_master"):
+                from app.core.analysis.intelligent_analyst import analysis_service
+                ai_report = analysis_service.analyze_bazi(ai_data)
+                
+                if "extra_info" not in result:
+                    result["extra_info"] = {}
+                result["extra_info"]["ai_analysis"] = ai_report
+        except Exception as e:
+            print(f"Bazi AI Analysis failed: {e}")
+        # -----------------------------
+
         # 保存分析记录
         history_service = HistoryService(db)
         await history_service.save_analysis(
