@@ -7,6 +7,7 @@ import { CompassOutlined, FireOutlined } from '@ant-design/icons'
 import ReactECharts from 'echarts-for-react'
 import dayjs from 'dayjs'
 import BaZiChart from '../../components/BaZiChart'
+import MarkdownViewer from '../../components/MarkdownViewer'
 import api from '../../services/api'
 
 const { Title, Paragraph, Text } = Typography
@@ -301,130 +302,10 @@ function BaZi() {
                         <Row style={{ marginTop: 24 }}>
                             <Col span={24}>
                                 <Card title="大数据引擎分析报告" className="feature-card" style={{ border: '1px solid #DAA520' }}>
-
-                                    {/* 核心格局 - 最突出的展示区 */}
-                                    {typeof analysisResult === 'object' && analysisResult.structured?.core && (
-                                        <div style={{
-                                            background: 'linear-gradient(135deg, rgba(218, 165, 32, 0.15), rgba(218, 165, 32, 0.05))',
-                                            border: '1px solid rgba(218, 165, 32, 0.4)',
-                                            borderRadius: 12,
-                                            padding: 20,
-                                            marginBottom: 24
-                                        }}>
-                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 12 }}>
-                                                <Tag color="gold" style={{ fontSize: 14, padding: '4px 12px' }}>核心格局</Tag>
-                                                <span style={{ marginLeft: 8, fontSize: 12, color: '#94a3b8' }}>本命特质与当季得失</span>
-                                            </div>
-                                            {analysisResult.structured.core.map((text, i) => (
-                                                <div
-                                                    key={i}
-                                                    style={{
-                                                        color: '#f5f5f5',
-                                                        fontSize: 14,
-                                                        lineHeight: 1.8,
-                                                        marginBottom: i < analysisResult.structured.core.length - 1 ? 16 : 0
-                                                    }}
-                                                    dangerouslySetInnerHTML={{
-                                                        __html: text
-                                                            .replace(/\n/g, '<br/>')
-                                                            .replace(/\*\*(.*?)\*\*/g, '<b style="color: #fbbf24">$1</b>')
-                                                            .replace(/##\s*(.*?)(<br\/>|$)/g, '<div style="font-size:16px;font-weight:bold;color:#DAA520;margin:8px 0">$1</div>')
-                                                    }}
-                                                />
-                                            ))}
-                                        </div>
-                                    )}
-
-                                    {/* 其他内容补充 - 只在没有core时显示 */}
-                                    {typeof analysisResult === 'object' && analysisResult.content && !analysisResult.structured?.core && (
-                                        <Paragraph style={{ fontSize: 15, color: '#e2e8f0', whiteSpace: 'pre-wrap' }}>
-                                            {analysisResult.content}
-                                        </Paragraph>
-                                    )}
-
-                                    {/* Render Structured Sections if available */}
-                                    {typeof analysisResult === 'object' && analysisResult.structured && (
-                                        <div style={{ marginTop: 24 }}>
-                                            <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8' }}>多维深度分析</Divider>
-                                            <Row gutter={[16, 16]}>
-                                                {analysisResult.structured.career && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(52, 211, 153, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(52, 211, 153, 0.2)' }}>
-                                                            <Tag color="green" style={{ marginBottom: 8 }}>事业格局</Tag>
-                                                            {analysisResult.structured.career.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.personality && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(167, 139, 250, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(167, 139, 250, 0.2)' }}>
-                                                            <Tag color="purple" style={{ marginBottom: 8 }}>性格剖析</Tag>
-                                                            {analysisResult.structured.personality.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.advice && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(251, 191, 36, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
-                                                            <Tag color="gold" style={{ marginBottom: 8 }}>发展建议</Tag>
-                                                            {analysisResult.structured.advice.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.shensha && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(244, 114, 182, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(244, 114, 182, 0.2)' }}>
-                                                            <Tag color="magenta" style={{ marginBottom: 8 }}>神煞启示</Tag>
-                                                            {analysisResult.structured.shensha.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>• {text}</div>
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.wealth && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(245, 158, 11, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(245, 158, 11, 0.2)' }}>
-                                                            <Tag color="orange" style={{ marginBottom: 8 }}>财运格局</Tag>
-                                                            {analysisResult.structured.wealth.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}
-                                                                    dangerouslySetInnerHTML={{ __html: text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.relationship && (
-                                                    <Col span={24} md={12}>
-                                                        <div style={{ background: 'rgba(236, 72, 153, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(236, 72, 153, 0.2)' }}>
-                                                            <Tag color="pink" style={{ marginBottom: 8 }}>人际感情</Tag>
-                                                            {analysisResult.structured.relationship.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}
-                                                                    dangerouslySetInnerHTML={{ __html: text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                                {analysisResult.structured.luck && (
-                                                    <Col span={24}>
-                                                        <div style={{ background: 'rgba(56, 189, 248, 0.05)', padding: 12, borderRadius: 8, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
-                                                            <Tag color="cyan" style={{ marginBottom: 8 }}>大运流年</Tag>
-                                                            {analysisResult.structured.luck.map((text, i) => (
-                                                                <div key={i} style={{ color: '#cbd5e1', fontSize: 13, marginBottom: 4 }}>
-                                                                    <div dangerouslySetInnerHTML={{ __html: text.replace(/\n/g, '<br/>').replace(/\*\*(.*?)\*\*/g, '<b>$1</b>') }} />
-                                                                </div>
-                                                            ))}
-                                                        </div>
-                                                    </Col>
-                                                )}
-                                            </Row>
-                                        </div>
-                                    )}
-
+                                    <MarkdownViewer
+                                        content={typeof analysisResult === 'object' ? analysisResult.content : analysisResult}
+                                        structured={typeof analysisResult === 'object' ? analysisResult.structured : null}
+                                    />
                                     <div style={{ marginTop: 16, textAlign: 'right', fontSize: 12, color: '#64748b' }}>
                                         Power by Local Rule Engine (50MB Corpus)
                                     </div>
