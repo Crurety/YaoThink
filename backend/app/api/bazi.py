@@ -120,35 +120,56 @@ async def analyze(
             await db.commit()
             await db.refresh(birth_info)
             
-        # --- AI Analysis ---
-        try:
-            # result structure usually contains 'sizhu' object or dict
-            # If analyze_bazi returns a dict with 'sizhu' key which is a Sizhu object:
-            # We need to extract data. Let's assume result['sizhu'] is available or similar.
-            # Actually, looking at core/bazi/__init__.py might be needed, but let's try a safe extraction.
-            
-            ai_data = {}
-            if result and "sizhu" in result:
-                # Assuming result['sizhu'] has .day_master (if object) or ['day_master'] (if dict)
-                # Let's try to handle both or assume standard dict if JSON serialized
-                sz = result["sizhu"]
-                if hasattr(sz, "day_master"):
-                    ai_data["day_master"] = sz.day_master
-                    ai_data["month"] = {"zhi": sz.month[1]}
-                elif isinstance(sz, dict):
-                    ai_data["day_master"] = sz.get("day_master")
-                    ai_data["month"] = {"zhi": sz.get("month", "")[1] if sz.get("month") else ""}
-            
-            if ai_data.get("day_master"):
-                from app.core.analysis.intelligent_analyst import analysis_service
-                ai_report = analysis_service.analyze_bazi(ai_data)
+            # --- AI Analysis Data Prep ---
+            try:
+                ai_data = {}
+                if result:
+                    # 1. Basic Info
+                    if "basic_info" in result:
+                        ai_data["day_master"] = result["basic_info"].get("day_master")
+                        # sizhu.month is like "壬午", take 2nd char
+                        sz = result["basic_info"].get("sizhu", {})
+                        m_str = sz.get("month", "")
+                        if m_str and len(m_str) >= 2:
+                            ai_data["month"] = {"zhi": m_str[1]}
+                            
+                    # 2. Wuxing
+                    if "wuxing" in result:
+                        ai_data["wuxing_scores"] = result["wuxing"].get("scores", {})
+                        
+                    # 3. Shishen (Personality)
+                    if "personality" in result:
+                        # dominant_shishen is list of [name, count]
+                        dom = result["personality"].get("dominant_shishen", [])
+                        ai_data["shishen_profile"] = {"dominant": [x[0] for x in dom]}
+                        
+                    # 4. Geju
+                    if "geju" in result:
+                        ai_data["geju"] = result["geju"].get("main_geju")
+                        
+                    # 5. Dayun
+                    if "dayun_liunian" in result:
+                        cur_dy = result["dayun_liunian"].get("current_dayun", {})
+                        dy_gz = cur_dy.get("ganzhi", "")
+                        if dy_gz and len(dy_gz) >= 2:
+                             ai_data["current_dayun"] = {"gan": dy_gz[0], "zhi": dy_gz[1]}
+                    
+                    # 6. Shensha
+                    if "shensha" in result:
+                         all_ss = result["shensha"].get("all_shensha", [])
+                         ai_data["shensha"] = [s.get("name") for s in all_ss]
                 
-                if "extra_info" not in result:
-                    result["extra_info"] = {}
-                result["extra_info"]["ai_analysis"] = ai_report
-        except Exception as e:
-            print(f"Bazi AI Analysis failed: {e}")
-        # -----------------------------
+                if ai_data.get("day_master"):
+                    from app.core.analysis.intelligent_analyst import analysis_service
+                    ai_report = analysis_service.analyze_bazi(ai_data)
+                    
+                    if "extra_info" not in result:
+                        result["extra_info"] = {}
+                    result["extra_info"]["ai_analysis"] = ai_report
+            except Exception as e:
+                print(f"Bazi AI Analysis failed: {e}")
+                # Don't fail the whole request
+            # -----------------------------
 
         # 保存分析记录
         history_service = HistoryService(db)

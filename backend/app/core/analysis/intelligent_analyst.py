@@ -81,27 +81,126 @@ class BaziAnalyst(BaseAnalyst):
     def analyze(self, data: Dict[str, Any]) -> str:
         items = []
         
+        # 提取基础数据
         day_master = data.get("day_master", "未知")
-        month_zhi = data.get("month", {}).get("zhi", "未知") if isinstance(data.get("month"), dict) else "未知"
+        # 兼容不同数据结构：data['month'] 可能是 dict 或 str
+        month_data = data.get("month", {})
+        month_zhi = month_data.get("zhi", "未知") if isinstance(month_data, dict) else "未知"
         
-        # 1. 日主与月令关系 (权重: 10)
+        # 提取更多数据用于深入分析
+        wuxing_scores = data.get("wuxing_scores", {})
+        shishen_profile = data.get("shishen_profile", {}) # Expecting dict like {'dominant': [...]}
+        geju = data.get("geju", "未知格局")
+        dayun = data.get("current_dayun", {})  # Expecting {'gan': '...', 'zhi': '...'}
+        shensha = data.get("shensha", []) # Expecting list of names
+        
+        # --- 1. 本命特质 (Day Master) ---
+        dm_desc = self.get_rule([f"bazi:theory:day_master:{day_master}:general"])
+        if dm_desc:
+            items.append(AnalyticItem(
+                content=f"**【本命特质】**\n{dm_desc}", 
+                weight=10.0, 
+                category="core"
+            ))
+        else:
+             items.append(AnalyticItem(
+                content=f"**【本命特质】**\n你是{day_master}日主的人。", 
+                weight=5.0, 
+                category="core"
+            ))
+
+        # --- 2. 当季得失 (Seasonal Effect) ---
         relation = self._check_month_relation(day_master, month_zhi)
         if relation:
-            items.append(AnalyticItem(content=relation, weight=10.0, category="core"))
+            items.append(AnalyticItem(content=relation, weight=9.5, category="core"))
             
-        # 2. 五行平衡分析 (权重: 8)
-        # Try specific rule first, then generic
-        items.append(AnalyticItem(
-            content=f"日主{day_master}生于{month_zhi}月，气候与五行流转决定了命局的基础底色", 
-            weight=5.0, 
-            category="core"
-        ))
+        # --- 3. 格局事业 (Structure/Geju) ---
+        geju_desc = self.get_rule([f"bazi:theory:geju:{geju}"])
+        if geju_desc:
+            items.append(AnalyticItem(
+                content=f"**【格局事业】**\n格局：{geju}。\n{geju_desc}",
+                weight=9.0,
+                category="career"
+            ))
+        elif geju != "未知格局":
+             items.append(AnalyticItem(
+                content=f"**【格局事业】**\n格局：{geju}。此格局定下了你事业的基本框架。",
+                weight=6.0,
+                category="career"
+            ))
+
+        # --- 4. 性格优劣 (Dominant Shishen) ---
+        # 假设 shishen_profile 包含 prominent 列表
+        dominant_shishens = shishen_profile.get("dominant", [])
+        if dominant_shishens:
+            traits = []
+            for shishen in dominant_shishens:
+                trait = self.get_rule([f"bazi:theory:shishen:dominant:{shishen}"])
+                if trait:
+                    traits.append(trait)
+            
+            if traits:
+                items.append(AnalyticItem(
+                    content="**【性格剖析】**\n" + "\n".join(traits),
+                    weight=8.5,
+                    category="personality"
+                ))
         
-        # 3. 十神/五行建议
-        dm_wuxing = self._get_wuxing(day_master)
-        if dm_wuxing:
-             # Example of future expansion
-             pass
+        # --- 5. 五行平衡 (Wuxing Balance) ---
+        # 简单的过旺/过弱检查
+        # 假设 wuxing_scores 是 {'木': 10, '火': 50 ...}
+        if wuxing_scores:
+            advice = []
+            sorted_wx = sorted(wuxing_scores.items(), key=lambda x: x[1], reverse=True)
+            if sorted_wx:
+                strongest = sorted_wx[0][0]
+                weakest = sorted_wx[-1][0]
+                
+                excess_rule = self.get_rule([f"bazi:theory:wuxing:excess:{self._wuxing_cn_to_en(strongest)}"])
+                deficiency_rule = self.get_rule([f"bazi:theory:wuxing:deficiency:{self._wuxing_cn_to_en(weakest)}"])
+                
+                if excess_rule: advice.append(excess_rule)
+                if deficiency_rule: advice.append(deficiency_rule)
+                
+            if advice:
+                items.append(AnalyticItem(
+                    content="**【五行建议】**\n" + "\n".join(advice),
+                    weight=8.0,
+                    category="advice"
+                ))
+
+        # --- 6. 大运分析 (Da Yun) ---
+        dy_gan = dayun.get("gan")
+        dy_zhi = dayun.get("zhi")
+        if dy_gan and dy_zhi:
+             dy_desc_gan = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_gan:{dy_gan}"])
+             dy_desc_zhi = self.get_rule([f"bazi:theory:day_master:{day_master}:dayun_zhi:{dy_zhi}"])
+             
+             content = f"**【当前大运】 ({dy_gan}{dy_zhi}运)**\n"
+             if dy_desc_gan: content += f"{dy_desc_gan}\n"
+             if dy_desc_zhi: content += f"{dy_desc_zhi}\n"
+             
+             if dy_desc_gan or dy_desc_zhi:
+                 items.append(AnalyticItem(content=content, weight=9.2, category="luck"))
+
+        # --- 7. 神煞解读 (Shen Sha) ---
+        if shensha:
+            ss_descs = []
+            for ss in shensha:
+                 # Map common names or use direct name
+                 # Example: '天乙贵人' -> 'tian_yi_gui_ren' mapping might be needed or key uses CN
+                 # Let's try direct CN key first for simplicity or pinyin
+                 # 暂定使用中文key，如果为了规范可以转拼音，这里先假设 corpus 用中文key
+                 desc = self.get_rule([f"bazi:theory:shensha:{ss}"])
+                 if desc:
+                     ss_descs.append(f"- **{ss}**：{desc}")
+            
+            if ss_descs:
+                items.append(AnalyticItem(
+                    content="**【神煞启示】**\n" + "\n".join(ss_descs),
+                    weight=7.0,
+                    category="shensha"
+                ))
 
         return self.generate_narrative(items)
     
@@ -112,7 +211,7 @@ class BaziAnalyst(BaseAnalyst):
         specific_key = f"bazi:theory:day_master:{dm}:month:{month}"
         theory = self.get_rule([specific_key])
         if theory:
-            return f"【经典月令论】：{theory}"
+            return f"**【当季得失】**\n{theory}"
 
         # 2. 尝试 L2 降级匹配 (General Season Theory)
         dm_wx = self._get_wuxing(dm)
@@ -122,16 +221,15 @@ class BaziAnalyst(BaseAnalyst):
             "申": "autumn", "酉": "autumn", "戌": "autumn",
             "亥": "winter", "子": "winter", "丑": "winter"
         }
-        wuxing_en = {"木":"wood", "火":"fire", "土":"earth", "金":"metal", "水":"water"}
         
         season = season_map.get(month, "unknown")
-        wx_en = wuxing_en.get(dm_wx)
+        wx_en = self._wuxing_cn_to_en(dm_wx)
         
         if wx_en and season != "unknown":
             fallback_key = f"bazi:theory:season:{wx_en}_{season}"
             theory = self.get_rule([fallback_key])
             if theory:
-                return f"【五行季节论】：{theory}" 
+                return f"**【五行季节论】**\n{theory}" 
                 
         return None
 
@@ -141,6 +239,10 @@ class BaziAnalyst(BaseAnalyst):
             "己": "土", "庚": "金", "辛": "金", "壬": "水", "癸": "水"
         }
         return mapping.get(stems)
+        
+    def _wuxing_cn_to_en(self, cn: str) -> Optional[str]:
+        mapping = {"木":"wood", "火":"fire", "土":"earth", "金":"metal", "水":"water"}
+        return mapping.get(cn)
 
 class ZiweiAnalyst(BaseAnalyst):
     """紫微智能分析器"""
