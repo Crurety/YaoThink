@@ -85,11 +85,11 @@ class WuXingScore:
     
     def to_dict(self) -> Dict[str, float]:
         return {
-            "木": self.mu,
-            "火": self.huo,
-            "土": self.tu,
-            "金": self.jin,
-            "水": self.shui
+            "木": round(self.mu, 3),
+            "火": round(self.huo, 3),
+            "土": round(self.tu, 3),
+            "金": round(self.jin, 3),
+            "水": round(self.shui, 3)
         }
     
     def get(self, wuxing: str) -> float:
