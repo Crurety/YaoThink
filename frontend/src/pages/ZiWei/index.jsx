@@ -165,6 +165,14 @@ function ZiWei() {
                                             <Paragraph style={{ color: '#cbd5e1' }}>
                                                 {renderContent(result.analysis.ming_analysis.description)}
                                             </Paragraph>
+                                            {result.extra_info?.ai_analysis_structured?.core && (
+                                                <div style={{ marginTop: 12, padding: 8, background: 'rgba(167, 139, 250, 0.1)', borderRadius: 8, border: '1px solid rgba(167, 139, 250, 0.2)' }}>
+                                                    <Tag color="purple" style={{ marginBottom: 4 }}>AI 深度透视</Tag>
+                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
+                                                        {result.extra_info.ai_analysis_structured.core.join('\n')}
+                                                    </Paragraph>
+                                                </div>
+                                            )}
                                         </>
                                     ) : (
                                         <div style={{ color: '#94a3b8', fontStyle: 'italic', textAlign: 'center', padding: 20 }}>
@@ -185,6 +193,14 @@ function ZiWei() {
                                             <Paragraph style={{ color: '#cbd5e1' }}>
                                                 {renderContent(result.analysis.wealth_analysis.description)}
                                             </Paragraph>
+                                            {result.extra_info?.ai_analysis_structured?.wealth && (
+                                                <div style={{ marginTop: 12, padding: 8, background: 'rgba(251, 191, 36, 0.1)', borderRadius: 8, border: '1px solid rgba(251, 191, 36, 0.2)' }}>
+                                                    <Tag color="gold" style={{ marginBottom: 4 }}>AI 财运洞察</Tag>
+                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
+                                                        {result.extra_info.ai_analysis_structured.wealth.join('\n')}
+                                                    </Paragraph>
+                                                </div>
+                                            )}
                                         </>
                                     ) : <div style={{ color: '#666' }}>财帛宫无主星，参考对宫（福德宫）</div>}
                                 </div>
@@ -201,6 +217,14 @@ function ZiWei() {
                                             <Paragraph style={{ color: '#cbd5e1' }}>
                                                 {renderContent(result.analysis.career_analysis.career_hint)}
                                             </Paragraph>
+                                            {result.extra_info?.ai_analysis_structured?.career && (
+                                                <div style={{ marginTop: 12, padding: 8, background: 'rgba(52, 211, 153, 0.1)', borderRadius: 8, border: '1px solid rgba(52, 211, 153, 0.2)' }}>
+                                                    <Tag color="green" style={{ marginBottom: 4 }}>AI 职场建议</Tag>
+                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
+                                                        {result.extra_info.ai_analysis_structured.career.join('\n')}
+                                                    </Paragraph>
+                                                </div>
+                                            )}
                                         </>
                                     ) : <div style={{ color: '#666' }}>官禄宫无主星，参考对宫（夫妻宫）</div>}
                                 </div>
@@ -217,6 +241,14 @@ function ZiWei() {
                                             <Paragraph style={{ color: '#cbd5e1' }}>
                                                 {renderContent(result.analysis.marriage_analysis.description)}
                                             </Paragraph>
+                                            {result.extra_info?.ai_analysis_structured?.love && (
+                                                <div style={{ marginTop: 12, padding: 8, background: 'rgba(244, 114, 182, 0.1)', borderRadius: 8, border: '1px solid rgba(244, 114, 182, 0.2)' }}>
+                                                    <Tag color="magenta" style={{ marginBottom: 4 }}>AI 情感指引</Tag>
+                                                    <Paragraph style={{ color: '#e2e8f0', fontSize: 13, margin: 0 }}>
+                                                        {result.extra_info.ai_analysis_structured.love.join('\n')}
+                                                    </Paragraph>
+                                                </div>
+                                            )}
                                         </>
                                     ) : <div style={{ color: '#666' }}>夫妻宫无主星，参考对宫（官禄宫）</div>}
                                 </div>

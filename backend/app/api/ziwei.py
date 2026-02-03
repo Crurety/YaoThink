@@ -240,6 +240,39 @@ async def analyze_from_solar(
             result_data=result
         )
         
+        # --- Big Data / AI Analysis ---
+        try:
+            # Extract features for Rule Engine
+            features = []
+            palaces_list = []
+            if result and "chart_data" in result and "palaces" in result["chart_data"]:
+                 palaces_list = result["chart_data"]["palaces"]
+            elif result and "palaces" in result: 
+                 palaces_list = result["palaces"]
+            
+            for palace in palaces_list:
+                p_name = palace.get("name")
+                # stars.main is a list of dicts or objects
+                stars_main = palace.get("stars", {}).get("main", [])
+                for star in stars_main:
+                    s_name = star.get("name") if isinstance(star, dict) else star
+                    features.append({"star": s_name, "palace": p_name})
+            
+            # Call Analysis Service
+            from app.core.analysis.intelligent_analyst import analysis_service
+            ai_report = analysis_service.analyze_ziwei({"features": features})
+            
+            if "extra_info" not in result:
+                result["extra_info"] = {}
+                
+            result["extra_info"]["ai_analysis"] = ai_report.get("content", "")
+            result["extra_info"]["ai_analysis_structured"] = ai_report.get("structured", {})
+            
+        except Exception as e:
+            print(f"AI Analysis failed: {e}")
+            pass
+        # -----------------------------
+
         return {"success": True, "data": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
