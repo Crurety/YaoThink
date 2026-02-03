@@ -32,8 +32,8 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-      # args:
-      #   - VITE_API_URL=/api
+      args:
+        - VITE_API_URL=/api
     container_name: yaothink-frontend
     restart: unless-stopped
     ports:
