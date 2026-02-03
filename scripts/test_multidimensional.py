@@ -5,9 +5,10 @@ import os
 sys.path.append(os.path.join(os.getcwd(), 'backend'))
 
 from app.core.analysis.intelligent_analyst import analysis_service
+from app.core.analysis.rule_engine import engine
 
 def test_ziwei_multidimensional():
-    print("Testing Ziwei Multi-dimensional Analysis...")
+    print("\n=== Testing Ziwei Multi-dimensional Analysis ===")
     
     mock_data = {
         "features": [
@@ -19,9 +20,6 @@ def test_ziwei_multidimensional():
         ]
     }
     
-    # Load rules (mocking the engine load if needed or relying on startup)
-    # The intelligent_analyst imports 'engine' which auto-loads on first use if we trigger it or we can manually load
-    from app.core.analysis.rule_engine import engine
     engine.load_rules()
     
     result = analysis_service.analyze_ziwei(mock_data)
@@ -44,5 +42,44 @@ def test_ziwei_multidimensional():
         for item in items:
             print(f"  - {item[:50]}...")
 
+def test_bazi_multidimensional():
+    print("\n=== Testing BaZi Multi-dimensional Analysis ===")
+    
+    # Mock data simulating what /api/bazi/analyze prepares
+    mock_data = {
+        "day_master": "甲",
+        "month": {"zhi": "寅"},
+        "geju": "正官格",
+        "shishen_profile": {"dominant": ["偏财", "七杀"]},
+        "wuxing_scores": {"火": 60, "木": 10}, # Excess Fire, Weak Wood
+        "current_dayun": {"gan": "丙", "zhi": "午"}
+    }
+    
+    engine.load_rules()
+    
+    result = analysis_service.analyze_bazi(mock_data)
+    structured = result.get("structured", {})
+    
+    print("\n--- Structured Output Keys ---")
+    print(list(structured.keys()))
+    
+    # Expect: core (Day Master), career (Geju), personality (Shishen), advice (Wuxing)
+    expected = ["core", "career", "personality", "advice"]
+    present = [k for k in expected if k in structured]
+    
+    if len(present) == len(expected):
+         print("\n[PASS] All expected dimensions present.")
+    else:
+         print(f"\n[FAIL] Missing dimensions. Expected {expected}, got {present}")
+         
+    print("\n--- Content Preview ---")
+    for cat, items in structured.items():
+        print(f"\n[{cat.upper()}]:")
+        for item in items:
+             # Clean newlines for preview
+            text = item.replace('\n', ' ')
+            print(f"  - {text[:60]}...")
+
 if __name__ == "__main__":
     test_ziwei_multidimensional()
+    test_bazi_multidimensional()
