@@ -18,7 +18,7 @@ from ..fusion import (
     MBTI_WUXING_MAP
 )
 
-router = APIRouter(prefix="/fusion", tags=["融合分析"])
+router = APIRouter(tags=["融合分析"])
 
 
 # ==================== 请求模型 ====================

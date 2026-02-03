@@ -105,7 +105,7 @@ async def global_exception_handler(request: Request, exc: Exception):
 # ==================== 注册路由 ====================
 
 app.include_router(auth.router, prefix="/api/auth", tags=["用户认证"])
-app.include_router(user.router, prefix="/api/users", tags=["用户管理"])
+
 app.include_router(bazi.router, prefix="/api/bazi", tags=["八字命理"])
 app.include_router(ziwei.router, prefix="/api/ziwei", tags=["紫微斗数"])
 app.include_router(yijing.router, prefix="/api/yijing", tags=["易经占卜"])
