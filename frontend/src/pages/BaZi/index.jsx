@@ -33,7 +33,7 @@ function BaZi() {
         if (!result) return
         setAnalysisLoading(true)
         try {
-            const response = await api.post('/api/analysis/analyze', {
+            const response = await api.post('/analysis/analyze', {
                 data: result.basic_info,
                 type: 'bazi'
             })
@@ -54,7 +54,7 @@ function BaZi() {
         setResult(null)
         try {
             const date = values.datetime
-            const response = await api.post('/api/bazi/analyze', {
+            const response = await api.post('/bazi/analyze', {
                 year: date.year(),
                 month: date.month() + 1,
                 day: date.date(),

@@ -48,7 +48,7 @@ const FusionPage = () => {
                 enneagram_type: userData.enneagram
             };
 
-            const res = await api.post('/api/fusion/analyze', requestData);
+            const res = await api.post('/fusion/analyze', requestData);
 
             if (res.data.success) {
                 setAnalysisResult(res.data.result);
@@ -76,7 +76,7 @@ const FusionPage = () => {
                 enneagram_type: userData.enneagram
             };
 
-            const res = await api.post('/api/fusion/report', requestData);
+            const res = await api.post('/fusion/report', requestData);
 
             if (res.data.success) {
                 setReport(res.data.report);

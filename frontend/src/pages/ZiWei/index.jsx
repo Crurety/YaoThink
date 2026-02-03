@@ -26,7 +26,7 @@ function ZiWei() {
         try {
             const date = values.datetime
             // 调用公历分析接口
-            const response = await api.post('/api/ziwei/analyze_solar', {
+            const response = await api.post('/ziwei/analyze_solar', {
                 year: date.year(),
                 month: date.month() + 1,
                 day: date.date(),

@@ -24,7 +24,7 @@ function YiJing() {
         setError(null)
         setResult(null)
         try {
-            const response = await api.post('/api/yijing/meihua/time', {
+            const response = await api.post('/yijing/meihua/time', {
                 question: ''
             })
             if (response.data.success) {
@@ -49,7 +49,7 @@ function YiJing() {
         setError(null)
         setResult(null)
         try {
-            const response = await api.post('/api/yijing/meihua/number', {
+            const response = await api.post('/yijing/meihua/number', {
                 number1: values.number1,
                 number2: values.number2,
                 question: values.question
@@ -76,7 +76,7 @@ function YiJing() {
         setError(null)
         setResult(null)
         try {
-            const response = await api.post('/api/yijing/meihua/text', {
+            const response = await api.post('/yijing/meihua/text', {
                 text: values.text,
                 question: values.question
             })
@@ -126,7 +126,7 @@ function YiJing() {
         setLoading(true)
 
         try {
-            const response = await api.post('/api/yijing/liuyao', {
+            const response = await api.post('/yijing/liuyao', {
                 question: ''
             })
             if (response.data.success) {

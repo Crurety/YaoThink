@@ -40,7 +40,7 @@ function AuthModal({ visible, onClose }) {
             }
 
             setSendingCode(true)
-            const response = await api.post('/api/auth/send-code', { phone })
+            const response = await api.post('/auth/send-code', { phone })
 
             if (response.data.success) {
                 message.success('验证码已发送')
@@ -68,22 +68,22 @@ function AuthModal({ visible, onClose }) {
             if (mode === 'login') {
                 switch (activeTab) {
                     case 'phone-sms':
-                        endpoint = '/api/auth/login/phone-sms'
+                        endpoint = '/auth/login/phone-sms'
                         payload = { phone: values.phone, code: values.code }
                         break
                     case 'phone-password':
-                        endpoint = '/api/auth/login/phone-password'
+                        endpoint = '/auth/login/phone-password'
                         payload = { phone: values.phone, password: values.password }
                         break
                     case 'email-password':
-                        endpoint = '/api/auth/login/email-password'
+                        endpoint = '/auth/login/email-password'
                         payload = { email: values.email, password: values.password }
                         break
                 }
             } else {
                 switch (activeTab) {
                     case 'phone-sms':
-                        endpoint = '/api/auth/register/phone'
+                        endpoint = '/auth/register/phone'
                         payload = {
                             phone: values.phone,
                             code: values.code,
@@ -92,7 +92,7 @@ function AuthModal({ visible, onClose }) {
                         }
                         break
                     case 'email-password':
-                        endpoint = '/api/auth/register/email'
+                        endpoint = '/auth/register/email'
                         payload = {
                             email: values.email,
                             password: values.password,

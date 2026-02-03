@@ -59,9 +59,9 @@ const ProfilePage = () => {
         setLoading(true);
         try {
             const [profileRes, statsRes, settingsRes] = await Promise.all([
-                api.get('/api/user/profile'),
-                api.get('/api/user/stats'),
-                api.get('/api/user/settings')
+                api.get('/user/profile'),
+                api.get('/user/stats'),
+                api.get('/user/settings')
             ]);
 
             setProfile(profileRes.data.data);
@@ -83,27 +83,27 @@ const ProfilePage = () => {
             let res;
             switch (type) {
                 case 'bazi':
-                    res = await api.get('/api/user/history/analyses', { params: { analysis_type: 'bazi' } });
+                    res = await api.get('/user/history/analyses', { params: { analysis_type: 'bazi' } });
                     setBaziList(res.data.data);
                     break;
                 case 'ziwei':
-                    res = await api.get('/api/user/history/analyses', { params: { analysis_type: 'ziwei' } });
+                    res = await api.get('/user/history/analyses', { params: { analysis_type: 'ziwei' } });
                     setZiweiList(res.data.data);
                     break;
                 case 'divinations':
-                    res = await api.get('/api/user/history/divinations');
+                    res = await api.get('/user/history/divinations');
                     setDivinations(res.data.data);
                     break;
                 case 'psychology':
-                    res = await api.get('/api/user/history/psychology');
+                    res = await api.get('/user/history/psychology');
                     setPsychologyTests(res.data.data);
                     break;
                 case 'fusions':
-                    res = await api.get('/api/user/history/fusions');
+                    res = await api.get('/user/history/fusions');
                     setFusions(res.data.data);
                     break;
                 case 'favorites':
-                    res = await api.get('/api/user/favorites');
+                    res = await api.get('/user/favorites');
                     setFavorites(res.data.data);
                     break;
             }
@@ -122,11 +122,11 @@ const ProfilePage = () => {
 
     const handleDelete = async (apiType, id, refreshType) => {
         try {
-            await api.delete(`/api/user/history/${apiType}/${id}`);
+            await api.delete(`/user/history/${apiType}/${id}`);
             message.success('删除成功');
             loadHistory(refreshType || apiType);
             // Refresh stats if needed
-            const statsRes = await api.get('/api/user/stats');
+            const statsRes = await api.get('/user/stats');
             setStats(statsRes.data.data);
         } catch (err) {
             message.error('删除失败');
@@ -143,7 +143,7 @@ const ProfilePage = () => {
     // Update Profile
     const handleUpdateProfile = async (values) => {
         try {
-            const res = await api.put('/api/user/profile', values);
+            const res = await api.put('/user/profile', values);
             if (res.data.success) {
                 message.success('资料更新成功');
                 setEditModalVisible(false);
@@ -157,7 +157,7 @@ const ProfilePage = () => {
     // Change Password
     const handleChangePassword = async (values) => {
         try {
-            const res = await api.post('/api/auth/change-password', values);
+            const res = await api.post('/auth/change-password', values);
             if (res.data.success) {
                 message.success('密码修改成功');
                 setPasswordModalVisible(false);
@@ -171,7 +171,7 @@ const ProfilePage = () => {
     // Update Settings
     const handleUpdateSettings = async (values) => {
         try {
-            const res = await api.put('/api/user/settings', values);
+            const res = await api.put('/user/settings', values);
             if (res.data.success) {
                 message.success('设置更新成功');
                 setSettings(values);
