@@ -51,14 +51,21 @@ function BaZi() {
                 },
                 // 五行能量分数
                 wuxing_scores: result.wuxing?.scores || {},
-                // 当前大运
-                current_dayun: result.dayun_liunian?.dayun_list?.find(d => d.is_current)
-                    ? {
-                        gan: result.dayun_liunian.dayun_list.find(d => d.is_current).ganzhi?.[0],
-                        zhi: result.dayun_liunian.dayun_list.find(d => d.is_current).ganzhi?.[1],
-                        shishen: result.dayun_liunian.dayun_list.find(d => d.is_current).shishen
+                // 当前大运（修复：shishen格式为"正官/偏印"，取天干十神）
+                current_dayun: (() => {
+                    const currentDy = result.dayun_liunian?.dayun_list?.find(d => d.is_current)
+                    if (!currentDy) return null
+                    // ganzhi 是字符串如 "甲子"
+                    const gz = currentDy.ganzhi || ''
+                    // shishen 格式为 "正官/偏印"，取斜杠前的天干十神
+                    const shishenStr = currentDy.shishen || ''
+                    const ganShishen = shishenStr.split('/')[0]
+                    return {
+                        gan: gz[0] || null,
+                        zhi: gz[1] || null,
+                        shishen: ganShishen || null
                     }
-                    : null,
+                })(),
                 // 神煞列表
                 shensha: [
                     ...(result.shensha?.ji_shensha?.map(s => s.name) || []),
