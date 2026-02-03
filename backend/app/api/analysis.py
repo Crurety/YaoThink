@@ -28,13 +28,15 @@ async def analyze(request: AnalysisRequest, current_user = Depends(get_current_u
         engine.load_rules()
         
         result = ""
+        from app.core.analysis.intelligent_analyst import analysis_service
+        
+        result = ""
         if request.type == "bazi":
-            result = engine.analyze_bazi(request.data)
+            result = analysis_service.analyze_bazi(request.data)
         elif request.type == "ziwei":
-            # 暂未实现详细的紫微逻辑，返回简单的查找结果或 Mock
-            result = "紫微大数据分析模块正在接入中..."
+            result = analysis_service.analyze_ziwei(request.data)
         elif request.type == "yijing":
-             result = "易经大数据分析模块正在接入中..."
+             result = analysis_service.analyze_yijing(request.data)
         else:
             raise HTTPException(status_code=400, detail="不支持的分析类型")
             
