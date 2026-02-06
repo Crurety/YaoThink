@@ -157,7 +157,7 @@ async def analyze(
                              dy_zhi = dy_gz[1]
                              
                              # 计算大运天干十神
-                             dy_shishen = get_shishen(sizhu.day_master, dy_gan)
+                             dy_shishen = get_shishen(result["basic_info"]["day_master"], dy_gan)
                              
                              ai_data["current_dayun"] = {
                                  "gan": dy_gan, 
