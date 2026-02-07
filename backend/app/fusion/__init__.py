@@ -9,12 +9,15 @@ from .mapper import (
     SHISHEN_ARCHETYPE_MAP,
     PALACE_LIFE_DOMAIN_MAP,
     SHENSHA_TRAIT_MAP,
+    ZIWEI_STAR_PSYCHOLOGY_MAP,
     
     # 映射函数
     get_wuxing_psychology,
     get_shishen_psychology,
     map_mbti_to_wuxing,
-    map_palace_to_psychology
+    map_palace_to_psychology,
+    get_star_psychology,
+    get_palace_stars_psychology
 )
 
 from .analyzer import (
@@ -36,12 +39,15 @@ __all__ = [
     "SHISHEN_ARCHETYPE_MAP",
     "PALACE_LIFE_DOMAIN_MAP",
     "SHENSHA_TRAIT_MAP",
+    "ZIWEI_STAR_PSYCHOLOGY_MAP",
     
     # 映射函数
     "get_wuxing_psychology",
     "get_shishen_psychology",
     "map_mbti_to_wuxing",
     "map_palace_to_psychology",
+    "get_star_psychology",
+    "get_palace_stars_psychology",
     
     # 分析器
     "FusionResult",

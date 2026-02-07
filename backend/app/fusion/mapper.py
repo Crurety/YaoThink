@@ -207,6 +207,110 @@ PALACE_LIFE_DOMAIN_MAP = {
 }
 
 
+# ==================== 紫微十四主星心理学映射 ====================
+
+ZIWEI_STAR_PSYCHOLOGY_MAP = {
+    "紫微": {
+        "mbti_tendencies": ["N", "J"],
+        "keywords": ["领导", "权威", "尊贵", "自信"],
+        "archetypes": ["RULER", "SAGE"],
+        "big5": {"E": 10, "C": 10},
+        "description": "紫微帝星，主尊贵威严，对应领导者原型，体现计划性与远见"
+    },
+    "天机": {
+        "mbti_tendencies": ["N", "P"],
+        "keywords": ["智慧", "机变", "谋略", "敏锐"],
+        "archetypes": ["SAGE", "MAGICIAN"],
+        "big5": {"O": 15, "C": 5},
+        "description": "天机善谋，主智慧变通，对应智者与魔法师原型"
+    },
+    "太阳": {
+        "mbti_tendencies": ["E", "J"],
+        "keywords": ["光明", "博爱", "付出", "积极"],
+        "archetypes": ["HERO", "CAREGIVER"],
+        "big5": {"E": 15, "A": 10},
+        "description": "太阳光辉普照，主积极博爱，对应英雄与照顾者原型"
+    },
+    "武曲": {
+        "mbti_tendencies": ["T", "J"],
+        "keywords": ["果断", "财星", "刚毅", "执行"],
+        "archetypes": ["HERO", "RULER"],
+        "big5": {"C": 15, "A": -5},
+        "description": "武曲财星，主果敢决断，对应英雄原型的行动力"
+    },
+    "天同": {
+        "mbti_tendencies": ["F", "P"],
+        "keywords": ["温和", "福星", "享受", "安逸"],
+        "archetypes": ["INNOCENT", "JESTER"],
+        "big5": {"A": 15, "N": -5},
+        "description": "天同福星，主温和知足，对应天真者与愚者原型"
+    },
+    "廉贞": {
+        "mbti_tendencies": ["E", "T"],
+        "keywords": ["桃花", "政治", "复杂", "魅力"],
+        "archetypes": ["LOVER", "MAGICIAN"],
+        "big5": {"E": 10, "O": 10},
+        "description": "廉贞次桃花，主魅力与复杂，对应恋人与魔法师原型"
+    },
+    "天府": {
+        "mbti_tendencies": ["S", "J"],
+        "keywords": ["稳重", "财库", "保守", "可靠"],
+        "archetypes": ["CAREGIVER", "RULER"],
+        "big5": {"C": 15, "A": 10},
+        "description": "天府财库，主稳重可靠，对应照顾者与统治者原型"
+    },
+    "太阴": {
+        "mbti_tendencies": ["I", "F"],
+        "keywords": ["柔和", "细腻", "内敛", "艺术"],
+        "archetypes": ["CREATOR", "CAREGIVER"],
+        "big5": {"A": 10, "O": 10, "E": -10},
+        "description": "太阴柔美，主细腻内敛，对应创造者原型的艺术天赋"
+    },
+    "贪狼": {
+        "mbti_tendencies": ["E", "P"],
+        "keywords": ["欲望", "才艺", "多变", "桃花"],
+        "archetypes": ["EXPLORER", "LOVER"],
+        "big5": {"E": 15, "O": 15},
+        "description": "贪狼主桃花才艺，对应探险家与恋人原型的多元追求"
+    },
+    "巨门": {
+        "mbti_tendencies": ["T", "P"],
+        "keywords": ["口才", "是非", "分析", "质疑"],
+        "archetypes": ["SAGE", "REBEL"],
+        "big5": {"O": 10, "A": -10},
+        "description": "巨门主口才是非，对应智者原型的分析与质疑精神"
+    },
+    "天相": {
+        "mbti_tendencies": ["F", "J"],
+        "keywords": ["印星", "辅助", "礼仪", "规矩"],
+        "archetypes": ["CAREGIVER", "EVERYMAN"],
+        "big5": {"A": 15, "C": 10},
+        "description": "天相印星，主辅助规矩，对应照顾者与凡人原型"
+    },
+    "天梁": {
+        "mbti_tendencies": ["I", "J"],
+        "keywords": ["清高", "荫星", "老成", "化解"],
+        "archetypes": ["SAGE", "CAREGIVER"],
+        "big5": {"C": 10, "A": 10, "E": -5},
+        "description": "天梁荫星，主清高化解，对应智者与照顾者原型"
+    },
+    "七杀": {
+        "mbti_tendencies": ["T", "P"],
+        "keywords": ["魄力", "将星", "冲劲", "独立"],
+        "archetypes": ["HERO", "REBEL"],
+        "big5": {"E": 10, "C": 5, "A": -10},
+        "description": "七杀将星，主魄力独立，对应英雄与叛逆者原型"
+    },
+    "破军": {
+        "mbti_tendencies": ["E", "P"],
+        "keywords": ["变革", "冲锋", "破坏", "开创"],
+        "archetypes": ["REBEL", "EXPLORER"],
+        "big5": {"O": 15, "A": -5},
+        "description": "破军主变革开创，对应叛逆者与探险家原型"
+    }
+}
+
+
 # ==================== 神煞与心理特质映射 ====================
 
 SHENSHA_TRAIT_MAP = {
@@ -370,3 +474,73 @@ def map_palace_to_psychology(palace_name: str) -> Dict:
         "psychology_aspects": [],
         "questions": []
     })
+
+
+def get_star_psychology(star_name: str) -> Dict:
+    """
+    获取单颗星曜的心理学映射
+    
+    Args:
+        star_name: 星曜名称（如 "紫微", "天机" 等）
+    
+    Returns:
+        心理学映射字典，包含 mbti_tendencies, keywords, archetypes, big5, description
+    """
+    return ZIWEI_STAR_PSYCHOLOGY_MAP.get(star_name, {})
+
+
+def get_palace_stars_psychology(palace_stars: list) -> Dict:
+    """
+    获取宫位内所有星曜的综合心理分析
+    
+    Args:
+        palace_stars: 星曜列表，每个元素可以是字符串或包含 'name' 键的字典
+    
+    Returns:
+        综合心理分析结果
+    """
+    combined = {
+        "mbti_tendencies": {},
+        "keywords": [],
+        "archetypes": {},
+        "big5": {"O": 0, "C": 0, "E": 0, "A": 0, "N": 0},
+        "descriptions": []
+    }
+    
+    for star in palace_stars:
+        star_name = star.get("name") if isinstance(star, dict) else star
+        psychology = get_star_psychology(star_name)
+        
+        if not psychology:
+            continue
+        
+        # 累计 MBTI 倾向
+        for tendency in psychology.get("mbti_tendencies", []):
+            combined["mbti_tendencies"][tendency] = combined["mbti_tendencies"].get(tendency, 0) + 1
+        
+        # 收集关键词
+        combined["keywords"].extend(psychology.get("keywords", []))
+        
+        # 累计原型分数
+        for archetype in psychology.get("archetypes", []):
+            combined["archetypes"][archetype] = combined["archetypes"].get(archetype, 0) + 1
+        
+        # 累计大五人格调整值
+        for dim, val in psychology.get("big5", {}).items():
+            combined["big5"][dim] = combined["big5"].get(dim, 0) + val
+        
+        # 收集描述
+        if psychology.get("description"):
+            combined["descriptions"].append(f"{star_name}: {psychology['description']}")
+    
+    # 提取主要倾向
+    if combined["mbti_tendencies"]:
+        sorted_tendencies = sorted(combined["mbti_tendencies"].items(), key=lambda x: x[1], reverse=True)
+        combined["primary_mbti_tendencies"] = [t[0] for t in sorted_tendencies[:4]]
+    
+    if combined["archetypes"]:
+        sorted_archetypes = sorted(combined["archetypes"].items(), key=lambda x: x[1], reverse=True)
+        combined["primary_archetype"] = sorted_archetypes[0][0]
+    
+    return combined
+

@@ -12,10 +12,13 @@ from .mapper import (
     get_shishen_psychology,
     map_mbti_to_wuxing,
     map_palace_to_psychology,
+    get_star_psychology,
+    get_palace_stars_psychology,
     WUXING_MBTI_MAP,
     MBTI_WUXING_MAP,
     SHISHEN_ARCHETYPE_MAP,
-    PALACE_LIFE_DOMAIN_MAP
+    PALACE_LIFE_DOMAIN_MAP,
+    ZIWEI_STAR_PSYCHOLOGY_MAP
 )
 
 
@@ -126,6 +129,7 @@ class FusionAnalyzer:
             "strengths": [],
             "challenges": [],
             "potential": [],
+            "ziwei_insights": {},
             "description": ""
         }
         
@@ -151,6 +155,33 @@ class FusionAnalyzer:
             
             fusion["core_traits"].append(f"原型倾向: {predicted_archetype}")
         
+        # ===== 从紫微斗数提取星曜人格 =====
+        if ziwei:
+            ziwei_palace_analysis = self._analyze_ziwei_palaces(ziwei)
+            fusion["ziwei_insights"] = ziwei_palace_analysis
+            
+            # 提取命宫主星特质到核心特质
+            ming_gong = ziwei_palace_analysis.get("命宫", {})
+            if ming_gong:
+                ming_keywords = ming_gong.get("star_keywords", [])
+                if ming_keywords:
+                    fusion["core_traits"].extend(ming_keywords[:4])
+                
+                ming_archetype = ming_gong.get("primary_archetype")
+                if ming_archetype:
+                    fusion["core_traits"].append(f"紫微原型: {ming_archetype}")
+                    
+                    # 与用户荣格测试结果对比
+                    if archetype and ming_archetype == archetype:
+                        fusion["strengths"].append("紫微星曜与荣格原型高度吻合")
+                    
+                    # 与MBTI对比
+                    if mbti:
+                        star_mbti_tendencies = ming_gong.get("mbti_tendencies", [])
+                        mbti_match_count = sum(1 for t in star_mbti_tendencies if t in mbti)
+                        if mbti_match_count >= 2:
+                            fusion["strengths"].append("紫微星曜与MBTI特质一致")
+        
         # MBTI与大五融合
         if mbti and big5:
             mbti_traits = self._get_mbti_traits(mbti)
@@ -167,6 +198,64 @@ class FusionAnalyzer:
         fusion["description"] = self._generate_personality_description(fusion)
         
         return fusion
+    
+    def _analyze_ziwei_palaces(self, ziwei_data: Dict) -> Dict:
+        """
+        分析紫微宫位与心理领域
+        
+        Args:
+            ziwei_data: 紫微分析结果，需包含 'palaces' 或 'chart_data.palaces' 字段
+        
+        Returns:
+            每个宫位的星曜心理分析
+        """
+        palace_insights = {}
+        
+        # 兼容不同的数据结构
+        palaces_list = []
+        if "chart_data" in ziwei_data and "palaces" in ziwei_data["chart_data"]:
+            palaces_list = ziwei_data["chart_data"]["palaces"]
+        elif "palaces" in ziwei_data:
+            palaces_list = ziwei_data["palaces"]
+        
+        # 关键宫位优先分析
+        key_palaces = ["命宫", "官禄宫", "财帛宫", "夫妻宫", "福德宫", "迁移宫"]
+        
+        for palace in palaces_list:
+            palace_name = palace.get("name", "")
+            if not palace_name:
+                continue
+            
+            # 获取宫位的心理学映射
+            palace_mapping = map_palace_to_psychology(palace_name)
+            
+            # 提取主星列表
+            stars_main = []
+            stars_data = palace.get("stars", {})
+            if isinstance(stars_data, dict):
+                stars_main = stars_data.get("main", [])
+            elif "major_stars" in palace:
+                stars_main = palace.get("major_stars", [])
+            
+            if not stars_main:
+                continue
+            
+            # 获取星曜综合心理分析
+            star_psychology = get_palace_stars_psychology(stars_main)
+            
+            palace_insights[palace_name] = {
+                "life_domains": palace_mapping.get("life_domains", []),
+                "psychology_aspects": palace_mapping.get("psychology_aspects", []),
+                "questions": palace_mapping.get("questions", []),
+                "stars": [s.get("name") if isinstance(s, dict) else s for s in stars_main],
+                "star_keywords": star_psychology.get("keywords", []),
+                "primary_archetype": star_psychology.get("primary_archetype"),
+                "mbti_tendencies": star_psychology.get("primary_mbti_tendencies", []),
+                "big5_adjustments": star_psychology.get("big5", {}),
+                "descriptions": star_psychology.get("descriptions", [])
+            }
+        
+        return palace_insights
     
     def _analyze_consistency(
         self,
@@ -287,12 +376,41 @@ class FusionAnalyzer:
                 guidance["relationship"].append("练习换位思考，提升共情能力")
         
         # 基于紫微宫位的建议
-        if ziwei and "palaces" in ziwei:
-            for palace in ziwei.get("palaces", []):
-                palace_name = palace.get("name")
-                if palace_name == "官禄宫":
-                    palace_info = map_palace_to_psychology(palace_name)
-                    guidance["career"].extend(palace_info.get("questions", [])[:1])
+        if ziwei:
+            ziwei_palace_analysis = self._analyze_ziwei_palaces(ziwei)
+            
+            # 官禄宫 - 事业建议
+            guan_lu = ziwei_palace_analysis.get("官禄宫", {})
+            if guan_lu:
+                stars = guan_lu.get("stars", [])
+                keywords = guan_lu.get("star_keywords", [])
+                if stars:
+                    star_str = "、".join(stars[:2])
+                    guidance["career"].append(f"官禄宫坐{star_str}，适合发挥{','.join(keywords[:2])}的特质")
+                guidance["career"].extend(guan_lu.get("questions", [])[:1])
+            
+            # 财帛宫 - 财运建议
+            cai_bo = ziwei_palace_analysis.get("财帛宫", {})
+            if cai_bo:
+                archetype = cai_bo.get("primary_archetype")
+                if archetype:
+                    archetype_advice = {
+                        "RULER": "适合管理型理财，可考虑投资管理岗位",
+                        "SAGE": "适合知识变现，咨询类收入",
+                        "HERO": "适合开拓性收入，创业或销售",
+                        "EXPLORER": "适合多元化投资，不宜守成",
+                        "CAREGIVER": "适合稳健理财，服务行业收入",
+                        "CREATOR": "适合创意类收入，设计或内容创作"
+                    }
+                    if archetype in archetype_advice:
+                        guidance["growth"].append(archetype_advice[archetype])
+            
+            # 夫妻宫 - 关系建议
+            fu_qi = ziwei_palace_analysis.get("夫妻宫", {})
+            if fu_qi:
+                keywords = fu_qi.get("star_keywords", [])
+                if keywords:
+                    guidance["relationship"].append(f"感情上倾向{','.join(keywords[:2])}的伴侣类型")
         
         return guidance
     
