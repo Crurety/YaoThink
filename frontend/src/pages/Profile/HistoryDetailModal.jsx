@@ -7,6 +7,7 @@ import {
     UserOutlined, RocketOutlined, HeartOutlined, StarOutlined, CheckCircleOutlined
 } from '@ant-design/icons';
 import api from '../../services/api';
+import ReactMarkdown from 'react-markdown';
 
 const { Title, Text, Paragraph } = Typography;
 const { useToken } = theme;
@@ -493,82 +494,129 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
         // Fix Data Mapping
         const chart = data.chart_data || data;
         const analysis = data.analysis || {};
+        const extraInfo = data.extra_info || {};
+        const aiReport = extraInfo.ai_analysis || "";
 
         if (!chart.ming_gong) return <Empty description="数据结构不匹配" />;
 
         return (
             <div className="detail-content">
-                <Card style={{ ...getCardStyle(), marginBottom: 24, textAlign: 'center' }}>
-                    <Row gutter={24} divide>
-                        <Col span={8}>
-                            <Statistic title="命宫主星" value={analysis.ming_gong_stars?.map(s => s.name).join(' ') || '无'} valueStyle={{ fontSize: 20 }} />
+                {/* 1. 核心概览 */}
+                <Card style={{ ...getCardStyle(), marginBottom: 24 }}>
+                    <div style={{ textAlign: 'center', marginBottom: 16 }}>
+                        <Title level={4} style={{ margin: 0 }}>🟣 紫微命盘概览</Title>
+                    </div>
+                    <Row gutter={[16, 16]} justify="center">
+                        <Col span={8} style={{ textAlign: 'center' }}>
+                            <Statistic
+                                title="命宫主星"
+                                value={analysis.ming_gong_stars?.map(s => s.name).join(' ') || '无'}
+                                valueStyle={{ fontSize: 18, color: token.colorPrimary, fontWeight: 'bold' }}
+                            />
                         </Col>
-                        <Col span={8}>
-                            <Statistic title="五行局" value={chart.wuxing_ju} valueStyle={{ fontSize: 20 }} />
+                        <Col span={8} style={{ textAlign: 'center' }}>
+                            <Statistic
+                                title="五行局"
+                                value={chart.wuxing_ju}
+                                valueStyle={{ fontSize: 18 }}
+                            />
                         </Col>
-                        <Col span={8}>
-                            <Statistic title="身宫" value={chart.shen_gong} valueStyle={{ fontSize: 20 }} />
+                        <Col span={8} style={{ textAlign: 'center' }}>
+                            <Statistic
+                                title="身宫"
+                                value={chart.shen_gong}
+                                valueStyle={{ fontSize: 18 }}
+                            />
                         </Col>
                     </Row>
                 </Card>
 
-                <Title level={5}>命盘格局</Title>
-                <div style={{ marginBottom: 24 }}>
-                    {analysis.advanced_patterns?.length > 0 ? (
-                        analysis.advanced_patterns.map((pt, idx) => (
-                            <Tag key={idx} color="purple" style={{ padding: '4px 10px', marginBottom: 8 }}>
-                                {pt.name}
-                            </Tag>
-                        ))
-                    ) : <Text type="secondary">平稳格局，无特殊显示</Text>}
-                </div>
+                {/* 2. 命盘格局 */}
+                {analysis.advanced_patterns?.length > 0 && (
+                    <div style={{ marginBottom: 24 }}>
+                        <Title level={5} style={{ marginBottom: 12 }}>✨ 命盘格局</Title>
+                        <Card size="small" style={getCardStyle()} bordered={false}>
+                            <Space wrap>
+                                {analysis.advanced_patterns.map((pt, idx) => (
+                                    <Tag key={idx} color="purple" style={{ padding: '4px 12px', fontSize: 14 }}>
+                                        {pt.name}
+                                    </Tag>
+                                ))}
+                            </Space>
+                        </Card>
+                    </div>
+                )}
 
-                <Title level={5}>核心宫位分析</Title>
-                <List
-                    grid={{ gutter: 16, column: 1 }}
-                    dataSource={Object.entries(analysis.palace_scores || {}).sort(([, a], [, b]) => b.score - a.score).slice(0, 3)} // Sort by score desc, show top 3
-                    renderItem={([name, data]) => (
-                        <List.Item>
-                            <Card size="small" style={{ background: 'rgba(255,255,255,0.02)', borderColor: token.colorBorderSecondary }} bordered={true}>
-                                <Row justify="space-between" align="middle" style={{ marginBottom: 8 }}>
-                                    <Col>
-                                        <Space>
-                                            <Text strong>{name}</Text>
+                {/* 3. AI 深度分析报告 */}
+                {aiReport && (
+                    <div style={{ marginBottom: 24 }}>
+                        <Title level={5} style={{ marginBottom: 12 }}>📋 深度分析报告</Title>
+                        <Card style={getCardStyle()} bordered={false}>
+                            <div className="markdown-content" style={{ lineHeight: 1.8 }}>
+                                <ReactMarkdown>{aiReport}</ReactMarkdown>
+                            </div>
+                        </Card>
+                    </div>
+                )}
+
+                {/* 4. 宫位详细评分 */}
+                <div style={{ marginBottom: 24 }}>
+                    <Title level={5} style={{ marginBottom: 12 }}>🏛️ 宫位能量分析</Title>
+                    <List
+                        grid={{ gutter: 16, xs: 1, sm: 2, md: 3 }}
+                        dataSource={Object.entries(analysis.palace_scores || {})
+                            .sort(([, a], [, b]) => b.score - a.score)}
+                        renderItem={([name, data]) => {
+                            const isHigh = data.score >= 80;
+                            const isLow = data.score < 60;
+                            return (
+                                <List.Item>
+                                    <Card
+                                        size="small"
+                                        title={
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <span>{name}</span>
+                                                <span style={{ fontSize: 12, color: token.colorTextSecondary }}>{data.score}分</span>
+                                            </div>
+                                        }
+                                        style={{
+                                            ...getCardStyle(),
+                                            borderTop: `3px solid ${isHigh ? token.colorSuccess : isLow ? token.colorError : token.colorPrimary}`
+                                        }}
+                                    >
+                                        <div style={{ marginBottom: 8 }}>
                                             <Tag color={data.level === '极佳' || data.level === '良好' ? 'green' : data.level === '中等' ? 'orange' : 'red'}>
                                                 {data.level}
                                             </Tag>
-                                        </Space>
-                                    </Col>
-                                    <Col>
-                                        <Text type="warning" strong style={{ fontSize: 16 }}>{data.score}分</Text>
-                                    </Col>
-                                </Row>
+                                        </div>
 
-                                {data.positive_factors && data.positive_factors.length > 0 && (
-                                    <div style={{ marginBottom: 4 }}>
-                                        <Text type="secondary" style={{ fontSize: 12 }}>加分项：</Text>
-                                        <Space wrap size={[4, 4]}>
-                                            {data.positive_factors.map((f, i) => (
-                                                <Tag key={i} color="blue" bordered={false} style={{ fontSize: 10 }}>{f}</Tag>
-                                            ))}
-                                        </Space>
-                                    </div>
-                                )}
-
-                                {data.negative_factors && data.negative_factors.length > 0 && (
-                                    <div>
-                                        <Text type="secondary" style={{ fontSize: 12 }}>减分项：</Text>
-                                        <Space wrap size={[4, 4]}>
-                                            {data.negative_factors.map((f, i) => (
-                                                <Tag key={i} color="red" bordered={false} style={{ fontSize: 10 }}>{f}</Tag>
-                                            ))}
-                                        </Space>
-                                    </div>
-                                )}
-                            </Card>
-                        </List.Item>
-                    )}
-                />
+                                        {data.positive_factors?.length > 0 && (
+                                            <div style={{ marginBottom: 8 }}>
+                                                <Text type="secondary" style={{ fontSize: 11 }}>加分：</Text>
+                                                <div style={{ lineHeight: '1.2' }}>
+                                                    {data.positive_factors.slice(0, 3).map((f, i) => (
+                                                        <Text key={i} style={{ fontSize: 11, marginRight: 4, color: token.colorSuccess }}>{f}</Text>
+                                                    ))}
+                                                    {data.positive_factors.length > 3 && <Text style={{ fontSize: 10 }}>...</Text>}
+                                                </div>
+                                            </div>
+                                        )}
+                                        {data.negative_factors?.length > 0 && (
+                                            <div>
+                                                <Text type="secondary" style={{ fontSize: 11 }}>减分：</Text>
+                                                <div style={{ lineHeight: '1.2' }}>
+                                                    {data.negative_factors.slice(0, 3).map((f, i) => (
+                                                        <Text key={i} style={{ fontSize: 11, marginRight: 4, color: token.colorError }}>{f}</Text>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </Card>
+                                </List.Item>
+                            );
+                        }}
+                    />
+                </div>
             </div>
         );
     };
