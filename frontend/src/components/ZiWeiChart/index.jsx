@@ -71,7 +71,13 @@ function ZiWeiChart({ palaces }) {
                                     key={`center-${rowIndex}-${colIndex}`}
                                     className="ziwei-center"
                                 >
-                                    <div style={{ zIndex: 2 }}>
+                                    <div style={{
+                                        zIndex: 2,
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        alignItems: 'center',
+                                        justifyContent: 'center'
+                                    }}>
                                         <div style={{ fontSize: 32, marginBottom: 8, filter: 'drop-shadow(0 0 10px #7c3aed)' }}>☯</div>
                                         <div style={{ color: '#DAA520', fontWeight: 'bold', letterSpacing: 2 }}>紫微斗数</div>
                                     </div>
