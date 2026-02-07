@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Row, Col, Button, Steps, Typography, Tag, Spin, message, Result, Progress, Collapse, Divider } from 'antd';
 import {
     ThunderboltOutlined,
@@ -17,6 +18,7 @@ const { Panel } = Collapse;
 
 // 融合分析页面
 const FusionPage = () => {
+    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [analysisResult, setAnalysisResult] = useState(null);
     const [report, setReport] = useState(null);
@@ -31,6 +33,73 @@ const FusionPage = () => {
         archetype: null,
         enneagram: null
     });
+
+    // 页面加载时从 localStorage 读取各类分析数据
+    useEffect(() => {
+        const loadStoredData = () => {
+            const stored = {};
+
+            // 读取紫微数据
+            const ziweiData = localStorage.getItem('fusion_ziwei_data');
+            if (ziweiData) {
+                try {
+                    stored.ziwei = JSON.parse(ziweiData);
+                } catch (e) {
+                    console.error('解析紫微数据失败:', e);
+                }
+            }
+
+            // 读取八字数据
+            const baziData = localStorage.getItem('fusion_bazi_data');
+            if (baziData) {
+                try {
+                    stored.bazi = JSON.parse(baziData);
+                } catch (e) {
+                    console.error('解析八字数据失败:', e);
+                }
+            }
+
+            // 读取 MBTI 数据
+            const mbtiData = localStorage.getItem('fusion_mbti_data');
+            if (mbtiData) {
+                stored.mbti = mbtiData;
+            }
+
+            // 读取大五人格数据
+            const big5Data = localStorage.getItem('fusion_big5_data');
+            if (big5Data) {
+                try {
+                    stored.big5 = JSON.parse(big5Data);
+                } catch (e) {
+                    console.error('解析大五数据失败:', e);
+                }
+            }
+
+            // 读取荣格原型数据
+            const archetypeData = localStorage.getItem('fusion_archetype_data');
+            if (archetypeData) {
+                stored.archetype = archetypeData;
+            }
+
+            // 读取九型人格数据
+            const enneagramData = localStorage.getItem('fusion_enneagram_data');
+            if (enneagramData) {
+                stored.enneagram = parseInt(enneagramData);
+            }
+
+            // 更新状态
+            setUserData(prev => ({
+                ...prev,
+                ...stored
+            }));
+
+            if (Object.keys(stored).length > 0) {
+                message.success(`已加载 ${Object.keys(stored).length} 项分析数据`);
+            }
+        };
+
+        loadStoredData();
+    }, []);
 
     // 执行融合分析
     const runFusionAnalysis = async () => {
@@ -112,7 +181,10 @@ const FusionPage = () => {
             <Title level={4}>数据收集状态</Title>
             <Row gutter={[16, 16]}>
                 <Col span={8}>
-                    <div className={`status-item ${userData.bazi ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.bazi ? 'completed' : ''}`}
+                        onClick={() => navigate('/bazi?from=fusion')}
+                    >
                         <StarOutlined />
                         <Text>八字命理</Text>
                         <Tag color={userData.bazi ? 'green' : 'default'}>
@@ -121,7 +193,10 @@ const FusionPage = () => {
                     </div>
                 </Col>
                 <Col span={8}>
-                    <div className={`status-item ${userData.mbti ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.mbti ? 'completed' : ''}`}
+                        onClick={() => navigate('/psychology?tab=mbti&from=fusion')}
+                    >
                         <UserOutlined />
                         <Text>MBTI测试</Text>
                         <Tag color={userData.mbti ? 'green' : 'default'}>
@@ -130,7 +205,10 @@ const FusionPage = () => {
                     </div>
                 </Col>
                 <Col span={8}>
-                    <div className={`status-item ${userData.big5 ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.big5 ? 'completed' : ''}`}
+                        onClick={() => navigate('/psychology?tab=big5&from=fusion')}
+                    >
                         <StarOutlined />
                         <Text>大五人格</Text>
                         <Tag color={userData.big5 ? 'green' : 'default'}>
@@ -139,7 +217,10 @@ const FusionPage = () => {
                     </div>
                 </Col>
                 <Col span={8}>
-                    <div className={`status-item ${userData.archetype ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.archetype ? 'completed' : ''}`}
+                        onClick={() => navigate('/psychology?tab=archetype&from=fusion')}
+                    >
                         <ThunderboltOutlined />
                         <Text>荣格原型</Text>
                         <Tag color={userData.archetype ? 'green' : 'default'}>
@@ -148,7 +229,10 @@ const FusionPage = () => {
                     </div>
                 </Col>
                 <Col span={8}>
-                    <div className={`status-item ${userData.enneagram ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.enneagram ? 'completed' : ''}`}
+                        onClick={() => navigate('/psychology?tab=enneagram&from=fusion')}
+                    >
                         <UserOutlined />
                         <Text>九型人格</Text>
                         <Tag color={userData.enneagram ? 'green' : 'default'}>
@@ -157,7 +241,10 @@ const FusionPage = () => {
                     </div>
                 </Col>
                 <Col span={8}>
-                    <div className={`status-item ${userData.ziwei ? 'completed' : ''}`}>
+                    <div
+                        className={`status-item clickable ${userData.ziwei ? 'completed' : ''}`}
+                        onClick={() => navigate('/ziwei?from=fusion')}
+                    >
                         <StarOutlined />
                         <Text>紫微斗数</Text>
                         <Tag color={userData.ziwei ? 'green' : 'default'}>

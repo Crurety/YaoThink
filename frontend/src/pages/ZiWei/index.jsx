@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
     Card, Form, InputNumber, Button, Row, Col, Spin, Tabs, DatePicker,
     Tag, Descriptions, Typography, Select, Space, Alert, message, Divider
@@ -22,6 +23,10 @@ const renderContent = (content) => {
 }
 
 function ZiWei() {
+    const navigate = useNavigate()
+    const [searchParams] = useSearchParams()
+    const fromFusion = searchParams.get('from') === 'fusion'
+
     const [form] = Form.useForm()
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState(null)
@@ -42,7 +47,20 @@ function ZiWei() {
             })
 
             if (response.data.success) {
-                setResult(response.data.data)
+                const ziweiResult = response.data.data
+                setResult(ziweiResult)
+
+                // 如果来自融合页面，保存数据到 localStorage
+                if (fromFusion) {
+                    // 提取用于融合分析的数据结构
+                    const fusionZiweiData = {
+                        chart_data: ziweiResult.chart_data,
+                        palaces: ziweiResult.chart_data?.palaces || [],
+                        extra_info: ziweiResult.extra_info
+                    }
+                    localStorage.setItem('fusion_ziwei_data', JSON.stringify(fusionZiweiData))
+                    message.success('紫微数据已保存，可返回融合分析')
+                }
             } else {
                 setError(response.data.error || '排盘失败')
                 message.error(response.data.error || '排盘失败')
@@ -57,6 +75,11 @@ function ZiWei() {
         }
     }
 
+    // 返回融合页面
+    const goBackToFusion = () => {
+        navigate('/fusion')
+    }
+
     // tabItems has been replaced by ziwei-dashboard layout
 
     return (
@@ -65,6 +88,20 @@ function ZiWei() {
                 title={<><StarOutlined /> 紫微斗数排盘</>}
                 style={{ marginBottom: 24 }}
             >
+                {fromFusion && (
+                    <Alert
+                        message="来自融合分析"
+                        description="完成分析后数据将自动保存，您可以点击下方按钮返回融合分析页面"
+                        type="success"
+                        showIcon
+                        action={
+                            <Button size="small" type="primary" onClick={goBackToFusion}>
+                                返回融合分析
+                            </Button>
+                        }
+                        style={{ marginBottom: 16 }}
+                    />
+                )}
                 <Alert
                     message="请输入出生时间（公历/阳历）"
                     type="info"

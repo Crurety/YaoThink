@@ -64,6 +64,16 @@
     transition: all 0.3s;
 }
 
+.status-item.clickable {
+    cursor: pointer;
+}
+
+.status-item.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+    border-color: var(--accent-primary);
+}
+
 .status-item.completed {
     background: rgba(82, 196, 26, 0.1);
     border-color: rgba(82, 196, 26, 0.3);
