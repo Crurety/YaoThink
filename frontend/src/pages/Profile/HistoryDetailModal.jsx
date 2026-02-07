@@ -346,7 +346,127 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                                 )}
                                             </div>
                                         ) : (
-                                            <Text style={{ lineHeight: 1.8 }}>{data.personality}</Text>
+                                            // 解析字符串形式的性格分析
+                                            (() => {
+                                                const text = String(data.personality);
+                                                // 按分号分割段落
+                                                const segments = text.split(/[；;]/).filter(s => s.trim());
+
+                                                // 分类识别
+                                                const shishenPattern = /^[\u4e00-\u9fa5]+,\d/; // 十神格式：正官,2
+                                                const strengthPattern = /品行|有责任感|稳重|学识渊博|心地善良|有贵人|受人尊敬|独立自主|意志坚定|自信|重义气/;
+                                                const weaknessPattern = /过于|胆小|缺乏|压力|依赖|保守|固执|懒惰|不善|争强|我行我素/;
+                                                const careerPattern = /适合|公务员|管理|法律|教育|学术|慈善|创业|自由职业|竞技/;
+                                                const summaryPattern = /您的八字|格局|属于/;
+
+                                                const shishen = [];
+                                                const strengths = [];
+                                                const weaknesses = [];
+                                                const careers = [];
+                                                let summary = '';
+
+                                                segments.forEach(seg => {
+                                                    const s = seg.trim();
+                                                    if (!s) return;
+
+                                                    if (shishenPattern.test(s)) {
+                                                        // 解析十神：正官,2,正印,2
+                                                        const parts = s.split(',');
+                                                        for (let i = 0; i < parts.length - 1; i += 2) {
+                                                            if (parts[i] && parts[i + 1]) {
+                                                                shishen.push({ name: parts[i].trim(), count: parts[i + 1].trim() });
+                                                            }
+                                                        }
+                                                    } else if (summaryPattern.test(s)) {
+                                                        summary = s;
+                                                    } else if (careerPattern.test(s)) {
+                                                        // 提取职业关键词
+                                                        const items = s.replace(/适合|等/g, '').split(/[,，、]/);
+                                                        careers.push(...items.filter(i => i.trim()));
+                                                    } else if (weaknessPattern.test(s)) {
+                                                        const items = s.split(/[,，、]/);
+                                                        weaknesses.push(...items.filter(i => i.trim()));
+                                                    } else if (strengthPattern.test(s) || strengths.length === 0) {
+                                                        const items = s.split(/[,，、]/);
+                                                        strengths.push(...items.filter(i => i.trim()));
+                                                    }
+                                                });
+
+                                                return (
+                                                    <div>
+                                                        {/* 十神分布 */}
+                                                        {shishen.length > 0 && (
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Text type="secondary" style={{ fontSize: 12 }}>🌟 十神分布</Text>
+                                                                <div style={{ marginTop: 8 }}>
+                                                                    <Space wrap size={[8, 8]}>
+                                                                        {shishen.map((s, i) => (
+                                                                            <Tag key={i} color="purple" style={{ margin: 0, padding: '4px 12px' }}>
+                                                                                {s.name} <strong>×{s.count}</strong>
+                                                                            </Tag>
+                                                                        ))}
+                                                                    </Space>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 优点 */}
+                                                        {strengths.length > 0 && (
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Text type="secondary" style={{ fontSize: 12 }}>✨ 性格优点</Text>
+                                                                <div style={{ marginTop: 8 }}>
+                                                                    <Space wrap size={[4, 4]}>
+                                                                        {strengths.slice(0, 12).map((s, i) => (
+                                                                            <Tag key={i} color="green" style={{ margin: 0 }}>{s.trim()}</Tag>
+                                                                        ))}
+                                                                    </Space>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 缺点 */}
+                                                        {weaknesses.length > 0 && (
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Text type="secondary" style={{ fontSize: 12 }}>⚠️ 需要注意</Text>
+                                                                <div style={{ marginTop: 8 }}>
+                                                                    <Space wrap size={[4, 4]}>
+                                                                        {weaknesses.slice(0, 12).map((w, i) => (
+                                                                            <Tag key={i} color="orange" style={{ margin: 0 }}>{w.trim()}</Tag>
+                                                                        ))}
+                                                                    </Space>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 适合职业 */}
+                                                        {careers.length > 0 && (
+                                                            <div style={{ marginBottom: 16 }}>
+                                                                <Text type="secondary" style={{ fontSize: 12 }}>💼 适合职业</Text>
+                                                                <div style={{ marginTop: 8 }}>
+                                                                    <Space wrap size={[4, 4]}>
+                                                                        {careers.slice(0, 12).map((c, i) => (
+                                                                            <Tag key={i} color="blue" style={{ margin: 0 }}>{c.trim()}</Tag>
+                                                                        ))}
+                                                                    </Space>
+                                                                </div>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 综合评语 */}
+                                                        {summary && (
+                                                            <div style={{
+                                                                marginTop: 16,
+                                                                padding: '12px 16px',
+                                                                background: token.colorFillAlter,
+                                                                borderRadius: token.borderRadiusLG,
+                                                                borderLeft: `3px solid ${token.colorPrimary}`
+                                                            }}>
+                                                                <Text style={{ lineHeight: 1.8 }}>{summary}</Text>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                );
+                                            })()
                                         )}
                                     </Card>
                                 </Col>
