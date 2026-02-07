@@ -61,9 +61,25 @@ class BaseAnalyst:
             
         paragraphs = []
         
-        # 核心格局优先
+        # 核心格局优先（八字、紫微、易经本卦等）
         if "core" in categories:
-            paragraphs.append("【核心格局】" + "；".join(categories["core"]) + "。")
+            paragraphs.extend(categories["core"])
+        
+        # 易经上下卦象
+        if "trigram" in categories:
+            paragraphs.extend(categories["trigram"])
+        
+        # 易经体用关系
+        if "relation" in categories:
+            paragraphs.extend(categories["relation"])
+        
+        # 易经动爻
+        if "moving" in categories:
+            paragraphs.extend(categories["moving"])
+        
+        # 易经变卦
+        if "change" in categories:
+            paragraphs.extend(categories["change"])
             
         # 性格分析
         if "personality" in categories:
@@ -71,9 +87,9 @@ class BaseAnalyst:
             
         # 运势/具体建议
         if "advice" in categories:
-            paragraphs.append("【发展建议】" + "；".join(categories["advice"]) + "。")
+            paragraphs.extend(categories["advice"])
 
-        # 神煞 (Missing in original logic but good to have)
+        # 神煞
         if "shensha" in categories:
              paragraphs.append("【神煞启示】" + "；".join(categories["shensha"]) + "。")
             
@@ -448,48 +464,246 @@ class ZiweiAnalyst(BaseAnalyst):
 class YijingAnalyst(BaseAnalyst):
     """易经智能分析器"""
     
+    # 八卦五行映射
+    BAGUA_WUXING = {
+        "乾": "金", "兑": "金",
+        "离": "火",
+        "震": "木", "巽": "木",
+        "坎": "水",
+        "艮": "土", "坤": "土"
+    }
+    
+    # 五行生克关系
+    WUXING_SHENG = {"木": "火", "火": "土", "土": "金", "金": "水", "水": "木"}
+    WUXING_KE = {"木": "土", "土": "水", "水": "火", "火": "金", "金": "木"}
+    
     def analyze(self, data: Dict[str, Any]) -> Dict[str, Any]:
         items = []
         
         main_gua = data.get("main_gua", {})
-        dong_yao = data.get("dong_yao") # int 1-6 or None
+        dong_yao = data.get("dong_yao")  # int 1-6 or None
+        changed_gua = data.get("changed_gua", {})
         
         gua_name = main_gua.get("name", "未知")
+        upper_gua = main_gua.get("upper", {}).get("name", "")
+        lower_gua = main_gua.get("lower", {}).get("name", "")
         
-        # 1. 本卦大象分析
-        # Strategy: 1. Specific Gua Name
+        # --- 1. 本卦大象分析 ---
         gua_desc = self.get_rule([f"yijing:theory:gua:{gua_name}"])
-        if not gua_desc:
-            gua_desc = f"【{gua_name}】：此卦象征当前的处境。"
-            
-        items.append(AnalyticItem(
-            content=gua_desc, 
-            weight=10.0, 
-            category="core"
-        ))
-        
-        # 2. 动爻具体分析
-        if dong_yao:
+        if gua_desc:
             items.append(AnalyticItem(
-                content=f"变爻在第{dong_yao}爻，这是事情发展的关键转折点", 
-                weight=8.0, 
+                content=f"**【本卦】{gua_name}**\n{gua_desc}",
+                weight=10.0,
                 category="core"
             ))
-            
-            yao_theory = self.get_rule([f"yijing:theory:yao:{dong_yao}"])
-            if yao_theory:
-                 items.append(AnalyticItem(content=yao_theory, weight=7.0, category="advice"))
         else:
             items.append(AnalyticItem(
-                content="此卦无动爻，更加强调本卦特质的稳定性，事情短期内变数较小", 
-                weight=7.0, 
+                content=f"**【本卦】{gua_name}**\n此卦象征当前的处境与问题的核心所在。",
+                weight=8.0,
                 category="core"
             ))
+        
+        # --- 2. 上下卦象分析 ---
+        trigram_items = self._analyze_trigrams(upper_gua, lower_gua)
+        items.extend(trigram_items)
+        
+        # --- 3. 体用生克分析 ---
+        if dong_yao and upper_gua and lower_gua:
+            relation_items = self._analyze_relation(upper_gua, lower_gua, dong_yao)
+            items.extend(relation_items)
+        
+        # --- 4. 动爻详解 ---
+        if dong_yao:
+            yao_items = self._analyze_moving_yao(dong_yao, gua_name)
+            items.extend(yao_items)
+        else:
+            items.append(AnalyticItem(
+                content="**【卦象稳定】**\n此卦无动爻，更加强调本卦特质的稳定性，事情短期内变数较小。宜守不宜攻，保持现状为佳。",
+                weight=7.0,
+                category="advice"
+            ))
+        
+        # --- 5. 变卦趋势分析 ---
+        if changed_gua and changed_gua.get("name"):
+            change_items = self._analyze_change(changed_gua, gua_name)
+            items.extend(change_items)
+        
+        # --- 6. 综合建议 ---
+        advice_item = self._generate_advice(gua_name, dong_yao, upper_gua, lower_gua)
+        if advice_item:
+            items.append(advice_item)
 
         return {
             "content": self.generate_narrative(items),
             "structured": self.generate_structured(items)
         }
+    
+    def _analyze_trigrams(self, upper: str, lower: str) -> List[AnalyticItem]:
+        """分析上下卦象"""
+        items = []
+        
+        # 上卦分析
+        if upper:
+            upper_desc = self.get_rule([f"yijing:theory:bagua:{upper}"])
+            if upper_desc:
+                items.append(AnalyticItem(
+                    content=f"**【上卦·外象】{upper}卦**\n上卦代表外在环境、他人态度或事情的表象。\n{upper_desc}",
+                    weight=9.0,
+                    category="trigram"
+                ))
+        
+        # 下卦分析
+        if lower:
+            lower_desc = self.get_rule([f"yijing:theory:bagua:{lower}"])
+            if lower_desc:
+                items.append(AnalyticItem(
+                    content=f"**【下卦·内象】{lower}卦**\n下卦代表内在状态、自身处境或事情的本质。\n{lower_desc}",
+                    weight=9.0,
+                    category="trigram"
+                ))
+        
+        return items
+    
+    def _analyze_relation(self, upper: str, lower: str, dong_yao: int) -> List[AnalyticItem]:
+        """
+        分析体用生克关系
+        梅花易数：动爻所在卦为用卦，不动的卦为体卦
+        动爻1-3在下卦，则下卦为用，上卦为体
+        动爻4-6在上卦，则上卦为用，下卦为体
+        """
+        items = []
+        
+        # 确定体用
+        if dong_yao <= 3:
+            ti_gua, yong_gua = upper, lower
+            ti_name, yong_name = "上卦", "下卦"
+        else:
+            ti_gua, yong_gua = lower, upper
+            ti_name, yong_name = "下卦", "上卦"
+        
+        ti_wx = self.BAGUA_WUXING.get(ti_gua, "")
+        yong_wx = self.BAGUA_WUXING.get(yong_gua, "")
+        
+        if not ti_wx or not yong_wx:
+            return items
+        
+        # 判断生克关系
+        relation = ""
+        relation_key = ""
+        if ti_wx == yong_wx:
+            relation = "比和"
+            relation_key = "比和"
+        elif self.WUXING_KE.get(ti_wx) == yong_wx:
+            relation = f"体克用（{ti_wx}克{yong_wx}）"
+            relation_key = "体克用"
+        elif self.WUXING_KE.get(yong_wx) == ti_wx:
+            relation = f"用克体（{yong_wx}克{ti_wx}）"
+            relation_key = "用克体"
+        elif self.WUXING_SHENG.get(ti_wx) == yong_wx:
+            relation = f"体生用（{ti_wx}生{yong_wx}）"
+            relation_key = "体生用"
+        elif self.WUXING_SHENG.get(yong_wx) == ti_wx:
+            relation = f"用生体（{yong_wx}生{ti_wx}）"
+            relation_key = "用生体"
+        
+        if relation:
+            relation_desc = self.get_rule([f"yijing:theory:relation:{relation_key}"])
+            content = f"**【体用关系】**\n- 体卦：{ti_gua}（{ti_name}，五行{ti_wx}）\n- 用卦：{yong_gua}（{yong_name}，五行{yong_wx}）\n- 关系：{relation}\n"
+            if relation_desc:
+                content += f"\n{relation_desc}"
+            
+            items.append(AnalyticItem(
+                content=content,
+                weight=9.0,
+                category="relation"
+            ))
+        
+        return items
+    
+    def _analyze_moving_yao(self, dong_yao: int, gua_name: str) -> List[AnalyticItem]:
+        """分析动爻"""
+        items = []
+        
+        # 通用爻位解读
+        yao_theory = self.get_rule([f"yijing:theory:yao:{dong_yao}"])
+        if yao_theory:
+            items.append(AnalyticItem(
+                content=f"**【动爻·第{dong_yao}爻】**\n变爻在第{dong_yao}爻，这是事情发展的关键转折点。\n{yao_theory}",
+                weight=8.5,
+                category="moving"
+            ))
+        else:
+            items.append(AnalyticItem(
+                content=f"**【动爻·第{dong_yao}爻】**\n变爻在第{dong_yao}爻，这是事情发展的关键转折点。动爻所在位置决定了变化的方向和性质。",
+                weight=7.5,
+                category="moving"
+            ))
+        
+        return items
+    
+    def _analyze_change(self, changed_gua: Dict, original_name: str) -> List[AnalyticItem]:
+        """分析变卦趋势"""
+        items = []
+        
+        changed_name = changed_gua.get("name", "")
+        if not changed_name:
+            return items
+        
+        # 变卦解读
+        changed_desc = self.get_rule([f"yijing:theory:gua:{changed_name}"])
+        content = f"**【变卦·{changed_name}】**\n由{original_name}变为{changed_name}，代表事情的发展趋势和最终走向。\n"
+        
+        if changed_desc:
+            content += f"\n{changed_desc}"
+        else:
+            content += "变卦揭示了事态演变的方向，需结合体用关系综合判断吉凶。"
+        
+        items.append(AnalyticItem(
+            content=content,
+            weight=8.0,
+            category="change"
+        ))
+        
+        return items
+    
+    def _generate_advice(self, gua_name: str, dong_yao: Optional[int], upper: str, lower: str) -> Optional[AnalyticItem]:
+        """生成综合建议"""
+        # 根据卦象生成简要行动建议
+        advice_parts = []
+        
+        # 根据上下卦五行给出大方向建议
+        upper_wx = self.BAGUA_WUXING.get(upper, "")
+        lower_wx = self.BAGUA_WUXING.get(lower, "")
+        
+        wx_advice = {
+            "金": "宜果断决策，把握时机",
+            "木": "宜稳步推进，循序渐进",
+            "水": "宜灵活应变，顺势而为",
+            "火": "宜积极行动，热情投入",
+            "土": "宜稳扎稳打，厚积薄发"
+        }
+        
+        if lower_wx and lower_wx in wx_advice:
+            advice_parts.append(f"内在基础：{wx_advice[lower_wx]}")
+        if upper_wx and upper_wx in wx_advice and upper_wx != lower_wx:
+            advice_parts.append(f"外在应对：{wx_advice[upper_wx]}")
+        
+        if dong_yao:
+            if dong_yao <= 2:
+                advice_parts.append("时机尚早，宜积蓄力量，不可冒进")
+            elif dong_yao <= 4:
+                advice_parts.append("正处关键期，需谨慎权衡，把握分寸")
+            else:
+                advice_parts.append("事态成熟，宜审时度势，见好就收")
+        
+        if advice_parts:
+            return AnalyticItem(
+                content="**【行动指南】**\n" + "；".join(advice_parts) + "。",
+                weight=7.5,
+                category="advice"
+            )
+        
+        return None
 
 class AnalysisService:
     """

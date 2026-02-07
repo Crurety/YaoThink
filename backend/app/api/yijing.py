@@ -24,12 +24,16 @@ def _attach_ai_analysis(result: dict):
     """附加大数据分析"""
     try:
         # Prepare data for rule engine
-        # result['original_hexagram'] contains 'name', 'code' etc.
+        # result['original_hexagram'] contains 'name', 'upper', 'lower' etc.
         # result['dong_yao'] is index (1-6)
+        # result['changed_gua'] contains the transformed hexagram info
+        
+        main_gua = result.get("main_gua", result.get("original_hexagram", {}))
         
         hex_data = {
-            "main_gua": result.get("original_hexagram", {}),
-            "dong_yao": result.get("dong_yao")
+            "main_gua": main_gua,
+            "dong_yao": result.get("dong_yao"),
+            "changed_gua": result.get("changed_gua", {})
         }
         
         from app.core.analysis.intelligent_analyst import analysis_service
@@ -37,7 +41,6 @@ def _attach_ai_analysis(result: dict):
         if ai_report:
            if "extra_info" not in result:
                result["extra_info"] = {}
-           # result["extra_info"]["ai_analysis"] = ai_report
            result["extra_info"]["ai_analysis"] = ai_report.get("content", "")
            result["extra_info"]["ai_analysis_structured"] = ai_report.get("structured", {})
     except Exception as e:
