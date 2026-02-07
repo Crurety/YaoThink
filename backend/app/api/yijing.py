@@ -184,7 +184,6 @@ async def meihua_text(
     """
     try:
         hexagram = meihua_by_text(request.text)
-        hexagram = meihua_by_text(request.text)
         result = analyze_hexagram(hexagram, request.question or request.text)
         
         # Attach AI Analysis
