@@ -42,7 +42,12 @@ const MarkdownViewer = ({
         relationship: { color: 'pink', label: '人际感情', bg: 'rgba(236, 72, 153, 0.05)', border: 'rgba(236, 72, 153, 0.2)' },
         luck: { color: 'cyan', label: '大运流年', bg: 'rgba(56, 189, 248, 0.05)', border: 'rgba(56, 189, 248, 0.2)' },
         shensha: { color: 'magenta', label: '神煞启示', bg: 'rgba(244, 114, 182, 0.05)', border: 'rgba(244, 114, 182, 0.2)' },
-        health: { color: 'red', label: '健康提示', bg: 'rgba(239, 68, 68, 0.05)', border: 'rgba(239, 68, 68, 0.2)' }
+        health: { color: 'red', label: '健康提示', bg: 'rgba(239, 68, 68, 0.05)', border: 'rgba(239, 68, 68, 0.2)' },
+        // 易经专用维度
+        trigram: { color: 'geekblue', label: '卦象分析', bg: 'rgba(59, 130, 246, 0.08)', border: 'rgba(59, 130, 246, 0.3)' },
+        relation: { color: 'lime', label: '体用关系', bg: 'rgba(132, 204, 22, 0.08)', border: 'rgba(132, 204, 22, 0.3)' },
+        moving: { color: 'volcano', label: '动爻详解', bg: 'rgba(255, 77, 79, 0.08)', border: 'rgba(255, 77, 79, 0.3)' },
+        change: { color: 'purple', label: '变卦趋势', bg: 'rgba(147, 51, 234, 0.08)', border: 'rgba(147, 51, 234, 0.3)' }
     }
 
     // 渲染单个维度卡片
@@ -78,7 +83,7 @@ const MarkdownViewer = ({
     }
 
     // 维度显示顺序
-    const dimensionOrder = ['core', 'luck', 'career', 'wealth', 'personality', 'relationship', 'advice', 'shensha', 'health']
+    const dimensionOrder = ['core', 'trigram', 'relation', 'moving', 'change', 'luck', 'career', 'wealth', 'personality', 'relationship', 'advice', 'shensha', 'health']
 
     return (
         <div style={{ ...style }}>
