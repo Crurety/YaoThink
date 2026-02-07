@@ -548,16 +548,38 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                 )}
 
                 {/* 3. AI 深度分析报告 */}
-                {aiReport && (
-                    <div style={{ marginBottom: 24 }}>
-                        <Title level={5} style={{ marginBottom: 12 }}>📋 深度分析报告</Title>
-                        <Card style={getCardStyle()} bordered={false}>
-                            <div className="markdown-content" style={{ lineHeight: 1.8 }}>
-                                <ReactMarkdown>{aiReport}</ReactMarkdown>
+                <div style={{ marginBottom: 24 }}>
+                    <Title level={5} style={{ marginBottom: 12 }}>📋 深度分析报告</Title>
+                    <Card style={getCardStyle()} bordered={false}>
+                        {aiReport ? (
+                            <div className="markdown-content" style={{ lineHeight: 1.8, fontSize: 14 }}>
+                                <ReactMarkdown
+                                    components={{
+                                        h1: ({ node, ...props }) => <h3 style={{ marginTop: 16, marginBottom: 12, color: token.colorPrimary }} {...props} />,
+                                        h2: ({ node, ...props }) => <h4 style={{ marginTop: 12, marginBottom: 8, color: token.colorTextHeading }} {...props} />,
+                                        p: ({ node, ...props }) => <p style={{ marginBottom: 12, color: token.colorText }} {...props} />,
+                                        li: ({ node, ...props }) => <li style={{ marginBottom: 4 }} {...props} />,
+                                        strong: ({ node, ...props }) => <strong style={{ color: token.colorPrimaryText }} {...props} />
+                                    }}
+                                >
+                                    {aiReport}
+                                </ReactMarkdown>
                             </div>
-                        </Card>
-                    </div>
-                )}
+                        ) : (
+                            <Empty
+                                image={Empty.PRESENTED_IMAGE_SIMPLE}
+                                description={
+                                    <span>
+                                        暂无深度分析报告
+                                        <div style={{ fontSize: 12, color: token.colorTextSecondary, marginTop: 4 }}>
+                                            (可能是早期记录或分析服务未响应)
+                                        </div>
+                                    </span>
+                                }
+                            />
+                        )}
+                    </Card>
+                </div>
 
                 {/* 4. 宫位详细评分 */}
                 <div style={{ marginBottom: 24 }}>
