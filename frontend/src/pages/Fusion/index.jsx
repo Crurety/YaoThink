@@ -105,24 +105,48 @@ const FusionPage = () => {
         }));
     };
 
-    // 获取报告摘要显示
+    // 类型名称映射
+    const TYPE_LABELS = {
+        bazi: '八字命理',
+        ziwei: '紫微斗数',
+        mbti: '心理测试',
+        big5: '心理测试',
+        archetype: '心理测试',
+        enneagram: '心理测试'
+    };
+
+    // 格式化报告编号: 类型+YYYY-MM-DD_HH:mm:SS
+    const formatRecordId = (category, record) => {
+        if (!record) return '';
+        const typeLabel = TYPE_LABELS[category] || '报告';
+        const date = new Date(record.created_at);
+        const yyyy = date.getFullYear();
+        const MM = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        const HH = String(date.getHours()).padStart(2, '0');
+        const mm = String(date.getMinutes()).padStart(2, '0');
+        const SS = String(date.getSeconds()).padStart(2, '0');
+        return `${typeLabel}_${yyyy}-${MM}-${dd}_${HH}:${mm}:${SS}`;
+    };
+
+    // 获取报告摘要显示（用于卡片 Tag）
     const getRecordSummary = (category, record) => {
         if (!record) return '待选择';
 
         switch (category) {
             case 'bazi':
             case 'ziwei':
-                return new Date(record.created_at).toLocaleDateString();
+                return formatRecordId(category, record);
             case 'mbti':
-                return record.result_data?.type_code || 'MBTI';
+                return record.result_data?.type_code || formatRecordId(category, record);
             case 'big5':
-                return '已测试';
+                return formatRecordId(category, record);
             case 'archetype':
-                return record.result_data?.primary?.name || '原型';
+                return record.result_data?.primary?.name || formatRecordId(category, record);
             case 'enneagram':
-                return `${record.result_data?.primary_type || ''}号`;
+                return record.result_data?.primary_type ? `${record.result_data.primary_type}号` : formatRecordId(category, record);
             default:
-                return '已选择';
+                return formatRecordId(category, record);
         }
     };
 
