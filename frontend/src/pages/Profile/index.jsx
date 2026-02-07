@@ -15,12 +15,14 @@ import {
 import api from '../../services/api';
 import HistoryDetailModal from './HistoryDetailModal';
 import HistoryCard from './components/HistoryCard';
+import { useTheme } from '../../stores/ThemeContext';
 import './index.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { TabPane } = Tabs;
 
 const ProfilePage = () => {
+    const { theme, setTheme } = useTheme();
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState('overview');
 
@@ -175,6 +177,10 @@ const ProfilePage = () => {
             if (res.data.success) {
                 message.success('设置更新成功');
                 setSettings(values);
+                // 联动应用主题
+                if (values.theme && values.theme !== theme) {
+                    setTheme(values.theme);
+                }
             }
         } catch (err) {
             message.error('设置更新失败');
@@ -308,7 +314,12 @@ const ProfilePage = () => {
                 onFinish={handleUpdateSettings}
             >
                 <Form.Item label="主题" name="theme">
-                    <Select>
+                    <Select
+                        onChange={(value) => {
+                            // 实时切换主题预览
+                            setTheme(value);
+                        }}
+                    >
                         <Select.Option value="dark">深色模式</Select.Option>
                         <Select.Option value="light">浅色模式</Select.Option>
                     </Select>
