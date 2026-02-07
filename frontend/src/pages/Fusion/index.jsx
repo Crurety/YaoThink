@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { Card, Row, Col, Button, Steps, Typography, Tag, Spin, message, Result, Progress, Collapse, Divider } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Card, Row, Col, Button, Steps, Typography, Tag, Spin, message, Progress, Collapse, Divider, Modal, List, Empty } from 'antd';
 import {
     ThunderboltOutlined,
     UserOutlined,
     StarOutlined,
-    CheckCircleOutlined,
     FileTextOutlined,
-    SyncOutlined
+    SyncOutlined,
+    HistoryOutlined,
+    CheckOutlined
 } from '@ant-design/icons';
 import api from '../../services/api';
 import ReactMarkdown from 'react-markdown';
@@ -15,6 +16,16 @@ import './index.css';
 
 const { Title, Text, Paragraph } = Typography;
 const { Panel } = Collapse;
+
+// 六大类别配置
+const CATEGORIES = {
+    bazi: { name: '八字命理', icon: <StarOutlined />, apiType: 'analyses', queryParam: 'bazi' },
+    ziwei: { name: '紫微斗数', icon: <StarOutlined />, apiType: 'analyses', queryParam: 'ziwei' },
+    mbti: { name: 'MBTI测试', icon: <UserOutlined />, apiType: 'psychology', queryParam: 'mbti' },
+    big5: { name: '大五人格', icon: <StarOutlined />, apiType: 'psychology', queryParam: 'big5' },
+    archetype: { name: '荣格原型', icon: <ThunderboltOutlined />, apiType: 'psychology', queryParam: 'archetype' },
+    enneagram: { name: '九型人格', icon: <UserOutlined />, apiType: 'psychology', queryParam: 'enneagram' }
+};
 
 // 融合分析页面
 const FusionPage = () => {
@@ -24,8 +35,8 @@ const FusionPage = () => {
     const [report, setReport] = useState(null);
     const [step, setStep] = useState(0);
 
-    // 用户已有的分析数据（模拟/从状态获取）
-    const [userData, setUserData] = useState({
+    // 选中的历史报告
+    const [selectedRecords, setSelectedRecords] = useState({
         bazi: null,
         ziwei: null,
         mbti: null,
@@ -34,87 +45,106 @@ const FusionPage = () => {
         enneagram: null
     });
 
-    // 页面加载时从 localStorage 读取各类分析数据
-    useEffect(() => {
-        const loadStoredData = () => {
-            const stored = {};
+    // Modal 状态
+    const [modalVisible, setModalVisible] = useState(false);
+    const [modalCategory, setModalCategory] = useState(null);
+    const [historyLoading, setHistoryLoading] = useState(false);
+    const [historyList, setHistoryList] = useState([]);
 
-            // 读取紫微数据
-            const ziweiData = localStorage.getItem('fusion_ziwei_data');
-            if (ziweiData) {
-                try {
-                    stored.ziwei = JSON.parse(ziweiData);
-                } catch (e) {
-                    console.error('解析紫微数据失败:', e);
-                }
+    // 计算已选择的报告数量
+    const selectedCount = Object.values(selectedRecords).filter(v => v !== null).length;
+    const canAnalyze = selectedCount >= 1; // 至少选择一项
+
+    // 打开选择历史记录弹窗
+    const openSelectModal = async (category) => {
+        setModalCategory(category);
+        setModalVisible(true);
+        setHistoryLoading(true);
+        setHistoryList([]);
+
+        try {
+            const config = CATEGORIES[category];
+            let endpoint = '';
+            let params = {};
+
+            if (config.apiType === 'analyses') {
+                endpoint = '/user/history/analyses';
+                params = { analysis_type: config.queryParam, limit: 20 };
+            } else {
+                endpoint = '/user/history/psychology';
+                params = { test_type: config.queryParam, limit: 20 };
             }
 
-            // 读取八字数据
-            const baziData = localStorage.getItem('fusion_bazi_data');
-            if (baziData) {
-                try {
-                    stored.bazi = JSON.parse(baziData);
-                } catch (e) {
-                    console.error('解析八字数据失败:', e);
-                }
+            const res = await api.get(endpoint, { params });
+            if (res.data.success) {
+                setHistoryList(res.data.data || []);
             }
+        } catch (err) {
+            console.error('加载历史记录失败:', err);
+            message.error('加载历史记录失败');
+        } finally {
+            setHistoryLoading(false);
+        }
+    };
 
-            // 读取 MBTI 数据
-            const mbtiData = localStorage.getItem('fusion_mbti_data');
-            if (mbtiData) {
-                stored.mbti = mbtiData;
-            }
+    // 选择一条历史记录
+    const selectRecord = (record) => {
+        setSelectedRecords(prev => ({
+            ...prev,
+            [modalCategory]: record
+        }));
+        setModalVisible(false);
+        message.success(`已选择 ${CATEGORIES[modalCategory].name} 报告`);
+    };
 
-            // 读取大五人格数据
-            const big5Data = localStorage.getItem('fusion_big5_data');
-            if (big5Data) {
-                try {
-                    stored.big5 = JSON.parse(big5Data);
-                } catch (e) {
-                    console.error('解析大五数据失败:', e);
-                }
-            }
+    // 取消选择
+    const clearSelection = (category) => {
+        setSelectedRecords(prev => ({
+            ...prev,
+            [category]: null
+        }));
+    };
 
-            // 读取荣格原型数据
-            const archetypeData = localStorage.getItem('fusion_archetype_data');
-            if (archetypeData) {
-                stored.archetype = archetypeData;
-            }
+    // 获取报告摘要显示
+    const getRecordSummary = (category, record) => {
+        if (!record) return '待选择';
 
-            // 读取九型人格数据
-            const enneagramData = localStorage.getItem('fusion_enneagram_data');
-            if (enneagramData) {
-                stored.enneagram = parseInt(enneagramData);
-            }
-
-            // 更新状态
-            setUserData(prev => ({
-                ...prev,
-                ...stored
-            }));
-
-            if (Object.keys(stored).length > 0) {
-                message.success(`已加载 ${Object.keys(stored).length} 项分析数据`);
-            }
-        };
-
-        loadStoredData();
-    }, []);
+        switch (category) {
+            case 'bazi':
+            case 'ziwei':
+                return new Date(record.created_at).toLocaleDateString();
+            case 'mbti':
+                return record.result_data?.type_code || 'MBTI';
+            case 'big5':
+                return '已测试';
+            case 'archetype':
+                return record.result_data?.primary?.name || '原型';
+            case 'enneagram':
+                return `${record.result_data?.primary_type || ''}号`;
+            default:
+                return '已选择';
+        }
+    };
 
     // 执行融合分析
     const runFusionAnalysis = async () => {
+        if (!canAnalyze) {
+            message.warning('请至少选择一项历史报告');
+            return;
+        }
+
         setLoading(true);
         setStep(1);
 
         try {
-            // 收集所有可用数据
+            // 从选中的历史记录提取数据
             const requestData = {
-                bazi_data: userData.bazi,
-                ziwei_data: userData.ziwei,
-                mbti_type: userData.mbti,
-                big5_scores: userData.big5,
-                archetype: userData.archetype,
-                enneagram_type: userData.enneagram
+                bazi_data: selectedRecords.bazi?.result_data || null,
+                ziwei_data: selectedRecords.ziwei?.result_data || null,
+                mbti_type: selectedRecords.mbti?.result_data?.type_code || null,
+                big5_scores: selectedRecords.big5?.result_data?.scores || null,
+                archetype: selectedRecords.archetype?.result_data?.primary?.name || null,
+                enneagram_type: selectedRecords.enneagram?.result_data?.primary_type || null
             };
 
             const res = await api.post('/fusion/analyze', requestData);
@@ -137,12 +167,12 @@ const FusionPage = () => {
 
         try {
             const requestData = {
-                bazi_data: userData.bazi,
-                ziwei_data: userData.ziwei,
-                mbti_type: userData.mbti,
-                big5_scores: userData.big5,
-                archetype: userData.archetype,
-                enneagram_type: userData.enneagram
+                bazi_data: selectedRecords.bazi?.result_data || null,
+                ziwei_data: selectedRecords.ziwei?.result_data || null,
+                mbti_type: selectedRecords.mbti?.result_data?.type_code || null,
+                big5_scores: selectedRecords.big5?.result_data?.scores || null,
+                archetype: selectedRecords.archetype?.result_data?.primary?.name || null,
+                enneagram_type: selectedRecords.enneagram?.result_data?.primary_type || null
             };
 
             const res = await api.post('/fusion/report', requestData);
@@ -159,109 +189,56 @@ const FusionPage = () => {
         }
     };
 
-    // 快速测试（使用示例数据）
-    const runQuickDemo = async () => {
-        setUserData({
-            mbti: 'INTJ',
-            big5: { O: 75, C: 70, E: 35, A: 50, N: 40 },
-            archetype: 'SAGE',
-            enneagram: 5,
-            bazi: {
-                wuxing: { '木': 25, '火': 15, '土': 20, '金': 30, '水': 40 },
-                shishen: { '正印': 2, '偏印': 1, '正官': 1, '七杀': 1 }
-            }
-        });
-
-        message.success('已加载示例数据');
-    };
-
     // 渲染数据收集状态
     const renderDataStatus = () => (
         <Card className="data-status-card">
-            <Title level={4}>数据收集状态</Title>
+            <Title level={4}>
+                <HistoryOutlined style={{ marginRight: 8 }} />
+                选择历史报告进行融合分析
+            </Title>
+            <Paragraph type="secondary" style={{ marginBottom: 16 }}>
+                点击下方卡片从历史记录中选择报告，至少选择一项后即可开始融合分析
+            </Paragraph>
             <Row gutter={[16, 16]}>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.bazi ? 'completed' : ''}`}
-                        onClick={() => navigate('/bazi?from=fusion')}
-                    >
-                        <StarOutlined />
-                        <Text>八字命理</Text>
-                        <Tag color={userData.bazi ? 'green' : 'default'}>
-                            {userData.bazi ? '已分析' : '待分析'}
-                        </Tag>
-                    </div>
-                </Col>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.mbti ? 'completed' : ''}`}
-                        onClick={() => navigate('/psychology?tab=mbti&from=fusion')}
-                    >
-                        <UserOutlined />
-                        <Text>MBTI测试</Text>
-                        <Tag color={userData.mbti ? 'green' : 'default'}>
-                            {userData.mbti || '待测试'}
-                        </Tag>
-                    </div>
-                </Col>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.big5 ? 'completed' : ''}`}
-                        onClick={() => navigate('/psychology?tab=big5&from=fusion')}
-                    >
-                        <StarOutlined />
-                        <Text>大五人格</Text>
-                        <Tag color={userData.big5 ? 'green' : 'default'}>
-                            {userData.big5 ? '已测试' : '待测试'}
-                        </Tag>
-                    </div>
-                </Col>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.archetype ? 'completed' : ''}`}
-                        onClick={() => navigate('/psychology?tab=archetype&from=fusion')}
-                    >
-                        <ThunderboltOutlined />
-                        <Text>荣格原型</Text>
-                        <Tag color={userData.archetype ? 'green' : 'default'}>
-                            {userData.archetype || '待测试'}
-                        </Tag>
-                    </div>
-                </Col>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.enneagram ? 'completed' : ''}`}
-                        onClick={() => navigate('/psychology?tab=enneagram&from=fusion')}
-                    >
-                        <UserOutlined />
-                        <Text>九型人格</Text>
-                        <Tag color={userData.enneagram ? 'green' : 'default'}>
-                            {userData.enneagram ? `${userData.enneagram}号` : '待测试'}
-                        </Tag>
-                    </div>
-                </Col>
-                <Col span={8}>
-                    <div
-                        className={`status-item clickable ${userData.ziwei ? 'completed' : ''}`}
-                        onClick={() => navigate('/ziwei?from=fusion')}
-                    >
-                        <StarOutlined />
-                        <Text>紫微斗数</Text>
-                        <Tag color={userData.ziwei ? 'green' : 'default'}>
-                            {userData.ziwei ? '已分析' : '待分析'}
-                        </Tag>
-                    </div>
-                </Col>
+                {Object.entries(CATEGORIES).map(([key, config]) => (
+                    <Col span={8} key={key}>
+                        <div
+                            className={`status-item clickable ${selectedRecords[key] ? 'completed' : ''}`}
+                            onClick={() => openSelectModal(key)}
+                        >
+                            {config.icon}
+                            <Text>{config.name}</Text>
+                            <Tag color={selectedRecords[key] ? 'green' : 'default'}>
+                                {getRecordSummary(key, selectedRecords[key])}
+                            </Tag>
+                            {selectedRecords[key] && (
+                                <Button
+                                    type="text"
+                                    size="small"
+                                    danger
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        clearSelection(key);
+                                    }}
+                                    style={{ marginTop: 4 }}
+                                >
+                                    取消选择
+                                </Button>
+                            )}
+                        </div>
+                    </Col>
+                ))}
             </Row>
 
             <div className="action-buttons">
-                <Button onClick={runQuickDemo} icon={<SyncOutlined />}>
-                    加载示例数据
-                </Button>
+                <Text type="secondary" style={{ marginRight: 16 }}>
+                    已选择 {selectedCount}/6 项
+                </Text>
                 <Button
                     type="primary"
                     onClick={runFusionAnalysis}
                     loading={loading}
+                    disabled={!canAnalyze}
                     icon={<ThunderboltOutlined />}
                 >
                     开始融合分析
@@ -445,7 +422,7 @@ const FusionPage = () => {
             </Paragraph>
 
             <Steps current={step} className="fusion-steps">
-                <Steps.Step title="数据收集" description="收集分析数据" />
+                <Steps.Step title="数据收集" description="选择历史报告" />
                 <Steps.Step title="融合分析" description="整合东西方视角" />
                 <Steps.Step title="生成报告" description="个性化分析报告" />
             </Steps>
@@ -453,6 +430,76 @@ const FusionPage = () => {
             {step === 0 && renderDataStatus()}
             {step === 2 && renderAnalysisResult()}
             {step === 3 && renderReport()}
+
+            {/* 选择历史记录弹窗 */}
+            <Modal
+                title={modalCategory ? `选择 ${CATEGORIES[modalCategory]?.name} 历史记录` : '选择历史记录'}
+                open={modalVisible}
+                onCancel={() => setModalVisible(false)}
+                footer={null}
+                width={600}
+            >
+                {historyLoading ? (
+                    <div style={{ textAlign: 'center', padding: 40 }}>
+                        <Spin tip="加载历史记录..." />
+                    </div>
+                ) : historyList.length === 0 ? (
+                    <Empty
+                        description={
+                            <span>
+                                暂无 {modalCategory ? CATEGORIES[modalCategory]?.name : ''} 历史记录
+                                <br />
+                                <Button
+                                    type="link"
+                                    onClick={() => {
+                                        setModalVisible(false);
+                                        if (modalCategory === 'bazi') navigate('/bazi');
+                                        else if (modalCategory === 'ziwei') navigate('/ziwei');
+                                        else navigate('/psychology');
+                                    }}
+                                >
+                                    去进行测试
+                                </Button>
+                            </span>
+                        }
+                    />
+                ) : (
+                    <List
+                        dataSource={historyList}
+                        renderItem={(record) => (
+                            <List.Item
+                                className="history-list-item"
+                                actions={[
+                                    <Button
+                                        type="primary"
+                                        size="small"
+                                        icon={<CheckOutlined />}
+                                        onClick={() => selectRecord(record)}
+                                    >
+                                        选择
+                                    </Button>
+                                ]}
+                            >
+                                <List.Item.Meta
+                                    title={
+                                        <span>
+                                            {getRecordSummary(modalCategory, record)}
+                                            <Tag style={{ marginLeft: 8 }}>
+                                                {new Date(record.created_at).toLocaleString()}
+                                            </Tag>
+                                        </span>
+                                    }
+                                    description={
+                                        modalCategory === 'bazi' || modalCategory === 'ziwei'
+                                            ? `ID: ${record.id}`
+                                            : record.result_data?.description?.slice(0, 50) || ''
+                                    }
+                                />
+                            </List.Item>
+                        )}
+                    />
+                )}
+            </Modal>
         </div>
     );
 };
