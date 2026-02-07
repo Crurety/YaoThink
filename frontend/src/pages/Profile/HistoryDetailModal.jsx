@@ -233,34 +233,126 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                     </Col>
                 </Row>
 
-                {/* 综合简评 */}
-                {(data.summary || data.day_master_analysis) && (
-                    <Card size="small" title="综合简评" style={getCardStyle()} bordered={false}>
-                        <Paragraph style={{ margin: 0 }}>
-                            {data.summary || data.day_master_analysis?.description || "暂无详细评语"}
-                        </Paragraph>
-                        {/* 喜用建议 */}
-                        {data.xi_yong_shen?.analysis && (
-                            <>
-                                <Divider style={{ margin: '12px 0' }} />
-                                <Paragraph>
-                                    <Text strong>喜用建议：</Text>
-                                    {data.xi_yong_shen.analysis}
-                                </Paragraph>
-                            </>
-                        )}
-                        {/* 性格分析 */}
-                        {data.personality && (
-                            <>
-                                <Divider style={{ margin: '12px 0' }} />
-                                <Paragraph>
-                                    <Text strong>性格特征：</Text>
-                                    {typeof data.personality === 'string' ? data.personality :
-                                        Object.values(data.personality).join('；')}
-                                </Paragraph>
-                            </>
-                        )}
-                    </Card>
+                {/* 综合简评 - 分类显示 */}
+                {(data.summary || data.day_master_analysis || data.xi_yong_shen || data.personality) && (
+                    <div style={{ marginTop: 24 }}>
+                        <Title level={5} style={{ marginBottom: 16 }}>📊 综合简评</Title>
+
+                        <Row gutter={[16, 16]}>
+                            {/* 日主分析 */}
+                            {(data.summary || data.day_master_analysis) && (
+                                <Col span={24}>
+                                    <Card
+                                        size="small"
+                                        title={<><StarOutlined style={{ marginRight: 8, color: token.colorPrimary }} />日主分析</>}
+                                        style={getCardStyle()}
+                                        bordered={false}
+                                    >
+                                        <Text style={{ fontSize: 15, lineHeight: 1.8 }}>
+                                            {data.summary || data.day_master_analysis?.description || "暂无详细评语"}
+                                        </Text>
+                                    </Card>
+                                </Col>
+                            )}
+
+                            {/* 喜用建议 */}
+                            {data.xi_yong_shen?.analysis && (
+                                <Col span={24} md={12}>
+                                    <Card
+                                        size="small"
+                                        title={<><FireOutlined style={{ marginRight: 8, color: '#fa541c' }} />喜用建议</>}
+                                        style={getCardStyle()}
+                                        bordered={false}
+                                    >
+                                        <div style={{ marginBottom: 12 }}>
+                                            <Space wrap>
+                                                {data.xi_yong_shen.yong_shen && (
+                                                    <Tag color="red">用神: {Array.isArray(data.xi_yong_shen.yong_shen) ? data.xi_yong_shen.yong_shen.join('、') : data.xi_yong_shen.yong_shen}</Tag>
+                                                )}
+                                                {data.xi_yong_shen.xi_shen && (
+                                                    <Tag color="orange">喜神: {Array.isArray(data.xi_yong_shen.xi_shen) ? data.xi_yong_shen.xi_shen.join('、') : data.xi_yong_shen.xi_shen}</Tag>
+                                                )}
+                                            </Space>
+                                        </div>
+                                        <Text style={{ lineHeight: 1.8 }}>{data.xi_yong_shen.analysis}</Text>
+                                    </Card>
+                                </Col>
+                            )}
+
+                            {/* 性格特征 */}
+                            {data.personality && (
+                                <Col span={24} md={data.xi_yong_shen?.analysis ? 12 : 24}>
+                                    <Card
+                                        size="small"
+                                        title={<><UserOutlined style={{ marginRight: 8, color: '#722ed1' }} />性格特征</>}
+                                        style={getCardStyle()}
+                                        bordered={false}
+                                    >
+                                        {typeof data.personality === 'object' && !Array.isArray(data.personality) ? (
+                                            <div>
+                                                {/* 优点 */}
+                                                {data.personality.strengths && (
+                                                    <div style={{ marginBottom: 12 }}>
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>✨ 优点</Text>
+                                                        <div style={{ marginTop: 4 }}>
+                                                            <Space wrap size={[4, 4]}>
+                                                                {(Array.isArray(data.personality.strengths)
+                                                                    ? data.personality.strengths
+                                                                    : data.personality.strengths.split(/[,，;；]/)
+                                                                ).map((s, i) => (
+                                                                    <Tag key={i} color="green" style={{ margin: 0 }}>{s.trim()}</Tag>
+                                                                ))}
+                                                            </Space>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {/* 缺点 */}
+                                                {data.personality.weaknesses && (
+                                                    <div style={{ marginBottom: 12 }}>
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>⚠️ 需注意</Text>
+                                                        <div style={{ marginTop: 4 }}>
+                                                            <Space wrap size={[4, 4]}>
+                                                                {(Array.isArray(data.personality.weaknesses)
+                                                                    ? data.personality.weaknesses
+                                                                    : data.personality.weaknesses.split(/[,，;；]/)
+                                                                ).map((w, i) => (
+                                                                    <Tag key={i} color="orange" style={{ margin: 0 }}>{w.trim()}</Tag>
+                                                                ))}
+                                                            </Space>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {/* 适合职业 */}
+                                                {data.personality.career && (
+                                                    <div>
+                                                        <Text type="secondary" style={{ fontSize: 12 }}>💼 适合职业</Text>
+                                                        <div style={{ marginTop: 4 }}>
+                                                            <Space wrap size={[4, 4]}>
+                                                                {(Array.isArray(data.personality.career)
+                                                                    ? data.personality.career
+                                                                    : data.personality.career.split(/[,，;；]/)
+                                                                ).map((c, i) => (
+                                                                    <Tag key={i} color="blue" style={{ margin: 0 }}>{c.trim()}</Tag>
+                                                                ))}
+                                                            </Space>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {/* 如果是普通文本格式 */}
+                                                {!data.personality.strengths && !data.personality.weaknesses && (
+                                                    <Text style={{ lineHeight: 1.8 }}>
+                                                        {Object.values(data.personality).join('；')}
+                                                    </Text>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <Text style={{ lineHeight: 1.8 }}>{data.personality}</Text>
+                                        )}
+                                    </Card>
+                                </Col>
+                            )}
+                        </Row>
+                    </div>
                 )}
             </div>
         );
