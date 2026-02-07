@@ -244,7 +244,7 @@ function Home() {
                         }}>
                             <div style={{ fontSize: 28, marginBottom: 12 }}>🔮</div>
                             <Title level={5} style={{
-                                color: isDark ? '#fda4af' : '#e11d48',
+                                color: isDark ? '#fda4af' : '#b45309',
                                 marginBottom: 8
                             }}>
                                 东方玄学
@@ -267,7 +267,7 @@ function Home() {
                         }}>
                             <div style={{ fontSize: 28, marginBottom: 12 }}>🧠</div>
                             <Title level={5} style={{
-                                color: isDark ? '#d8b4fe' : '#7c3aed',
+                                color: isDark ? '#d8b4fe' : '#0d9488',
                                 marginBottom: 8
                             }}>
                                 现代心理

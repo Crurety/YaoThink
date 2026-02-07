@@ -77,8 +77,8 @@ function AppContent() {
             theme={{
                 algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
                 token: {
-                    colorPrimary: isDark ? '#8b5cf6' : '#6366f1',
-                    colorBgContainer: isDark ? '#1e293b' : '#ffffff',
+                    colorPrimary: isDark ? '#8b5cf6' : '#b45309',
+                    colorBgContainer: isDark ? '#1e293b' : '#fffef9',
                     colorBgElevated: isDark ? '#1e293b' : '#ffffff',
                     borderRadius: 12,
                 }
