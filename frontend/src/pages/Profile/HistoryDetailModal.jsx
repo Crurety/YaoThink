@@ -548,38 +548,119 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                 )}
 
                 {/* 3. AI 深度分析报告 */}
-                <div style={{ marginBottom: 24 }}>
-                    <Title level={5} style={{ marginBottom: 12 }}>📋 深度分析报告</Title>
-                    <Card style={getCardStyle()} bordered={false}>
-                        {aiReport ? (
-                            <div className="markdown-content" style={{ lineHeight: 1.8, fontSize: 14 }}>
-                                <ReactMarkdown
-                                    components={{
-                                        h1: ({ node, ...props }) => <h3 style={{ marginTop: 16, marginBottom: 12, color: token.colorPrimary }} {...props} />,
-                                        h2: ({ node, ...props }) => <h4 style={{ marginTop: 12, marginBottom: 8, color: token.colorTextHeading }} {...props} />,
-                                        p: ({ node, ...props }) => <p style={{ marginBottom: 12, color: token.colorText }} {...props} />,
-                                        li: ({ node, ...props }) => <li style={{ marginBottom: 4 }} {...props} />,
-                                        strong: ({ node, ...props }) => <strong style={{ color: token.colorPrimaryText }} {...props} />
-                                    }}
-                                >
-                                    {aiReport}
-                                </ReactMarkdown>
+                {(aiReport || (extraInfo.ai_analysis_structured && Object.keys(extraInfo.ai_analysis_structured).length > 0)) && (
+                    <div style={{ marginBottom: 24 }}>
+                        <Title level={5} style={{ marginBottom: 12 }}>📋 深度分析报告</Title>
+
+                        {/* 结构化 AI 数据展示 */}
+                        {extraInfo.ai_analysis_structured && Object.keys(extraInfo.ai_analysis_structured).length > 0 && (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: aiReport ? 24 : 0 }}>
+                                {Object.entries(extraInfo.ai_analysis_structured).map(([key, item], idx) => {
+                                    if (!item || typeof item !== 'object') return null;
+                                    // 识别宫位类型以分配图标和颜色
+                                    let icon = <StarOutlined />;
+                                    let color = token.colorPrimary;
+                                    let title = item.title || key;
+
+                                    if (key.includes('career') || title.includes('官禄') || title.includes('事业')) {
+                                        icon = <RocketOutlined />;
+                                        color = '#13c2c2'; // 青色
+                                    } else if (key.includes('love') || title.includes('夫妻') || title.includes('情感')) {
+                                        icon = <HeartOutlined />;
+                                        color = '#eb2f96'; // 粉红
+                                    } else if (key.includes('wealth') || title.includes('财帛')) {
+                                        icon = <GoldOutlined />;
+                                        color = '#faad14'; // 金色
+                                    }
+
+                                    return (
+                                        <Card key={idx} style={{ ...getCardStyle(), borderLeft: `4px solid ${color}` }} bordered={false}>
+                                            <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+                                                <div style={{
+                                                    background: `${color}20`,
+                                                    padding: 8,
+                                                    borderRadius: '50%',
+                                                    marginRight: 12,
+                                                    color: color
+                                                }}>
+                                                    {icon}
+                                                </div>
+                                                <Title level={4} style={{ margin: 0 }}>{title}</Title>
+                                            </div>
+
+                                            {/* 主星与标签 */}
+                                            {item.stars && (
+                                                <div style={{ marginBottom: 16 }}>
+                                                    <Title level={3} style={{ color: color, margin: 0, marginBottom: 8 }}>
+                                                        {Array.isArray(item.stars) ? item.stars.join(' · ') : item.stars}
+                                                    </Title>
+                                                    {item.tags && (
+                                                        <Text type="secondary">{Array.isArray(item.tags) ? item.tags.join('、') : item.tags}</Text>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* AI 深度透视 */}
+                                            <div style={{
+                                                marginTop: 16,
+                                                background: token.mode === 'dark' ? 'rgba(255,255,255,0.05)' : '#f9f9f9',
+                                                borderRadius: token.borderRadius,
+                                                padding: 16,
+                                                border: `1px solid ${token.colorBorderSecondary}`
+                                            }}>
+                                                <Tag color="purple" style={{ marginBottom: 12 }}>AI 深度透视</Tag>
+
+                                                {/* 渲染各个小节 */}
+                                                {Object.entries(item).map(([subKey, subContent]) => {
+                                                    if (['title', 'stars', 'tags', 'palace'].includes(subKey)) return null;
+                                                    if (typeof subContent !== 'string' && typeof subContent !== 'object') return null;
+
+                                                    // 尝试格式化 content
+                                                    const contentText = typeof subContent === 'string' ? subContent : JSON.stringify(subContent);
+                                                    // 简单过滤掉太短的内容
+                                                    if (contentText.length < 2) return null;
+
+                                                    return (
+                                                        <div key={subKey} style={{ marginBottom: 16 }}>
+                                                            <Title level={5} style={{ fontSize: 14, color: color, marginBottom: 4 }}>
+                                                                {subKey === 'modern' ? '🔭 现代全息' :
+                                                                    subKey === 'guidance' ? '💡 命盘指引' :
+                                                                        subKey === 'essence' ? '📖 星曜本义' :
+                                                                            subKey}
+                                                            </Title>
+                                                            <Paragraph style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 0 }}>
+                                                                {contentText}
+                                                            </Paragraph>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </Card>
+                                    );
+                                })}
                             </div>
-                        ) : (
-                            <Empty
-                                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                description={
-                                    <span>
-                                        暂无深度分析报告
-                                        <div style={{ fontSize: 12, color: token.colorTextSecondary, marginTop: 4 }}>
-                                            (可能是早期记录或分析服务未响应)
-                                        </div>
-                                    </span>
-                                }
-                            />
                         )}
-                    </Card>
-                </div>
+
+                        {/* Markdown 文本报告 (作为补充或兼容旧数据) */}
+                        {aiReport && (
+                            <Card style={getCardStyle()} bordered={false}>
+                                <div className="markdown-content" style={{ lineHeight: 1.8, fontSize: 14 }}>
+                                    <ReactMarkdown
+                                        components={{
+                                            h1: ({ node, ...props }) => <h3 style={{ marginTop: 16, marginBottom: 12, color: token.colorPrimary }} {...props} />,
+                                            h2: ({ node, ...props }) => <h4 style={{ marginTop: 12, marginBottom: 8, color: token.colorTextHeading }} {...props} />,
+                                            p: ({ node, ...props }) => <p style={{ marginBottom: 12, color: token.colorText }} {...props} />,
+                                            li: ({ node, ...props }) => <li style={{ marginBottom: 4 }} {...props} />,
+                                            strong: ({ node, ...props }) => <strong style={{ color: token.colorPrimaryText }} {...props} />
+                                        }}
+                                    >
+                                        {aiReport}
+                                    </ReactMarkdown>
+                                </div>
+                            </Card>
+                        )}
+                    </div>
+                )}
 
                 {/* 4. 宫位详细评分 */}
                 <div style={{ marginBottom: 24 }}>
