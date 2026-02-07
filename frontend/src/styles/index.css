@@ -104,6 +104,11 @@
 
   /* antd 兼容 */
   --ant-primary: #b45309;
+
+  /* 日间模式字体优化 - 更易读 */
+  --font-body: 'PingFang SC', 'Microsoft YaHei', 'Hiragino Sans GB', 'Noto Sans SC', -apple-system, sans-serif;
+  --font-weight-normal: 450;
+  --font-weight-medium: 550;
 }
 
 /* ========== 全局重置 ========== */
@@ -119,12 +124,23 @@ html {
 
 body {
   font-family: var(--font-body);
+  font-weight: var(--font-weight-normal, 400);
   background: var(--bg-base);
   color: var(--text-primary);
   min-height: 100vh;
-  line-height: 1.6;
+  line-height: 1.7;
   overflow-x: hidden;
   transition: background var(--transition-normal), color var(--transition-normal);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* 日间模式正文字体增强 */
+[data-theme="light"] body,
+[data-theme="light"] .ant-card,
+[data-theme="light"] .ant-typography {
+  font-weight: var(--font-weight-normal, 450);
+  letter-spacing: 0.02em;
 }
 
 /* ========== 应用布局 ========== */
