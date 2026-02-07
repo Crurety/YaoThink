@@ -43,20 +43,20 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
             if (recordType === 'analyses' || (record && (record.type === 'bazi' || record.type === 'ziwei'))) {
                 // Fallback if recordType is generic 'analyses' but record has specific type
                 const specificType = record.type || 'bazi'; // default to bazi if missing?
-                endpoint = `/api/user/history/analyses/${id}`;
+                endpoint = `/user/history/analyses/${id}`;
             } else if (recordType === 'divinations' || recordType === 'meihua' || recordType === 'liuyao') {
-                endpoint = `/api/user/history/divinations/${id}`;
+                endpoint = `/user/history/divinations/${id}`;
             } else if (recordType === 'psychology') {
-                endpoint = `/api/user/history/psychology/${id}`;
+                endpoint = `/user/history/psychology/${id}`;
             } else if (recordType === 'fusions') {
-                endpoint = `/api/user/history/fusions/${id}`;
+                endpoint = `/user/history/fusions/${id}`;
             }
 
             if (!endpoint) {
                 // Try to guess from record if type is ambiguous
-                if (record.analysis_type) endpoint = `/api/user/history/analyses/${id}`;
-                else if (record.method) endpoint = `/api/user/history/divinations/${id}`;
-                else if (record.test_type) endpoint = `/api/user/history/psychology/${id}`;
+                if (record.analysis_type) endpoint = `/user/history/analyses/${id}`;
+                else if (record.method) endpoint = `/user/history/divinations/${id}`;
+                else if (record.test_type) endpoint = `/user/history/psychology/${id}`;
                 else throw new Error("Unknown record type");
             }
 
