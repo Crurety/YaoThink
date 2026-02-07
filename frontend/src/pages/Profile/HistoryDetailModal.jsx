@@ -219,11 +219,15 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                     renderItem={([pillar, shas]) => (
                                         <List.Item>
                                             <Card size="small" type="inner" title={`${pillar === 'year' ? '年柱' :
-                                                    pillar === 'month' ? '月柱' :
-                                                        pillar === 'day' ? '日柱' :
-                                                            pillar === 'hour' ? '时柱' :
-                                                                pillar === 'summary' ? '📋 神煞总结' :
-                                                                    pillar
+                                                pillar === 'month' ? '月柱' :
+                                                    pillar === 'day' ? '日柱' :
+                                                        pillar === 'hour' ? '时柱' :
+                                                            pillar === 'summary' ? '📋 神煞总结' :
+                                                                pillar === 'all_shensha' ? '🌟 全部神煞' :
+                                                                    pillar === 'ji_shensha' ? '✨ 吉神' :
+                                                                        pillar === 'xiong_shensha' ? '⚠️ 凶煞' :
+                                                                            pillar === 'zhong_shensha' ? '🔘 中性神煞' :
+                                                                                pillar
                                                 }`}>
                                                 {Array.isArray(shas) && shas.length > 0 ? shas.map((sha, idx) => (
                                                     <Tag key={idx} color="purple" style={{ marginBottom: 4 }}>
@@ -294,7 +298,7 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                         style={getCardStyle()}
                                         bordered={false}
                                     >
-                                        {typeof data.personality === 'object' && !Array.isArray(data.personality) ? (
+                                        {typeof data.personality === 'object' && !Array.isArray(data.personality) && (data.personality.strengths || data.personality.weaknesses || data.personality.career) ? (
                                             <div>
                                                 {/* 优点 */}
                                                 {data.personality.strengths && (
@@ -344,17 +348,17 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                                         </div>
                                                     </div>
                                                 )}
-                                                {/* 如果是普通文本格式 */}
-                                                {!data.personality.strengths && !data.personality.weaknesses && (
-                                                    <Text style={{ lineHeight: 1.8 }}>
-                                                        {Object.values(data.personality).join('；')}
-                                                    </Text>
-                                                )}
                                             </div>
                                         ) : (
-                                            // 解析字符串形式的性格分析
+                                            // 解析字符串形式的性格分析（包括对象转换的情况）
                                             (() => {
-                                                const text = String(data.personality);
+                                                // 如果是对象但没有特定字段，先转成字符串
+                                                let text = '';
+                                                if (typeof data.personality === 'object' && !Array.isArray(data.personality)) {
+                                                    text = Object.values(data.personality).join('；');
+                                                } else {
+                                                    text = String(data.personality);
+                                                }
                                                 // 按分号分割段落
                                                 const segments = text.split(/[；;]/).filter(s => s.trim());
 
