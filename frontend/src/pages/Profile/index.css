@@ -1,13 +1,14 @@
+/* 个人中心页面 - 支持日/夜双主题 */
 .profile-page {
     min-height: 100vh;
     padding: 40px 24px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .page-title {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 24px;
 }
 
@@ -16,23 +17,28 @@
 }
 
 .profile-tabs .ant-tabs-tab {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
+}
+
+.profile-tabs .ant-tabs-tab:hover {
+    color: var(--text-secondary);
 }
 
 .profile-tabs .ant-tabs-tab-active {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .profile-tabs .ant-tabs-ink-bar {
-    background: linear-gradient(90deg, #722ed1, #eb2f96);
+    background: linear-gradient(90deg, var(--primary), var(--accent-pink));
 }
 
 /* 概览 */
 .profile-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
     margin-bottom: 24px;
+    box-shadow: var(--shadow-sm);
 }
 
 .profile-header {
@@ -46,7 +52,7 @@
 }
 
 .profile-info h3 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 4px;
 }
 
@@ -55,54 +61,57 @@
 }
 
 .stat-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
     text-align: center;
+    box-shadow: var(--shadow-sm);
 }
 
 .stat-card .ant-statistic-title {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
 }
 
 .stat-card .ant-statistic-content {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 /* 历史列表 */
 .history-list {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
     padding: 16px;
+    border: 1px solid var(--border-default);
 }
 
 .history-list .ant-list-item {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--border-default);
     padding: 16px;
 }
 
 .history-list .ant-list-item-meta-title {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
 }
 
 .history-list .ant-list-item-meta-description {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
 }
 
 .history-list .ant-empty-description {
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--text-muted);
 }
 
 /* 设置 */
 .settings-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
     max-width: 500px;
+    box-shadow: var(--shadow-sm);
 }
 
 .settings-card .ant-form-item-label>label {
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-secondary);
 }
 
 /* 加载 */
@@ -111,7 +120,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
 }
 
 /* 响应式 */

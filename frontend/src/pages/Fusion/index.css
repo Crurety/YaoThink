@@ -1,43 +1,46 @@
+/* 融合分析页面 - 支持日/夜双主题 */
 .fusion-page {
     min-height: 100vh;
     padding: 40px 24px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
     max-width: 1200px;
     margin: 0 auto;
 }
 
 .page-title {
     text-align: center;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .page-desc {
     text-align: center;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
     margin-bottom: 32px;
 }
 
 .fusion-steps {
     margin-bottom: 40px;
     padding: 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
 }
 
 .fusion-steps .ant-steps-item-title {
-    color: rgba(255, 255, 255, 0.85) !important;
+    color: var(--text-primary) !important;
 }
 
 .fusion-steps .ant-steps-item-description {
-    color: rgba(255, 255, 255, 0.45) !important;
+    color: var(--text-muted) !important;
 }
 
 /* 数据状态卡片 */
 .data-status-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .data-status-card .ant-card-body {
@@ -45,7 +48,7 @@
 }
 
 .data-status-card h4 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 24px;
 }
 
@@ -55,9 +58,9 @@
     align-items: center;
     gap: 8px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
     transition: all 0.3s;
 }
 
@@ -66,17 +69,22 @@
     border-color: rgba(82, 196, 26, 0.3);
 }
 
+[data-theme="light"] .status-item.completed {
+    background: rgba(4, 120, 87, 0.08);
+    border-color: rgba(4, 120, 87, 0.25);
+}
+
 .status-item .anticon {
     font-size: 24px;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
 }
 
 .status-item.completed .anticon {
-    color: #52c41a;
+    color: var(--accent-green);
 }
 
 .status-item .ant-typography {
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-primary);
 }
 
 .action-buttons {
@@ -92,9 +100,10 @@
 }
 
 .result-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .result-card .ant-card-body {
@@ -102,19 +111,19 @@
 }
 
 .result-card h3 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 24px;
 }
 
 .confidence-section {
     margin-bottom: 24px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.03);
-    border-radius: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
 }
 
 .confidence-section .ant-typography {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
     margin-bottom: 8px;
     display: block;
 }
@@ -134,7 +143,7 @@
 }
 
 .consistency-score .ant-typography {
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-primary);
 }
 
 /* Collapse样式 */
@@ -144,19 +153,19 @@
 }
 
 .result-card .ant-collapse-item {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-default);
     margin-bottom: 8px;
 }
 
 .result-card .ant-collapse-header {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-input);
     border-radius: 8px !important;
-    color: rgba(255, 255, 255, 0.9) !important;
+    color: var(--text-primary) !important;
 }
 
 .result-card .ant-collapse-content {
-    background: rgba(255, 255, 255, 0.02);
-    border-color: rgba(255, 255, 255, 0.1);
+    background: var(--bg-surface);
+    border-color: var(--border-default);
 }
 
 .result-card .ant-collapse-content-box {
@@ -164,12 +173,12 @@
 }
 
 .result-card h5 {
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text-primary);
     margin: 16px 0 8px;
 }
 
 .result-card p {
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--text-secondary);
     margin-bottom: 8px;
 }
 
@@ -179,9 +188,10 @@
 }
 
 .report-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
 }
 
 .report-header {
@@ -192,14 +202,14 @@
 }
 
 .report-header h3 {
-    color: #fff;
+    color: var(--text-primary);
     margin: 0;
 }
 
 .markdown-content {
     padding: 24px;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
     max-height: 600px;
     overflow-y: auto;
 }
@@ -208,7 +218,7 @@
 .markdown-content h2,
 .markdown-content h3,
 .markdown-content h4 {
-    color: #fff;
+    color: var(--text-primary);
     margin-top: 24px;
     margin-bottom: 12px;
 }
@@ -219,7 +229,7 @@
 
 .markdown-content h2 {
     font-size: 1.4rem;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid var(--border-default);
     padding-bottom: 8px;
 }
 
@@ -229,7 +239,7 @@
 
 .markdown-content p,
 .markdown-content li {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
     line-height: 1.8;
 }
 
@@ -238,12 +248,12 @@
 }
 
 .markdown-content hr {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--border-default);
     margin: 24px 0;
 }
 
 .markdown-content em {
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
 }
 
 /* 加载状态 */
@@ -252,7 +262,7 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
 }
 
 /* 响应式 */

@@ -1,7 +1,8 @@
+/* 心理测评页面 - 支持日/夜双主题 */
 .psychology-page {
     min-height: 100vh;
     padding: 40px 24px;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
 }
 
 /* 测试选择页面 */
@@ -12,14 +13,14 @@
 
 .section-title {
     text-align: center;
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 8px;
     font-size: 2rem;
 }
 
 .section-desc {
     text-align: center;
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
     margin-bottom: 40px;
     font-size: 1.1rem;
 }
@@ -29,18 +30,19 @@
 }
 
 .test-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
     text-align: center;
     transition: all 0.3s ease;
     height: 100%;
+    box-shadow: var(--shadow-sm);
 }
 
 .test-card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-    background: rgba(255, 255, 255, 0.08);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--border-hover);
 }
 
 .test-card .ant-card-body {
@@ -53,12 +55,12 @@
 }
 
 .test-card h4 {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 8px;
 }
 
 .test-card .ant-typography-secondary {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
 }
 
 .test-meta {
@@ -66,9 +68,9 @@
 }
 
 .test-meta .ant-tag {
-    background: rgba(255, 255, 255, 0.1);
-    border: none;
-    color: rgba(255, 255, 255, 0.8);
+    background: var(--bg-input);
+    border: 1px solid var(--border-default);
+    color: var(--text-secondary);
 }
 
 /* 测试进行页面 */
@@ -83,28 +85,31 @@
     align-items: center;
     margin-bottom: 24px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
 }
 
 .test-header h4 {
     margin: 0;
+    color: var(--text-primary);
 }
 
 .test-header .ant-typography {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
 }
 
 .question-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-lg);
     margin-top: 24px;
     padding: 32px;
+    box-shadow: var(--shadow-sm);
 }
 
 .question-text {
-    color: #fff;
+    color: var(--text-primary);
     margin-bottom: 32px;
     font-size: 1.25rem;
     line-height: 1.6;
@@ -116,9 +121,9 @@
 
 .option-item {
     padding: 16px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border-default);
     transition: all 0.3s ease;
     width: 100%;
     display: flex;
@@ -126,8 +131,8 @@
 }
 
 .option-item:hover {
-    background: rgba(255, 255, 255, 0.1);
-    border-color: rgba(255, 255, 255, 0.2);
+    background: var(--bg-elevated);
+    border-color: var(--border-hover);
 }
 
 .option-item .ant-radio {
@@ -135,7 +140,7 @@
 }
 
 .option-item span {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
     font-size: 1rem;
 }
 
@@ -149,20 +154,21 @@
 .likert-item {
     min-width: 100px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.05) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    color: rgba(255, 255, 255, 0.8) !important;
+    background: var(--bg-input) !important;
+    border-color: var(--border-default) !important;
+    color: var(--text-secondary) !important;
     border-radius: 8px !important;
 }
 
 .likert-item:hover {
-    background: rgba(255, 255, 255, 0.1) !important;
+    background: var(--bg-elevated) !important;
+    border-color: var(--border-hover) !important;
 }
 
 .likert-item.ant-radio-button-wrapper-checked {
-    background: linear-gradient(135deg, #722ed1 0%, #eb2f96 100%) !important;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--accent-pink) 100%) !important;
     border-color: transparent !important;
-    color: #fff !important;
+    color: var(--text-inverse) !important;
 }
 
 .nav-buttons {
@@ -179,17 +185,18 @@
 }
 
 .test-result .ant-result {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
     padding: 32px;
+    border: 1px solid var(--border-default);
 }
 
 .test-result .ant-result-title {
-    color: #fff;
+    color: var(--text-primary);
 }
 
 .test-result .ant-result-subtitle {
-    color: rgba(255, 255, 255, 0.65);
+    color: var(--text-muted);
 }
 
 .result-content {
@@ -203,19 +210,19 @@
     border-radius: 50px;
     font-size: 2.5rem;
     font-weight: bold;
-    color: #fff;
+    color: var(--text-inverse);
     margin-bottom: 16px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow-md);
 }
 
 .result-content h2 {
-    color: #fff;
+    color: var(--text-primary);
     font-size: 2rem;
     margin-bottom: 8px;
 }
 
 .result-content p {
-    color: rgba(255, 255, 255, 0.75);
+    color: var(--text-secondary);
     font-size: 1rem;
     line-height: 1.8;
 }
@@ -225,9 +232,9 @@
 }
 
 .dimensions .ant-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
 }
 
 .dimensions .ant-card-body {
@@ -235,7 +242,7 @@
 }
 
 .dimensions .ant-typography {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
 }
 
 .dimension-row {
@@ -244,13 +251,13 @@
     gap: 16px;
     margin-bottom: 16px;
     padding: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
 }
 
 .dimension-row .ant-typography {
     min-width: 80px;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
 }
 
 .dimension-row .ant-progress {
@@ -259,22 +266,22 @@
 
 .traits-card {
     margin-top: 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
 }
 
 .traits-card .ant-card-head {
-    border-bottom-color: rgba(255, 255, 255, 0.1);
+    border-bottom-color: var(--border-default);
 }
 
 .traits-card .ant-card-head-title {
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-primary);
 }
 
 .primary-archetype {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 16px;
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
     padding: 24px;
     border-width: 2px;
 }
@@ -284,22 +291,24 @@
 }
 
 .info-card {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
 }
 
 .info-card p {
     text-align: left;
     margin-bottom: 8px;
+    color: var(--text-secondary);
 }
 
 .profile-text {
     margin-top: 24px;
     padding: 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
+    background: var(--bg-input);
+    border-radius: var(--radius-md);
     text-align: left;
+    color: var(--text-secondary);
 }
 
 .result-actions {
@@ -316,11 +325,11 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    background: var(--bg-gradient);
 }
 
 .loading-container .ant-spin-text {
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-secondary);
 }
 
 /* 响应式 */
