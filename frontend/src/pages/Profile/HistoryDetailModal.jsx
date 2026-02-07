@@ -218,7 +218,13 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                     dataSource={Object.entries(shensha)}
                                     renderItem={([pillar, shas]) => (
                                         <List.Item>
-                                            <Card size="small" type="inner" title={`${pillar === 'year' ? '年柱' : pillar === 'month' ? '月柱' : pillar === 'day' ? '日柱' : '时柱'}`}>
+                                            <Card size="small" type="inner" title={`${pillar === 'year' ? '年柱' :
+                                                    pillar === 'month' ? '月柱' :
+                                                        pillar === 'day' ? '日柱' :
+                                                            pillar === 'hour' ? '时柱' :
+                                                                pillar === 'summary' ? '📋 神煞总结' :
+                                                                    pillar
+                                                }`}>
                                                 {Array.isArray(shas) && shas.length > 0 ? shas.map((sha, idx) => (
                                                     <Tag key={idx} color="purple" style={{ marginBottom: 4 }}>
                                                         {typeof sha === 'object' ? (sha?.name || JSON.stringify(sha)) : sha}
