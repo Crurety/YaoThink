@@ -492,7 +492,9 @@ const FusionPage = () => {
                                     description={
                                         modalCategory === 'bazi' || modalCategory === 'ziwei'
                                             ? `ID: ${record.id}`
-                                            : record.result_data?.description?.slice(0, 50) || ''
+                                            : (typeof record.result_data?.description === 'string'
+                                                ? record.result_data.description.slice(0, 50)
+                                                : '')
                                     }
                                 />
                             </List.Item>
