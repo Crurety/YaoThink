@@ -6,10 +6,9 @@ import {
     StarOutlined,
     BookOutlined,
     ExperimentOutlined,
-    RightOutlined,
-    ThunderboltOutlined,
-    FireOutlined
+    RightOutlined
 } from '@ant-design/icons'
+import { useTheme } from '../../stores'
 
 const { Title, Paragraph } = Typography
 
@@ -17,230 +16,268 @@ const features = [
     {
         key: 'bazi',
         path: '/bazi',
-        icon: <CompassOutlined style={{ fontSize: 32 }} />,
+        icon: <CompassOutlined style={{ fontSize: 28 }} />,
         title: '八字命理',
-        description: 'AI深度解析你的命运代码，揭示五行真谛',
-        color: '#fbbf24', // Amber
-        bgGradient: 'linear-gradient(135deg, rgba(251, 191, 36, 0.1) 0%, rgba(251, 191, 36, 0.05) 100%)',
-        gridArea: 'span 2 / span 1' // Tall card
+        subtitle: 'BaZi Analysis',
+        description: '四柱排盘・五行生克・大运流年',
+        color: '#fbbf24',
+        lightColor: '#d97706'
     },
     {
         key: 'ziwei',
         path: '/ziwei',
-        icon: <StarOutlined style={{ fontSize: 32 }} />,
+        icon: <StarOutlined style={{ fontSize: 28 }} />,
         title: '紫微斗数',
-        description: '十二宫全景扫描，掌控星运轨迹',
-        color: '#f472b6', // Pink
-        bgGradient: 'linear-gradient(135deg, rgba(244, 114, 182, 0.1) 0%, rgba(244, 114, 182, 0.05) 100%)',
-        gridArea: 'span 1 / span 1'
+        subtitle: 'Zi Wei Dou Shu',
+        description: '十二宫位・星曜布局・命运轨迹',
+        color: '#f472b6',
+        lightColor: '#db2777'
     },
     {
         key: 'yijing',
         path: '/yijing',
-        icon: <BookOutlined style={{ fontSize: 32 }} />,
+        icon: <BookOutlined style={{ fontSize: 28 }} />,
         title: '易经占卜',
-        description: '六爻神算，决断当下困惑',
-        color: '#34d399', // Emerald
-        bgGradient: 'linear-gradient(135deg, rgba(52, 211, 153, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%)',
-        gridArea: 'span 1 / span 1'
+        subtitle: 'I Ching Oracle',
+        description: '六爻卦象・变卦推演・AI智解',
+        color: '#34d399',
+        lightColor: '#059669'
     },
     {
         key: 'psychology',
         path: '/psychology',
-        icon: <ExperimentOutlined style={{ fontSize: 32 }} />,
+        icon: <ExperimentOutlined style={{ fontSize: 28 }} />,
         title: '心理测评',
-        description: 'MBTI/人格原型，科学读心',
-        color: '#60a5fa', // Blue
-        bgGradient: 'linear-gradient(135deg, rgba(96, 165, 250, 0.1) 0%, rgba(96, 165, 250, 0.05) 100%)',
-        gridArea: 'span 1 / span 2', // Wide card
+        subtitle: 'Psychology Test',
+        description: 'MBTI人格・大五量表・荣格原型',
+        color: '#60a5fa',
+        lightColor: '#2563eb'
     }
 ]
 
 function Home() {
     const navigate = useNavigate()
+    const { isDark } = useTheme()
 
     return (
-        <div className="home-page" style={{ paddingBottom: 60 }}>
-            {/* Hero Section */}
-            <div style={{ textAlign: 'center', margin: '40px 0 80px', position: 'relative' }}>
+        <div className="home-page animate-fadeIn" style={{ paddingBottom: 60 }}>
+            {/* Hero Section - 简洁大气 */}
+            <div style={{
+                textAlign: 'center',
+                padding: '60px 20px 80px',
+                position: 'relative'
+            }}>
+                {/* 背景装饰 */}
                 <div style={{
                     position: 'absolute',
                     top: '50%',
                     left: '50%',
                     transform: 'translate(-50%, -50%)',
-                    width: '600px',
-                    height: '600px',
-                    background: 'radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, rgba(0,0,0,0) 70%)',
+                    width: '500px',
+                    height: '500px',
+                    background: `radial-gradient(circle, ${isDark ? 'rgba(139, 92, 246, 0.12)' : 'rgba(99, 102, 241, 0.08)'} 0%, transparent 70%)`,
                     zIndex: 0,
                     pointerEvents: 'none'
                 }} />
 
-                <div className="animate-float" style={{ fontSize: 80, marginBottom: 24, textShadow: '0 0 40px rgba(139, 92, 246, 0.4)' }}>
+                {/* Logo */}
+                <div style={{
+                    fontSize: 64,
+                    marginBottom: 20,
+                    filter: `drop-shadow(0 0 30px ${isDark ? 'rgba(139, 92, 246, 0.4)' : 'rgba(99, 102, 241, 0.3)'})`
+                }}>
                     ☯
                 </div>
 
+                {/* 标题 */}
                 <Title style={{
-                    fontFamily: "var(--font-display)",
-                    fontSize: 56,
-                    background: 'linear-gradient(135deg, #fff 0%, #a78bfa 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    marginBottom: 24,
-                    letterSpacing: 4,
+                    fontFamily: 'var(--font-display)',
+                    fontSize: 48,
+                    fontWeight: 700,
+                    color: 'var(--text-primary)',
+                    marginBottom: 16,
+                    letterSpacing: 6,
                     position: 'relative'
                 }}>
                     玄心理命
                 </Title>
 
+                {/* 副标题 */}
                 <Paragraph style={{
-                    fontSize: 20,
-                    color: '#94a3b8',
-                    maxWidth: 500,
-                    margin: '0 auto 40px',
+                    fontSize: 18,
+                    color: 'var(--text-muted)',
+                    maxWidth: 400,
+                    margin: '0 auto 32px',
                     lineHeight: 1.8,
                     position: 'relative'
                 }}>
-                    解锁你的 <span style={{ color: '#a78bfa', fontWeight: 'bold' }}>命运源代码</span>
+                    东方玄学 × 现代心理
                     <br />
-                    赛博修仙与心理科学的终极融合
+                    <span style={{
+                        color: 'var(--primary)',
+                        fontWeight: 500
+                    }}>
+                        探索内心・洞见未来
+                    </span>
                 </Paragraph>
 
-                <Space size="large" style={{ position: 'relative' }}>
-                    <Button
-                        type="primary"
-                        size="large"
-                        style={{ height: 50, padding: '0 40px', fontSize: 18 }}
-                        onClick={() => navigate('/bazi')}
-                    >
-                        立即开始 <RightOutlined />
-                    </Button>
-                </Space>
+                <Button
+                    type="primary"
+                    size="large"
+                    style={{
+                        height: 48,
+                        padding: '0 36px',
+                        fontSize: 16,
+                        borderRadius: 'var(--radius-full)'
+                    }}
+                    onClick={() => navigate('/bazi')}
+                >
+                    开始探索 <RightOutlined />
+                </Button>
             </div>
 
-            {/* Bento Grid Layout - Custom CSS Grid */}
+            {/* 功能卡片 - Bento Grid */}
             <div style={{
-                maxWidth: 1000,
+                maxWidth: 900,
                 margin: '0 auto',
                 padding: '0 20px',
                 display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: 24
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: 20
             }}>
-                {features.map((feature, index) => (
+                {features.map((feature) => (
                     <div
                         key={feature.key}
                         className="feature-card"
                         style={{
-                            background: feature.bgGradient,
-                            border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: 24,
-                            padding: 32,
-                            cursor: feature.disabled ? 'not-allowed' : 'pointer',
-                            transition: 'all 0.3s ease',
-                            position: 'relative',
-                            overflow: 'hidden',
-                            backdropFilter: 'blur(10px)',
-                            gridColumn: index === 3 ? '1 / -1' : 'auto', // Last item spans full width on mobile/tablet
+                            background: 'var(--bg-card)',
+                            backdropFilter: 'blur(16px)'
                         }}
-                        onClick={() => !feature.disabled && navigate(feature.path)}
+                        onClick={() => navigate(feature.path)}
                     >
+                        {/* 图标 */}
                         <div style={{
+                            color: isDark ? feature.color : feature.lightColor,
+                            background: `${isDark ? feature.color : feature.lightColor}15`,
+                            width: 56,
+                            height: 56,
+                            borderRadius: 16,
                             display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'flex-start',
+                            alignItems: 'center',
+                            justifyContent: 'center',
                             marginBottom: 20
                         }}>
-                            <div style={{
-                                color: feature.color,
-                                background: 'rgba(255,255,255,0.05)',
-                                padding: 12,
-                                borderRadius: 16,
-                                display: 'inline-flex'
-                            }}>
-                                {feature.icon}
-                            </div>
-                            {!feature.disabled && <RightOutlined style={{ color: '#64748b' }} />}
-                            {feature.disabled && (
-                                <span style={{
-                                    background: 'rgba(0,0,0,0.3)',
-                                    padding: '4px 12px',
-                                    borderRadius: 12,
-                                    fontSize: 12,
-                                    color: '#94a3b8'
-                                }}>
-                                    开发中
-                                </span>
-                            )}
+                            {feature.icon}
                         </div>
 
-                        <Title level={3} style={{
-                            color: '#fff',
-                            marginBottom: 8,
-                            fontSize: 24,
+                        {/* 标题 */}
+                        <Title level={4} style={{
+                            color: 'var(--text-primary)',
+                            marginBottom: 4,
+                            fontSize: 20,
                             fontWeight: 600
                         }}>
                             {feature.title}
                         </Title>
 
+                        {/* 英文副标题 */}
+                        <div style={{
+                            fontSize: 12,
+                            color: 'var(--text-muted)',
+                            letterSpacing: 1,
+                            marginBottom: 12,
+                            textTransform: 'uppercase'
+                        }}>
+                            {feature.subtitle}
+                        </div>
+
+                        {/* 描述 */}
                         <Paragraph style={{
-                            color: '#94a3b8',
+                            color: 'var(--text-secondary)',
                             marginBottom: 0,
-                            fontSize: 16
+                            fontSize: 14
                         }}>
                             {feature.description}
                         </Paragraph>
 
-                        {/* Decoration Circle */}
+                        {/* 箭头 */}
                         <div style={{
                             position: 'absolute',
-                            bottom: -20,
-                            right: -20,
+                            top: 24,
+                            right: 24,
+                            color: 'var(--text-muted)',
+                            opacity: 0.5
+                        }}>
+                            <RightOutlined />
+                        </div>
+
+                        {/* 装饰光晕 */}
+                        <div style={{
+                            position: 'absolute',
+                            bottom: -30,
+                            right: -30,
                             width: 100,
                             height: 100,
-                            background: feature.color,
-                            opacity: 0.1,
+                            background: isDark ? feature.color : feature.lightColor,
+                            opacity: 0.08,
                             borderRadius: '50%',
-                            filter: 'blur(20px)'
+                            filter: 'blur(30px)'
                         }} />
                     </div>
                 ))}
             </div>
 
-            {/* Bottom Info */}
+            {/* 底部说明 */}
             <div style={{
-                maxWidth: 800,
-                margin: '100px auto 0',
-                textAlign: 'center'
+                maxWidth: 700,
+                margin: '80px auto 0',
+                textAlign: 'center',
+                padding: '0 20px'
             }}>
-                <Title level={3} style={{ color: '#fbbf24', marginBottom: 32 }}>
-                    东西方智慧融合
-                </Title>
-                <Row gutter={[40, 24]}>
+                <Row gutter={[32, 24]}>
                     <Col xs={24} md={12}>
                         <div style={{
                             padding: 24,
-                            background: 'rgba(255,255,255,0.02)',
-                            borderRadius: 16,
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            background: 'var(--bg-card)',
+                            borderRadius: 'var(--radius-lg)',
+                            border: '1px solid var(--border-default)'
                         }}>
-                            <div style={{ fontSize: 32, marginBottom: 16 }}>🔮</div>
-                            <Title level={5} style={{ color: '#fda4af', marginBottom: 8 }}>东方玄学体系</Title>
-                            <Paragraph style={{ color: '#cbd5e1', fontSize: 14 }}>
-                                挖掘八字命理、紫微斗数、易经占卜等传统术数背后的数据模型
+                            <div style={{ fontSize: 28, marginBottom: 12 }}>🔮</div>
+                            <Title level={5} style={{
+                                color: isDark ? '#fda4af' : '#e11d48',
+                                marginBottom: 8
+                            }}>
+                                东方玄学
+                            </Title>
+                            <Paragraph style={{
+                                color: 'var(--text-secondary)',
+                                fontSize: 13,
+                                marginBottom: 0
+                            }}>
+                                汲取八字、紫微、易经千年智慧精髓
                             </Paragraph>
                         </div>
                     </Col>
                     <Col xs={24} md={12}>
                         <div style={{
                             padding: 24,
-                            background: 'rgba(255,255,255,0.02)',
-                            borderRadius: 16,
-                            border: '1px solid rgba(255,255,255,0.05)'
+                            background: 'var(--bg-card)',
+                            borderRadius: 'var(--radius-lg)',
+                            border: '1px solid var(--border-default)'
                         }}>
-                            <div style={{ fontSize: 32, marginBottom: 16 }}>🧠</div>
-                            <Title level={5} style={{ color: '#d8b4fe', marginBottom: 8 }}>现代心理科学</Title>
-                            <Paragraph style={{ color: '#cbd5e1', fontSize: 14 }}>
-                                结合MBTI人格类型、荣格原型现代理论，科学解析性格特质
+                            <div style={{ fontSize: 28, marginBottom: 12 }}>🧠</div>
+                            <Title level={5} style={{
+                                color: isDark ? '#d8b4fe' : '#7c3aed',
+                                marginBottom: 8
+                            }}>
+                                现代心理
+                            </Title>
+                            <Paragraph style={{
+                                color: 'var(--text-secondary)',
+                                fontSize: 13,
+                                marginBottom: 0
+                            }}>
+                                融合MBTI、荣格原型等科学理论
                             </Paragraph>
                         </div>
                     </Col>
@@ -251,3 +288,4 @@ function Home() {
 }
 
 export default Home
+

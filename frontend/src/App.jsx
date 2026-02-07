@@ -9,7 +9,9 @@ import {
     UserOutlined,
     ExperimentOutlined,
     LogoutOutlined,
-    LoginOutlined
+    LoginOutlined,
+    SunOutlined,
+    MoonOutlined
 } from '@ant-design/icons'
 
 import Home from './pages/Home'
@@ -21,7 +23,7 @@ import Fusion from './pages/Fusion'
 import Profile from './pages/Profile'
 import AuthModal from './components/AuthModal'
 import PrivateRoute from './components/PrivateRoute'
-import { useUserStore } from './stores'
+import { useUserStore, ThemeProvider, useTheme } from './stores'
 
 const { Header, Content, Footer } = Layout
 
@@ -34,13 +36,14 @@ const menuItems = [
     { key: '/fusion', icon: <StarOutlined />, label: '融合分析' },
 ]
 
-function App() {
+// 主应用内容（需要在 ThemeProvider 内部）
+function AppContent() {
     const navigate = useNavigate()
     const location = useLocation()
     const [authModalVisible, setAuthModalVisible] = useState(false)
     const { user, isAuthenticated, logout } = useUserStore()
+    const { theme: currentTheme, toggleTheme, isDark } = useTheme()
 
-    // 未登录时自动弹出登录框（访问受保护页面）
     const handleAuthRequired = () => {
         setAuthModalVisible(true)
         message.warning('请先登录后再使用此功能')
@@ -72,11 +75,12 @@ function App() {
     return (
         <ConfigProvider
             theme={{
-                algorithm: theme.darkAlgorithm,
+                algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
                 token: {
-                    colorPrimary: '#6366f1',
-                    colorBgContainer: '#1e293b', // Match --bg-secondary
-                    colorBgElevated: '#1e293b', // Match --bg-secondary for dropdowns/modals
+                    colorPrimary: isDark ? '#8b5cf6' : '#6366f1',
+                    colorBgContainer: isDark ? '#1e293b' : '#ffffff',
+                    colorBgElevated: isDark ? '#1e293b' : '#ffffff',
+                    borderRadius: 12,
                 }
             }}
         >
@@ -87,7 +91,7 @@ function App() {
                         <span className="logo-text">玄心理命</span>
                     </div>
                     <Menu
-                        theme="dark"
+                        theme={isDark ? 'dark' : 'light'}
                         mode="horizontal"
                         selectedKeys={[location.pathname]}
                         items={menuItems}
@@ -95,6 +99,15 @@ function App() {
                         className="header-menu"
                     />
                     <div className="header-auth">
+                        {/* 主题切换按钮 */}
+                        <button
+                            className="theme-toggle"
+                            onClick={toggleTheme}
+                            title={isDark ? '切换到日间模式' : '切换到夜间模式'}
+                        >
+                            {isDark ? <SunOutlined style={{ color: '#fbbf24' }} /> : <MoonOutlined style={{ color: '#6366f1' }} />}
+                        </button>
+
                         {isAuthenticated ? (
                             <Dropdown menu={userMenu} placement="bottomRight">
                                 <span className="user-dropdown-link" style={{ cursor: 'pointer', color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -167,5 +180,15 @@ function App() {
     )
 }
 
+// 根组件（包裹 ThemeProvider）
+function App() {
+    return (
+        <ThemeProvider>
+            <AppContent />
+        </ThemeProvider>
+    )
+}
+
 export default App
+
 

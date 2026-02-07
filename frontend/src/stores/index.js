@@ -1,6 +1,9 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
+// 导出主题上下文
+export { ThemeProvider, useTheme } from './ThemeContext'
+
 /**
  * 用户状态管理
  */
