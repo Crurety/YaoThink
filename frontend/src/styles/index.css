@@ -85,11 +85,15 @@
   --bg-input: #fef7ed;
   --bg-gradient: linear-gradient(180deg, #fef3c7 0%, #fffbeb 40%, #fffbf5 100%);
 
-  /* 文字 - 暖灰/棕色系，高对比度 */
-  --text-primary: #1c1917;
-  --text-secondary: #44403c;
-  --text-muted: #78716c;
-  --text-inverse: #fafaf9;
+  /* 文字 - 深灰色系，更柔和 */
+  --text-primary: #4b5563;
+  /* Gray 600 - 深灰正文 */
+  --text-secondary: #6b7280;
+  /* Gray 500 - 次深灰 */
+  --text-muted: #9ca3af;
+  /* Gray 400 */
+  --text-inverse: #f9fafb;
+  /* Gray 50 */
 
   /* 边框 - 暖色边框 */
   --border-default: rgba(120, 113, 108, 0.15);

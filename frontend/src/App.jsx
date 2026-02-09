@@ -81,6 +81,8 @@ function AppContent() {
                     colorBgContainer: isDark ? '#1e293b' : '#fffef9',
                     colorBgElevated: isDark ? '#1e293b' : '#ffffff',
                     borderRadius: 12,
+                    colorText: isDark ? undefined : '#4b5563', // 日间模式文本改为深灰 (Gray 600)
+                    colorTextHeading: isDark ? undefined : '#1f2937', // 日间模式标题改为更深的灰 (Gray 800)
                 }
             }}
         >
