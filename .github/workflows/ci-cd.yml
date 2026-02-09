@@ -76,15 +76,30 @@ jobs:
             cd /root/yaothink
             
             echo "Starting deployment..."
-            # Clean up old containers/images if needed (optional)
-            # docker system prune -f
             
-            docker compose down || true
-            docker compose down || true
+            # Debug: Show current containers
+            docker ps -a | grep yaothink || true
+            
+            # Aggressive cleanup
+            echo "Stopping and removing existing containers..."
+            docker stop yaothink-backend yaothink-frontend yaothink-redis yaothink-db || true
             docker rm -f yaothink-backend yaothink-frontend yaothink-redis yaothink-db || true
+            
+            # Docker Compose cleanup
+            echo "Running docker compose down..."
+            docker compose down --remove-orphans || true
+            
+            # Verify cleanup
+            if [ -n "$(docker ps -aq -f name=yaothink-backend)" ]; then
+                echo "Warning: yaothink-backend still exists. Force removing by ID..."
+                docker rm -f $(docker ps -aq -f name=yaothink-backend)
+            fi
+            
+            # Prune networks to avoid conflicts
             docker network prune -f || true
+            
+            echo "Starting new containers..."
             docker compose up -d --build --force-recreate
-            docker compose up -d --build
             
             # Wait a bit for services to start
             sleep 10
