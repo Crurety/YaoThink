@@ -4,26 +4,29 @@
 
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Float, JSON
+from sqlalchemy import Column, Integer, String, DateTime, Text, Boolean, Float, JSON, text
+from sqlalchemy.engine.url import make_url
 from datetime import datetime, timedelta
 import os
+import logging
+from app.core.config import settings
+
+# 配置日志
+logger = logging.getLogger(__name__)
 
 def get_beijing_time():
     """获取北京时间"""
     return datetime.utcnow() + timedelta(hours=8)
 
-# 数据库URL配置
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/yaothink"
-)
+# 数据库URL配置 (使用 settings 中的配置)
+DATABASE_URL = settings.DATABASE_URL
 
 # 创建异步引擎
 engine = create_async_engine(
     DATABASE_URL,
-    echo=os.getenv("DEBUG", "false").lower() == "true",
-    pool_size=5,
-    max_overflow=10
+    echo=settings.DEBUG,
+    pool_size=settings.DATABASE_POOL_SIZE,
+    max_overflow=settings.DATABASE_MAX_OVERFLOW
 )
 
 # 创建会话工厂
@@ -180,8 +183,69 @@ class ExportHistory(Base):
 
 # ==================== 数据库操作 ====================
 
+async def create_database_if_not_exists():
+    """如果数据库不存在则创建"""
+    url = make_url(parse_db_url(DATABASE_URL))
+    db_name = url.database
+    
+    # 切换到默认 postgres 数据库来执行创建操作
+    # 注意：这里假设使用的是 postgresql 驱动
+    if 'postgresql' in url.drivername:
+        default_db = 'postgres'
+    elif 'mysql' in url.drivername:
+        default_db = 'mysql'
+    else:
+        # 其他数据库可能无法自动创建，或者不需要
+        return
+
+    # 创建临时的 URL 连接到默认数据库
+    # 使用 set() 方法更新 database
+    temp_url = url.set(database=default_db)
+    
+    # 创建临时引擎
+    temp_engine = create_async_engine(
+        temp_url,
+        isolation_level="AUTOCOMMIT" # 创建数据库需要自动提交模式
+    )
+    
+    try:
+        async with temp_engine.connect() as conn:
+            # 检查数据库是否存在
+            # 注意：参数化查询在 DDL 中可能不支持，但在 WHERE 中支持
+            if 'postgresql' in url.drivername:
+                check_sql = text(f"SELECT 1 FROM pg_database WHERE datname = :db_name")
+                result = await conn.execute(check_sql, {"db_name": db_name})
+            elif 'mysql' in url.drivername:
+                check_sql = text(f"SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = :db_name")
+                result = await conn.execute(check_sql, {"db_name": db_name})
+            else:
+                return
+
+            if not result.scalar():
+                logger.info(f"Database '{db_name}' does not exist. Creating...")
+                # CREATE DATABASE 不能在事务块中运行，且不能使用参数化
+                await conn.execute(text(f'CREATE DATABASE "{db_name}"'))
+                logger.info(f"Database '{db_name}' created successfully.")
+            else:
+                logger.info(f"Database '{db_name}' already exists.")
+    except Exception as e:
+        logger.error(f"Failed to check/create database: {e}")
+        # 这里记录错误但不抛出，以免影响后续可能的重试或手动创建
+    finally:
+        await temp_engine.dispose()
+
+def parse_db_url(url):
+    """解析并确保 URL 是字符串"""
+    if hasattr(url, 'render_as_string'):
+        return url.render_as_string(hide_password=False)
+    return str(url)
+
 async def init_db():
     """初始化数据库表"""
+    # 先尝试创建数据库
+    await create_database_if_not_exists()
+    
+    # 再创建表
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
