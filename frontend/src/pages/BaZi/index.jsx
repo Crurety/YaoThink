@@ -212,7 +212,8 @@ function BaZi() {
                 label: {
                     show: true,
                     formatter: '{b}\n{d}%',
-                    color: '#f5f5f5'
+                    color: '#4b5563', // 改为深灰，适应日间模式
+                    fontWeight: 'bold'
                 },
                 data: Object.entries(scores).map(([name, value]) => ({
                     name,
