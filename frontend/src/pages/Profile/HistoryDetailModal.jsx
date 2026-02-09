@@ -628,7 +628,7 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                                                                         subKey === 'essence' ? '📖 星曜本义' :
                                                                             subKey}
                                                             </Title>
-                                                            <Paragraph style={{ fontSize: 14, color: token.colorTextSecondary, marginBottom: 0 }}>
+                                                            <Paragraph style={{ fontSize: 14, color: token.colorText, marginBottom: 0 }}>
                                                                 {contentText}
                                                             </Paragraph>
                                                         </div>
@@ -644,7 +644,7 @@ const HistoryDetailModal = ({ visible, onClose, record, type }) => {
                         {/* Markdown 文本报告 (作为补充或兼容旧数据) */}
                         {aiReport && (
                             <Card style={getCardStyle()} bordered={false}>
-                                <div className="markdown-content" style={{ lineHeight: 1.8, fontSize: 14 }}>
+                                <div className="markdown-content" style={{ lineHeight: 1.8, fontSize: 14, color: token.colorText }}>
                                     <ReactMarkdown
                                         components={{
                                             h1: ({ node, ...props }) => <h3 style={{ marginTop: 16, marginBottom: 12, color: token.colorPrimary }} {...props} />,

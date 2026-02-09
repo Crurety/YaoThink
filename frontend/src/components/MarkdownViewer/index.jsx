@@ -23,13 +23,13 @@ const MarkdownViewer = ({
         if (!text) return ''
         return text
             .replace(/\n/g, '<br/>')
-            .replace(/## \*\*(.+?)\*\*/g, '<h3 style="color:#DAA520;margin:16px 0 8px">$1</h3>')
-            .replace(/## (.+?)(<br\/>|$)/g, '<h3 style="color:#DAA520;margin:16px 0 8px">$1</h3>')
-            .replace(/\*\*(.+?)\*\*/g, '<b style="color:#fbbf24">$1</b>')
-            .replace(/✅/g, '<span style="color:#10b981">✅</span>')
-            .replace(/❌/g, '<span style="color:#ef4444">❌</span>')
-            .replace(/⚠️/g, '<span style="color:#f59e0b">⚠️</span>')
-            .replace(/📈/g, '<span style="color:#3b82f6">📈</span>')
+            .replace(/## \*\*(.+?)\*\*/g, '<h3 style="color:var(--accent-gold);margin:16px 0 8px">$1</h3>')
+            .replace(/## (.+?)(<br\/>|$)/g, '<h3 style="color:var(--accent-gold);margin:16px 0 8px">$1</h3>')
+            .replace(/\*\*(.+?)\*\*/g, '<b style="color:var(--accent-gold)">$1</b>')
+            .replace(/✅/g, '<span style="color:var(--accent-green)">✅</span>')
+            .replace(/❌/g, '<span style="color:var(--accent-red)">❌</span>')
+            .replace(/⚠️/g, '<span style="color:var(--accent-gold)">⚠️</span>')
+            .replace(/📈/g, '<span style="color:var(--primary)">📈</span>')
     }
 
     // 维度配置：颜色和标签
@@ -52,7 +52,7 @@ const MarkdownViewer = ({
 
     // 渲染单个维度卡片
     const renderDimensionCard = (key, items) => {
-        const config = dimensionConfig[key] || { color: 'default', label: key, bg: 'rgba(100,100,100,0.05)', border: 'rgba(100,100,100,0.2)' }
+        const config = dimensionConfig[key] || { color: 'default', label: key, bg: 'var(--bg-card)', border: 'var(--border-default)' }
 
         return (
             <div
@@ -70,7 +70,7 @@ const MarkdownViewer = ({
                     <div
                         key={i}
                         style={{
-                            color: '#e2e8f0',
+                            color: 'var(--text-primary)',
                             fontSize: 14,
                             lineHeight: 1.8,
                             marginBottom: i < items.length - 1 ? 12 : 0
@@ -91,7 +91,7 @@ const MarkdownViewer = ({
             {structured ? (
                 <div>
                     {showDividers && Object.keys(structured).length > 0 && (
-                        <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', color: '#94a3b8', margin: '16px 0' }}>
+                        <Divider style={{ borderColor: 'var(--border-default)', color: 'var(--text-muted)', margin: '16px 0' }}>
                             多维深度分析
                         </Divider>
                     )}
@@ -112,13 +112,13 @@ const MarkdownViewer = ({
             ) : content ? (
                 <div
                     style={{
-                        color: '#e2e8f0',
+                        color: 'var(--text-primary)',
                         fontSize: 14,
                         lineHeight: 1.8,
                         padding: 16,
                         borderRadius: 8,
-                        background: 'rgba(255,255,255,0.05)',
-                        border: '1px solid rgba(255,255,255,0.1)'
+                        background: 'var(--bg-input)', // 适配日夜间
+                        border: '1px solid var(--border-default)'
                     }}
                     dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }}
                 />
