@@ -37,7 +37,7 @@ services:
     container_name: yaothink-frontend
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "3000:80"
     depends_on:
       yaothink-backend:
         condition: service_healthy
@@ -61,7 +61,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "5433:5432"
     networks:
       - yaothink-network
     healthcheck:
